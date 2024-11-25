@@ -73,6 +73,9 @@ export default function IMessageAnalysisApp({ repos }) {
                             />
                         ))}
                     </div>
+                    <p>
+                        - shoutout to user #2 for providing example usage  
+                    </p>
                 </section>
             </div>
         </div>

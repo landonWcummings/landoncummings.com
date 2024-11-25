@@ -9,6 +9,7 @@ const NavBar = ({ repos = [] }) => {
         'nbodysimulation',
         'flappy-bird-plus-ai',
         'imessageanalysisapp',
+        'WhartonInvestmentQuant',
     ];
 
     // Filter main and other repos
@@ -48,18 +49,24 @@ const NavBar = ({ repos = [] }) => {
                         width: '60px',
                         height: '60px',
                         backgroundColor: '#333',
-                        color: '#fff',
                         textAlign: 'center',
-                        lineHeight: '60px',
-                        textDecoration: 'none',
-                        fontWeight: 'bold',
-                        fontSize: '24px',
                         borderRadius: '50%',
                         boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                        overflow: 'hidden', // Ensure the image stays within the circle
                     }}
                 >
-                    LC
+                    <img
+                        src="/LCfancylogo.png"
+                        alt="LC Logo"
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover', // Ensures the image fills the space properly
+                            borderRadius: '50%', // Matches the circular button
+                        }}
+                    />
                 </Link>
+
 
                 {/* Main Repository Links */}
                 <div style={{ display: 'flex', gap: '10px', marginLeft: '80px' }}>

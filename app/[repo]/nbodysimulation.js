@@ -298,6 +298,11 @@ export default function NBodySimulation({ repos }) {
       <h1 style={{ fontSize: '3rem', marginBottom: '20px' }}>
         N-Body Simulation
       </h1>
+      <p>
+        Simulating planetary objects <br />
+        you've heard of the three-body problem... <br />
+        let's take it a step further 
+      </p>
       <canvas
         ref={canvasRef}
         width={canvasWidth}

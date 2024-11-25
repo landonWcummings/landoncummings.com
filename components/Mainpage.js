@@ -110,7 +110,8 @@ export default function Mainpage() {
           Welcome to landoncummings.com
         </h1>
         <p style={{ fontSize: '1.2rem' }}>
-          Select a repository from the navigation bar to view its details.
+          Select a repository from the navigation bar to view its details.<br />
+          ⬇️  or ask Grok something  ⬇️
         </p>
       </div>
 

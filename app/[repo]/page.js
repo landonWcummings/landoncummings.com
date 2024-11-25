@@ -14,6 +14,20 @@ async function fetchYouTubeVideoDetails(videoId) {
   return null;
 }
 
+async function fetchReadme(owner, repo) {
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/readme`;
+  try {
+    const response = await fetch(apiUrl);
+    if (response.ok) {
+      const data = await response.json();
+      return atob(data.content); // Decode Base64 content
+    }
+  } catch (error) {
+    console.error(`Error fetching README for ${repo}:`, error);
+  }
+  return null; // No README found or an error occurred
+}
+
 export default async function RepoPage({ params }) {
   const username = 'landonWcummings';
   const repos = await fetchRepos(username);
@@ -28,6 +42,9 @@ export default async function RepoPage({ params }) {
     );
   }
 
+  // Fetch README content
+  const readmeContent = await fetchReadme(username, repo.name);
+
   // Dynamic routing to NBodySimulation page
   if (repo.name === 'nbodysimulation') {
     const NBodySimulation = dynamic(() => import('./nbodysimulation'));
@@ -40,8 +57,9 @@ export default async function RepoPage({ params }) {
   }
 
   const videoDemoLinks = {
-    clashroyalebot: 'https://www.youtube.com/embed/bFXPIAsaGCw?autoplay=1&mute=1',
+    'clashroyalebot': 'https://www.youtube.com/embed/bFXPIAsaGCw?autoplay=1&mute=1',
     'flappy-bird-plus-ai': 'https://www.youtube.com/embed/zO0pvvvpuEU?autoplay=1&mute=1',
+    'brawlstarsbot': "https://www.youtube.com/embed/urdA_M8X0UA?autoplay=1&mute=1"
   };
 
   const videoLink = videoDemoLinks[repo?.name];
@@ -66,6 +84,25 @@ export default async function RepoPage({ params }) {
         </a>
       </h1>
       <p>{repo.description || 'No description provided.'}</p>
+
+      {readmeContent && (
+        <div
+          style={{
+            marginTop: '20px',
+            padding: '10px',
+            border: '1px solid #ccc',
+            borderRadius: '5px',
+            backgroundColor: '#f9f9f9',
+            textAlign: 'left',
+            maxWidth: '800px',
+            margin: '0 auto',
+            overflowX: 'auto',
+          }}
+        >
+          <h3>README</h3>
+          <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{readmeContent}</pre>
+        </div>
+      )}
 
       {videoLink ? (
         <div
