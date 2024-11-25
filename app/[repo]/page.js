@@ -34,6 +34,11 @@ export default async function RepoPage({ params }) {
     return <NBodySimulation repos={repos} />;
   }
 
+  if (repo.name === 'imessageanalysisapp') {
+    const Imessageanalysisapp = dynamic(() => import('./imessageanalysisapp'));
+    return <Imessageanalysisapp repos={repos} />;
+  }
+
   const videoDemoLinks = {
     clashroyalebot: 'https://www.youtube.com/embed/bFXPIAsaGCw?autoplay=1&mute=1',
     'flappy-bird-plus-ai': 'https://www.youtube.com/embed/zO0pvvvpuEU?autoplay=1&mute=1',

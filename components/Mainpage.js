@@ -107,7 +107,7 @@ export default function Mainpage() {
       {/* Top Section */}
       <div style={{ marginBottom: '50px' }}>
         <h1 style={{ fontSize: '2.5rem', marginBottom: '20px' }}>
-          Welcome to My GitHub Repositories
+          Welcome to landoncummings.com
         </h1>
         <p style={{ fontSize: '1.2rem' }}>
           Select a repository from the navigation bar to view its details.
