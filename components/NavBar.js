@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 
 const NavBar = ({ repos = [] }) => {
@@ -55,15 +56,12 @@ const NavBar = ({ repos = [] }) => {
                         overflow: 'hidden', // Ensure the image stays within the circle
                     }}
                 >
-                    <img
+                    <Image
                         src="/LCfancylogo.png"
                         alt="LC Logo"
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover', // Ensures the image fills the space properly
-                            borderRadius: '50%', // Matches the circular button
-                        }}
+                        width={60}
+                        height={60}
+                        style={{ borderRadius: '50%' }}
                     />
                 </Link>
 

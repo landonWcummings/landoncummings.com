@@ -2,6 +2,15 @@ import NavBar from '../../components/NavBar';
 import { fetchRepos } from '../../lib/github';
 import dynamic from 'next/dynamic';
 
+export async function generateStaticParams() {
+  const username = 'landonWcummings';
+  const repos = await fetchRepos(username); // Fetch all repos
+
+  return repos.map((repo) => ({
+    repo: repo.name, // Each route corresponds to a repo name
+  }));
+}
+
 async function fetchYouTubeVideoDetails(videoId) {
   const apiKey = 'AIzaSyDssFgGUruZAHD1H-IKEYWOOlHeXmtzmMw'; // Replace with your actual API key
   const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`;
@@ -29,14 +38,35 @@ async function fetchReadme(owner, repo) {
 }
 
 export default async function RepoPage({ params }) {
+  const repoName = params.repo; // Safely use params.repo
+
   const username = 'landonWcummings';
-  const repos = await fetchRepos(username);
-  const repo = repos.find((r) => r.name === params.repo);
+
+  let repos;
+  try {
+    repos = await fetchRepos(username); // Fetch repositories
+  } catch (error) {
+    return (
+      <div style={{ textAlign: 'center', padding: '20px' }}>
+        <h1>Error fetching repositories</h1>
+        <p>{error.message}</p>
+      </div>
+    );
+  }
+
+  const repo = repos.find((r) => r.name === repoName);
+  if (!repos || repos.length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: '20px' }}>
+        <h1>Error loading repositories</h1>
+        <p>Please try refreshing the page or check your network connection.</p>
+      </div>
+    );
+  }
 
   if (!repo) {
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
-        <NavBar repos={repos} />
         <h1>Repository Not Found</h1>
       </div>
     );
@@ -59,7 +89,7 @@ export default async function RepoPage({ params }) {
   const videoDemoLinks = {
     'clashroyalebot': 'https://www.youtube.com/embed/bFXPIAsaGCw?autoplay=1&mute=1',
     'flappy-bird-plus-ai': 'https://www.youtube.com/embed/zO0pvvvpuEU?autoplay=1&mute=1',
-    'brawlstarsbot': "https://www.youtube.com/embed/urdA_M8X0UA?autoplay=1&mute=1"
+    'brawlstarsbot': 'https://www.youtube.com/embed/urdA_M8X0UA?autoplay=1&mute=1',
   };
 
   const videoLink = videoDemoLinks[repo?.name];

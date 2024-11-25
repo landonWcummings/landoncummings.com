@@ -300,9 +300,10 @@ export default function NBodySimulation({ repos }) {
       </h1>
       <p>
         Simulating planetary objects <br />
-        you've heard of the three-body problem... <br />
-        let's take it a step further 
+        you&apos;ve heard of the three-body problem... <br />
+        let&apos;s take it a step further
       </p>
+
       <canvas
         ref={canvasRef}
         width={canvasWidth}
