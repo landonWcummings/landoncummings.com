@@ -11,6 +11,7 @@ const NavBar = ({ repos = [] }) => {
         'flappy-bird-plus-ai',
         'imessageanalysisapp',
         'WhartonInvestmentQuant',
+        'snake-plus-ai',
     ];
 
     // Filter main and other repos
@@ -73,20 +74,22 @@ const NavBar = ({ repos = [] }) => {
                             href={`/${repo.name}`}
                             key={repo.id}
                             style={{
-                                display: 'inline-block',
-                                width: '150px',
-                                height: '40px',
-                                backgroundColor: '#f4f4f4',
-                                textDecoration: 'none',
-                                color: '#333',
-                                borderRadius: '4px',
-                                border: '1px solid #ccc',
-                                paddingLeft: '10px',
-                                lineHeight: '40px',
-                                overflow: 'hidden',
-                                whiteSpace: 'nowrap',
-                                textOverflow: 'ellipsis',
+                              display: 'inline-block',
+                              minWidth: '100px',
+                              maxWidth: '150px',
+                              height: '40px',
+                              backgroundColor: '#f4f4f4',
+                              textDecoration: 'none',
+                              color: '#333',
+                              borderRadius: '4px',
+                              border: '1px solid #ccc',
+                              paddingLeft: '10px',
+                              lineHeight: '40px',
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap',
+                              textOverflow: 'ellipsis',
                             }}
+                          
                         >
                             {repo.name}
                         </Link>
@@ -107,7 +110,7 @@ const NavBar = ({ repos = [] }) => {
                             fontSize: '16px',
                         }}
                     >
-                        Other Repos
+                        Other Projects
                     </button>
                     {isDropdownOpen && (
                         <div
