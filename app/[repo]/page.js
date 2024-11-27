@@ -91,6 +91,11 @@ export default async function RepoPage({ params }) {
     return <Snakeplusai repos={repos} />;
   }
 
+  if (repo.name === 'WhartonInvestmentQuant') {
+    const Quant = dynamic(() => import('./WhartonInvestmentQuant'));
+    return <Quant repos={repos} />;
+  }
+
   
 
   const videoDemoLinks = {

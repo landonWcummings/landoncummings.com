@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import NavBar from '../../components/NavBar';
 
 export default function IMessageAnalysisApp({ repos }) {
@@ -61,16 +62,19 @@ export default function IMessageAnalysisApp({ repos }) {
                 </h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {imageUrls.map((url, index) => (
-                            <img
-                                key={index}
-                                src={url}
-                                alt={`Visualization ${index + 1}`}
-                                style={{
-                                    maxWidth: '100%',
-                                    borderRadius: '8px',
-                                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                                }}
-                            />
+                            <div key={index} style={{ position: 'relative', width: '100%', height: 'auto' }}>
+                                <Image
+                                    src={url}
+                                    alt={`Visualization ${index + 1}`}
+                                    layout="responsive" // Ensures the image is responsive
+                                    width={800} // Specify width
+                                    height={600} // Specify height
+                                    style={{
+                                        borderRadius: '8px',
+                                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                    }}
+                                />
+                            </div>
                         ))}
                     </div>
                     <p>
