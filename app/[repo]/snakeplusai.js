@@ -1,58 +1,108 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as ort from 'onnxruntime-web';
 import NavBar from '../../components/NavBar'; // Adjust the path as needed
 
-export default function Snakeplusai({ repos }) { // Accept repos as a prop
-  const canvasRef = useRef(null);
+let activeGames = []; // Array to track all active game instances
 
-  useEffect(() => {
+export default function Snakeplusai({ repos }) {
+  const canvasRef = useRef(null);
+  const [gridSize, setGridSize] = useState(4); // Default grid size
+  const [isGameReady, setIsGameReady] = useState(false); // Track if the game is ready
+
+  const stopAllGames = () => {
+    // Stop and clear all active game instances
+    activeGames.forEach((game) => game.stop());
+    activeGames = [];
+  };
+
+  const startNewGame = async (size) => {
+    setIsGameReady(false); // Set game as not ready while loading
+
+    // Stop all existing games before starting a new one
+    stopAllGames();
+
+    // Create a new game instance
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
-    const gameInstance = new Game(canvas, context);
+    const newGameInstance = new Game(canvas, context, size);
 
-    // Load the AI model before starting the game
-    gameInstance.loadModel().then(() => {
-      gameInstance.start();
-    });
+    await newGameInstance.loadModel(size);
+    newGameInstance.start();
 
-    // Cleanup on unmount
+    activeGames.push(newGameInstance); // Add the new game to the active games array
+    setIsGameReady(true); // Set game as ready
+  };
+
+  useEffect(() => {
+    // Start a new game whenever the grid size changes
+    startNewGame(gridSize);
+
+    // Stop all games when the component unmounts
     return () => {
-      gameInstance.stop();
+      stopAllGames();
+    };
+  }, [gridSize]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopAllGames();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
+  const handleGridSizeChange = (size) => {
+    setGridSize(size);
+  };
+
   return (
     <>
-      <NavBar repos={repos} /> {/* Pass repos to NavBar */}
+      <NavBar repos={repos} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
         <p>Snake model trained with Proximal Policy Optimization</p>
         <canvas ref={canvasRef} width={500} height={600}></canvas>
       </div>
+      {isGameReady && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', gap: '10px' }}>
+          {[4, 5, 6].map((size) => (
+            <button
+              key={size}
+              onClick={() => handleGridSizeChange(size)}
+              style={{
+                padding: '10px 20px',
+                border: '2px solid #000',
+                borderRadius: '5px',
+                backgroundColor: size === gridSize ? '#4CAF50' : '#FFF',
+                color: size === gridSize ? '#FFF' : '#000',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                outline: size === gridSize ? '2px solid #4CAF50' : 'none',
+              }}
+            >
+              {size}x{size}
+            </button>
+          ))}
+        </div>
+      )}
     </>
   );
 }
 
-// Constants
-const SCORE_FONT = '50px Comic Sans MS';
-const WHITE = '#FFFFFF';
-const BLACK = '#000000';
-const RED = '#FF0000';
-const GRAY = '#6E6E6E';
-
-const oppositeDirection = {
-  3: 9,   // Right's opposite is Left
-  6: 12,  // Down's opposite is Up
-  9: 3,   // Left's opposite is Right
-  12: 6,  // Up's opposite is Down
-};
-
+// Game class remains unchanged
 class Game {
-  constructor(canvas, context) {
+  constructor(canvas, context, gridsize = 4) {
     this.canvas = canvas;
     this.context = context;
-    this.gridsize = 4;
+    this.gridsize = gridsize;
     this.player = new Player(this.gridsize);
     this.window_width = canvas.width;
     this.window_height = canvas.height;
@@ -82,10 +132,18 @@ class Game {
     this.model = null; // ONNX Runtime model session
   }
 
-  // Load the ONNX model
-  async loadModel() {
-    this.model = await ort.InferenceSession.create('/models/ppo_policy4.onnx');
+  async loadModel(gridSize) {
+    const modelPath = `/models/ppo_policy${gridSize}.onnx`;
+    this.model = await ort.InferenceSession.create(modelPath);
   }
+
+  stop() {
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null; // Ensure it's properly cleared
+    }
+  }
+
 
   // Prepare observation by flattening the grid
   getObservation() {
@@ -282,6 +340,19 @@ class Game {
     console.log('Game grid after reset:', this.gamegrid);
   }
 }
+// Constants
+const SCORE_FONT = '50px Comic Sans MS';
+const WHITE = '#FFFFFF';
+const BLACK = '#000000';
+const RED = '#FF0000';
+const GRAY = '#6E6E6E';
+
+const oppositeDirection = {
+  3: 9,   // Right's opposite is Left
+  6: 12,  // Down's opposite is Up
+  9: 3,   // Left's opposite is Right
+  12: 6,  // Up's opposite is Down
+};
 
 class Player {
   constructor(gridsize) {
@@ -303,6 +374,7 @@ class Player {
     // Place food randomly on the grid
     this.foodplace = this._generateFoodPlace();
   }
+  
 
   reset() {
     this.orientation = 3; // Default direction: Right
