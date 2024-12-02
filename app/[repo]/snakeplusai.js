@@ -9,7 +9,14 @@ let activeGames = []; // Array to track all active game instances
 export default function Snakeplusai({ repos }) {
   const canvasRef = useRef(null);
   const [gridSize, setGridSize] = useState(4); // Default grid size
+  const [speed, setSpeed] = useState(200); // Default game speed (ms between frames)
   const [isGameReady, setIsGameReady] = useState(false); // Track if the game is ready
+
+  const commentary = {
+    4: "Trained in roughly 5 hours. Model is pretty solid overall. Still some rough edges, could be perfected in more training time.",
+    5: "Trained in roughly 18 and a half hours. Much harder to perfect a 5x5 grid due to the odd nature. A 5x5 board has an odd number of total cells making it impossible to execute one sustainable pattern as seen in the endgame of the 4x4. Given further training the model could likely perfect a 5x5",
+    6: "The largest grid, challenging and rewarding for advanced players.",
+  };
 
   const stopAllGames = () => {
     // Stop and clear all active game instances
@@ -28,11 +35,19 @@ export default function Snakeplusai({ repos }) {
     const context = canvas.getContext('2d');
     const newGameInstance = new Game(canvas, context, size);
 
+    newGameInstance.msbetweenframes = speed; // Set initial speed
     await newGameInstance.loadModel(size);
     newGameInstance.start();
 
     activeGames.push(newGameInstance); // Add the new game to the active games array
     setIsGameReady(true); // Set game as ready
+  };
+
+  const updateGameSpeed = (newSpeed) => {
+    setSpeed(newSpeed); // Update speed in state
+    activeGames.forEach((game) => {
+      game.msbetweenframes = newSpeed; // Update speed for all active games
+    });
   };
 
   useEffect(() => {
@@ -70,27 +85,50 @@ export default function Snakeplusai({ repos }) {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
         <p>Snake model trained with Proximal Policy Optimization</p>
         <canvas ref={canvasRef} width={500} height={600}></canvas>
+        <div style={{ marginTop: '10px' }}>
+          <label htmlFor="speed-slider">Frame Spacing: {speed}ms</label>
+          <input
+            id="speed-slider"
+            type="range"
+            min="50"
+            max="500"
+            step="10"
+            value={speed}
+            onChange={(e) => updateGameSpeed(Number(e.target.value))}
+            style={{ width: '300px', marginTop: '5px' }}
+          />
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', gap: '10px' }}>
+        {[4, 5, 6].map((size) => (
+          <button
+            key={size}
+            onClick={() => handleGridSizeChange(size)}
+            style={{
+              padding: '10px 20px',
+              border: '2px solid #000',
+              borderRadius: '5px',
+              backgroundColor: size === gridSize ? '#4CAF50' : '#FFF',
+              color: size === gridSize ? '#FFF' : '#000',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              outline: size === gridSize ? '2px solid #4CAF50' : 'none',
+            }}
+          >
+            {size}x{size}
+          </button>
+        ))}
       </div>
       {isGameReady && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', gap: '10px' }}>
-          {[4, 5, 6].map((size) => (
-            <button
-              key={size}
-              onClick={() => handleGridSizeChange(size)}
-              style={{
-                padding: '10px 20px',
-                border: '2px solid #000',
-                borderRadius: '5px',
-                backgroundColor: size === gridSize ? '#4CAF50' : '#FFF',
-                color: size === gridSize ? '#FFF' : '#000',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                outline: size === gridSize ? '2px solid #4CAF50' : 'none',
-              }}
-            >
-              {size}x{size}
-            </button>
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
+          <img
+            src={`/models/ppo${gridSize}graph.png`}
+            alt={`Graph for PPO model with grid size ${gridSize}`}
+            style={{ marginTop: '10px', maxWidth: '100%', height: 'auto' }}
+          />
+          <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#a12aff' }}>
+            {commentary[gridSize]}
+          </p>
         </div>
       )}
     </>
@@ -106,6 +144,7 @@ class Game {
     this.player = new Player(this.gridsize);
     this.window_width = canvas.width;
     this.window_height = canvas.height;
+    this.msbetweenframes = 200
 
     this.WIDTH = canvas.width;
     this.HEIGHT = canvas.height;
@@ -209,7 +248,7 @@ class Game {
 
   async gameLoop(timestamp) {
     const deltaTime = timestamp - this.lastTime;
-    if (deltaTime >= 200) {
+    if (deltaTime >= this.msbetweenframes) {
       await this.update(); // Wait for the async update
       this.draw();
       this.lastTime = timestamp;

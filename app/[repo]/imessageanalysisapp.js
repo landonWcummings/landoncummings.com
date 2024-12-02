@@ -7,16 +7,16 @@ import NavBar from '../../components/NavBar';
 export default function IMessageAnalysisApp({ repos }) {
     // Updated array of image URLs with the correct path
     const imageUrls = [
-        '/images/intro.png',
-        '/images/lifetimeact.png',
-        '/images/sentlife.png',
-        '/images/24act.png',
-        '/images/topgcparticipation.png',
-        '/images/topgcbymessages.png',
-        '/images/topcontactsdm.png',
-        '/images/topcontactinteractions.png',
-        '/images/GCanalysis.png',
-        '/images/contactanalysis.png',
+        '/imessageanalysisimages/intro.png',
+        '/imessageanalysisimages/lifetimeact.png',
+        '/imessageanalysisimages/sentlife.png',
+        '/imessageanalysisimages/24act.png',
+        '/imessageanalysisimages/topgcparticipation.png',
+        '/imessageanalysisimages/topgcbymessages.png',
+        '/imessageanalysisimages/topcontactsdm.png',
+        '/imessageanalysisimages/topcontactinteractions.png',
+        '/imessageanalysisimages/GCanalysis.png',
+        '/imessageanalysisimages/contactanalysis.png',
     ];
 
     return (
