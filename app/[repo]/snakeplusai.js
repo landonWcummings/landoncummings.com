@@ -11,11 +11,12 @@ export default function Snakeplusai({ repos }) {
   const [gridSize, setGridSize] = useState(4); // Default grid size
   const [speed, setSpeed] = useState(200); // Default game speed (ms between frames)
   const [isGameReady, setIsGameReady] = useState(false); // Track if the game is ready
+  const [finishImageExists, setFinishImageExists] = useState(false); // Check for finish image existence
 
   const commentary = {
     4: "Trained in roughly 5 hours. Model is pretty solid overall. Still some rough edges, could be perfected in more training time.",
     5: "Trained in roughly 18 and a half hours. Much harder to perfect a 5x5 grid due to the odd nature. A 5x5 board has an odd number of total cells making it impossible to execute one sustainable pattern as seen in the endgame of the 4x4. Given further training the model could likely perfect a 5x5",
-    6: "The largest grid, challenging and rewarding for advanced players.",
+    6: "Trained in roughly 76 hours. Added 4 inputs on top of the grid. These four new boolean values depict whether or not the model will die if it moves in any of the four directions. This helps the model converge much faster, I had trained a model over 3.5 days to little avail without this addition.",
   };
 
   const stopAllGames = () => {
@@ -41,6 +42,10 @@ export default function Snakeplusai({ repos }) {
 
     activeGames.push(newGameInstance); // Add the new game to the active games array
     setIsGameReady(true); // Set game as ready
+
+    // Check if the finish image exists
+    const imagePath = `/models/ppo${size}finish.png`;
+    checkImageExists(imagePath, setFinishImageExists);
   };
 
   const updateGameSpeed = (newSpeed) => {
@@ -77,6 +82,13 @@ export default function Snakeplusai({ repos }) {
 
   const handleGridSizeChange = (size) => {
     setGridSize(size);
+  };
+
+  const checkImageExists = (imagePath, callback) => {
+    const img = new Image();
+    img.onload = () => callback(true); // Image exists
+    img.onerror = () => callback(false); // Image does not exist
+    img.src = imagePath;
   };
 
   return (
@@ -131,11 +143,23 @@ export default function Snakeplusai({ repos }) {
           </p>
         </div>
       )}
+      {finishImageExists && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+            <img
+            src={`/models/ppo${gridSize}finish.png`}
+            alt={`Finish image for PPO model with grid size ${gridSize}`}
+            style={{ maxWidth: '100%', height: 'auto' }}
+          />
+          <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#555' }}>
+            Evaluated over 1000 games. Note - all snakes start at size 2, so the first score is only when they reach length 3.
+          </p>
+        </div>
+      )}
     </>
   );
 }
 
-// Game class remains unchanged
+// Game class
 class Game {
   constructor(canvas, context, gridsize = 4) {
     this.canvas = canvas;
@@ -144,7 +168,7 @@ class Game {
     this.player = new Player(this.gridsize);
     this.window_width = canvas.width;
     this.window_height = canvas.height;
-    this.msbetweenframes = 200
+    this.msbetweenframes = 200;
 
     this.WIDTH = canvas.width;
     this.HEIGHT = canvas.height;
@@ -172,6 +196,7 @@ class Game {
   }
 
   async loadModel(gridSize) {
+    // Same model path logic, but make sure you have a separate ONNX for the 6-grid:
     const modelPath = `/models/ppo_policy${gridSize}.onnx`;
     this.model = await ort.InferenceSession.create(modelPath);
   }
@@ -179,15 +204,57 @@ class Game {
   stop() {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null; // Ensure it's properly cleared
+      this.animationFrameId = null; 
     }
   }
 
-
-  // Prepare observation by flattening the grid
+  /**
+   * For gridSize=6, we need to append 4 extra danger booleans (up, right, down, left).
+   * For gridSize=4 or 5, keep the original flattened grid only.
+   */
   getObservation() {
-    const obs = this.gamegrid.flat();
-    return new Float32Array(obs);
+    // Flatten the grid first
+    const flatGrid = this.gamegrid.flat();
+
+    // If the new environment (gridSize=6) needs 4 extra collision booleans:
+    if (this.gridsize === 6) {
+      // Get the snake head
+      const [headX, headY] = this.player.locations[0];
+
+      // Compute collisions in each direction
+      const dangerUp = this.isCollision(headX, headY - 1);
+      const dangerRight = this.isCollision(headX + 1, headY);
+      const dangerDown = this.isCollision(headX, headY + 1);
+      const dangerLeft = this.isCollision(headX - 1, headY);
+
+      // Append these 4 values to the observation
+      const obsWithDanger = flatGrid.concat(dangerUp, dangerRight, dangerDown, dangerLeft);
+      return new Float32Array(obsWithDanger);
+    } else {
+      // For gridSize=4 or 5, use the original approach (no extra booleans)
+      return new Float32Array(flatGrid);
+    }
+  }
+
+  /**
+   * Collision check similar to what the Python SnakeEnv does:
+   *  - Out of bounds = collision
+   *  - Position in the snake's body = collision
+   * Returns 1 if collision, else 0.
+   */
+  isCollision(x, y) {
+    // Out of bounds
+    if (x < 0 || x >= this.gridsize || y < 0 || y >= this.gridsize) {
+      return 1;
+    }
+    // Check if (x, y) is already occupied by the snake
+    for (let i = 0; i < this.player.locations.length; i++) {
+      const [sx, sy] = this.player.locations[i];
+      if (sx === x && sy === y) {
+        return 1;
+      }
+    }
+    return 0;
   }
 
   // Get action from the AI model
@@ -260,70 +327,82 @@ class Game {
   async update() {
     const obs = this.getObservation();
     let action = await this.getAction(obs);
-  
+
     if (action === undefined || action < 0 || action > 3) {
       console.warn('Invalid action received:', action, '- Using fallback');
       action = 0; // Default to 'up'
     }
-  
+
     const directionMap = [12, 3, 6, 9]; // Up, Right, Down, Left
     const dir = directionMap[action];
-  
+
     this.player.updatedir(dir);
-  
+
     // Continue with game logic
     [this.gamegrid, this.score] = this.player.move(this.gamegrid);
-  
+
     // Handle game over state triggered by move logic
     if (this.gamegrid.length === 1 && this.gamegrid[0][0] === -10) {
       this.reset();
       return;
     }
-  
+
     // Check if player has won
     if (this.player.hasWon) {
       console.log('Player has won the game.');
-      // Allow one frame to display the full snake, then reset
+      // Let them see the final position, then reset
       this.gameOver = true;
     }
-  
+
     if (this.gameOver) {
       this.reset();
       this.gameOver = false;
       return;
     }
-  
+
     this.states += 1;
   }
-  
-
 
   draw() {
     const ctx = this.context;
-
+  
     // Clear canvas
     ctx.fillStyle = RED;
     ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
-
+  
     // Draw game grid background
     ctx.fillStyle = GRAY;
     ctx.fillRect(0, this.HEIGHT / 6, this.WIDTH, this.HEIGHT);
-
+  
     // Draw grid cells
     for (let y = 0; y < this.gridsize; y++) {
       for (let x = 0; x < this.gridsize; x++) {
-        if (this.gamegrid[y][x] === 0) {
+        const value = this.gamegrid[y][x];
+        
+        if (value === 0) {
           ctx.fillStyle = BLACK; // Empty cell
-        } else if (this.gamegrid[y][x] === 1) {
+        } else if (value === 1) {
           ctx.fillStyle = RED; // Food
-        } else if (this.gamegrid[y][x] === 2) {
-          ctx.fillStyle = WHITE; // Snake head
+        } else if (this.gridsize === 6) {
+          // Color logic for gridSize === 6
+          if (value === 2) {
+            ctx.fillStyle = WHITE; // Head
+          } else if (value >= 3 && value < 100) {
+            const shade = Math.max((value - 2) * 10, 150); // Body fades from white to gray
+            ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
+          } else if (value === 100) {
+            ctx.fillStyle = `rgb(100, 100, 255)`; // Tail gets a unique blue color
+          }
         } else {
-          // Snake body with fading effect based on value
-          const shade =  Math.min((this.gamegrid[y][x] - 2) * 5, 200);
-          const shade2 = (this.gamegrid[y][x] - 2) 
-          ctx.fillStyle = `rgb(${shade}, ${shade2}, ${shade})`;
+          // Color logic for gridSize !== 6 (default behavior)
+          if (value === 2) {
+            ctx.fillStyle = WHITE; // Head
+          } else {
+            const shade = Math.min((value - 2) * 5, 255); // Body fades from white to light gray
+            ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
+          }
         }
+  
         ctx.fillRect(
           this.cellspacing * (x + 1) + this.cellw * x,
           this.cellspacing * (y + 1) + this.cellh * y + this.top,
@@ -332,10 +411,11 @@ class Game {
         );
       }
     }
-
+  
     // Draw score
     this._draw_score();
   }
+  
 
   _draw_score() {
     const ctx = this.context;
@@ -359,7 +439,6 @@ class Game {
     this.states = 0;
     this.player.hasWon = false; // Reset the hasWon flag
 
-
     this.player.reset();
 
     // Reinitialize the grid
@@ -379,6 +458,7 @@ class Game {
     console.log('Game grid after reset:', this.gamegrid);
   }
 }
+
 // Constants
 const SCORE_FONT = '50px Comic Sans MS';
 const WHITE = '#FFFFFF';
@@ -402,30 +482,29 @@ class Player {
     this.hasWon = false;
 
     this.orientation = 3; // Initial direction: Right
-    this.cantgo = oppositeDirection[this.orientation]; // Correctly set to Left
+    this.cantgo = oppositeDirection[this.orientation]; 
 
     // Set initial positions explicitly
     this.locations = [
-      [1, 1], // Head at (second row, second column)
-      [0, 1], // Body at (first row, second column)
+      [1, 1], // Head
+      [0, 1], // Body
     ];
 
     // Place food randomly on the grid
     this.foodplace = this._generateFoodPlace();
   }
-  
 
   reset() {
     this.orientation = 3; // Default direction: Right
-    this.cantgo = oppositeDirection[this.orientation]; // Correctly set to Left
+    this.cantgo = oppositeDirection[this.orientation];
     this.score = 0;
     this.length = 2;
     this.static_states = 0;
 
     // Explicitly set the snake's starting position
     this.locations = [
-      [1, 1], // Head at (second row, second column)
-      [0, 1], // Body at (first row, second column)
+      [1, 1], // Head
+      [0, 1], // Body
     ];
 
     // Generate food in a random position not overlapping with the snake
@@ -453,12 +532,10 @@ class Player {
     return [zx, zy];
   }
 
-
-
   updatedir(dir) {
     if (dir === 0 || dir === this.cantgo) return;
     this.orientation = dir;
-    this.cantgo = oppositeDirection[dir]; // Correctly set the opposite direction
+    this.cantgo = oppositeDirection[dir];
   }
 
   move(gamegrid) {
@@ -501,19 +578,19 @@ class Player {
       nextplace[0] === this.foodplace[0] &&
       nextplace[1] === this.foodplace[1]
     ) {
-      this.foodplace = this._generateFoodPlace(); // Attempt to generate new food
+      this.foodplace = this._generateFoodPlace();
       trimsize = false; // Keep snake length
       this.score += 1;
       this.static_states = 0;
       this.length += 1;
-  
+
       if (this.foodplace === null) {
         // No space for new food; snake has filled the grid
         console.log('Snake has filled the entire grid.');
-        this.hasWon = true; // Set hasWon flag
+        this.hasWon = true;
       }
     }
-  
+
     // Trim tail if no food eaten
     if (trimsize) {
       this.locations.pop();
@@ -525,16 +602,29 @@ class Player {
         gamegrid[y][x] = 0; // Clear previous values
       }
     }
-
-    this.locations.forEach(([x, y], index) => {
-      gamegrid[y][x] = index === 0 ? 2 : 2 + (47 - index); // Head is 2, body has unique values
-    });
+    if (this.gridsize ==6 ){
+      this.locations.forEach(([x, y], idx) => {
+        if (idx === this.locations.length - 1) {
+          // Tail
+          gamegrid[y][x] = 100;
+        } else {
+          // Head is idx=0 => (2 + 0) = 2
+          // Next segment is idx=1 => 3, next => 4, etc.
+          gamegrid[y][x] = 2 + idx;
+        }
+      });
+    
+    } else{
+      this.locations.forEach(([x, y], index) => {
+        gamegrid[y][x] = index === 0 ? 2 : 2 + (47 - index); // Head = 2, body gets unique values
+      });
+    }
+    
 
     if (this.foodplace) {
       const [foodX, foodY] = this.foodplace;
-      gamegrid[foodY][foodX] = 1; // Food is 1
+      gamegrid[foodY][foodX] = 1; // Food = 1
     }
-
 
     console.log('Updated gamegrid:', gamegrid);
 

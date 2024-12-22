@@ -86,7 +86,7 @@ export default async function RepoPage({ params }) {
     return <Imessageanalysisapp repos={repos} />;
   }
 
-  if (repo.name === 'snake-plus-ai') {
+  if (repo.name === 'snakePlusAi-V1-NEAT') {
     const Snakeplusai = dynamic(() => import('./snakeplusai'));
     return <Snakeplusai repos={repos} />;
   }

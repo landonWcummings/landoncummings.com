@@ -11,7 +11,7 @@ const NavBar = ({ repos = [] }) => {
         'flappy-bird-plus-ai',
         'imessageanalysisapp',
         'WhartonInvestmentQuant',
-        'snake-plus-ai',
+        'snakePlusAi-V1-NEAT',
     ];
 
     // Filter main and other repos
@@ -67,34 +67,56 @@ const NavBar = ({ repos = [] }) => {
                 </Link>
 
 
-                {/* Main Repository Links */}
+                                    {/* Main Repository Links */}
                 <div style={{ display: 'flex', gap: '10px', marginLeft: '80px' }}>
                     {mainRepos.map((repo) => (
                         <Link
-                            href={`/${repo.name}`}
-                            key={repo.id}
-                            style={{
-                              display: 'inline-block',
-                              minWidth: '100px',
-                              maxWidth: '150px',
-                              height: '40px',
-                              backgroundColor: '#f4f4f4',
-                              textDecoration: 'none',
-                              color: '#333',
-                              borderRadius: '4px',
-                              border: '1px solid #ccc',
-                              paddingLeft: '10px',
-                              lineHeight: '40px',
-                              overflow: 'hidden',
-                              whiteSpace: 'nowrap',
-                              textOverflow: 'ellipsis',
-                            }}
-                          
+                        href={`/${repo.name}`}
+                        key={repo.id}
+                        style={{
+                            display: 'inline-block',
+                            minWidth: '100px',
+                            maxWidth: '150px',
+                            height: '40px',
+                            textDecoration: 'none',
+                            color: '#333',
+                            borderRadius: '4px',
+                            border: '1px solid #ccc',
+                            paddingLeft: '10px',
+                            lineHeight: '40px',
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis',
+                            ...(repo.name === 'imessageanalysisapp'
+                            ? {
+                                background: 'linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet)',
+                                backgroundSize: '400% 400%',
+                                animation: 'gradientAnimation 10s ease infinite',
+                                color: '#fff',
+                                fontWeight: 'bold',
+                                }
+                            : { backgroundColor: '#f4f4f4' }),
+                        }}
                         >
-                            {repo.name}
+                        {repo.name}
                         </Link>
                     ))}
-                </div>
+                    </div>
+
+                    <style jsx>{`
+                    @keyframes gradientAnimation {
+                        0% {
+                        background-position: 0% 50%;
+                        }
+                        50% {
+                        background-position: 100% 50%;
+                        }
+                        100% {
+                        background-position: 0% 50%;
+                        }
+                    }
+                    `}</style>
+
 
                 {/* Dropdown for Other Repositories */}
                 <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
