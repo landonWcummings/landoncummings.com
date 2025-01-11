@@ -1,94 +1,125 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo
+} from 'react';
 import * as ort from 'onnxruntime-web';
-import NavBar from '../../components/NavBar'; // Adjust the path as needed
+import NavBar from '../../components/NavBar';
+import Image from 'next/image';
 
-let activeGames = []; // Array to track all active game instances
 
 export default function Snakeplusai({ repos }) {
   const canvasRef = useRef(null);
-  const [gridSize, setGridSize] = useState(4); // Default grid size
-  const [speed, setSpeed] = useState(200); // Default game speed (ms between frames)
-  const [isGameReady, setIsGameReady] = useState(false); // Track if the game is ready
-  const [finishImageExists, setFinishImageExists] = useState(false); // Check for finish image existence
+  const gameRef = useRef(null); 
+  const speedChangeTimer = useRef(null);
 
-  const commentary = {
+  const [gridSize, setGridSize] = useState(4);
+  // `speed` is the actual speed used by the game
+  const [speed, setSpeed] = useState(200);  
+  // `tempSpeed` is used while dragging the slider
+  const [tempSpeed, setTempSpeed] = useState(200);
+  
+  const [isGameReady, setIsGameReady] = useState(false);
+  const [finishImageExists, setFinishImageExists] = useState(false);
+
+  const commentary = useMemo(() => ({
     4: "Trained in roughly 5 hours. Model is pretty solid overall. Still some rough edges, could be perfected in more training time.",
     5: "Trained in roughly 18 and a half hours. Much harder to perfect a 5x5 grid due to the odd nature. A 5x5 board has an odd number of total cells making it impossible to execute one sustainable pattern as seen in the endgame of the 4x4. Given further training the model could likely perfect a 5x5",
-    6: "Trained in roughly 76 hours. For 4x4 and 5x5 the input is the entire grid. For the 6x6, 4 inputs were added in addition to the grid. Four new boolean inputs depict whether or not the model will die if it moves in any each the four directions. This helps the model converge much faster. I had trained a model over 3.5 days without this addition and it was innefective.",
+    6: "Trained in roughly 76 hours. For 4x4 and 5x5 the input is the entire grid. For the 6x6, 4 inputs were added in addition to the grid. Four new boolean inputs depict whether or not the model will die if it moves in each of the four directions. This helps the model converge much faster. I had trained a model over 3.5 days without this addition and it was ineffective.",
+  }), []);
+
+  const stopActiveGame = useCallback(() => {
+    if (gameRef.current) {
+      gameRef.current.stop();
+      gameRef.current = null;
+    }
+  }, []);
+
+  const checkImageExists = (imagePath, callback) => {
+    const img = new window.Image(); // Use `window.Image` to avoid conflict with `next/image`
+    img.onload = () => callback(true);
+    img.onerror = () => callback(false);
+    img.src = imagePath;
   };
 
-  const stopAllGames = () => {
-    // Stop and clear all active game instances
-    activeGames.forEach((game) => game.stop());
-    activeGames = [];
-  };
 
-  const startNewGame = async (size) => {
-    setIsGameReady(false); // Set game as not ready while loading
+  const startNewGame = useCallback(async (size) => {
+    setIsGameReady(false);
+    stopActiveGame();
 
-    // Stop all existing games before starting a new one
-    stopAllGames();
-
-    // Create a new game instance
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     const newGameInstance = new Game(canvas, context, size);
 
-    newGameInstance.msbetweenframes = speed; // Set initial speed
+    newGameInstance.msbetweenframes = speed;
     await newGameInstance.loadModel(size);
     newGameInstance.start();
 
-    activeGames.push(newGameInstance); // Add the new game to the active games array
-    setIsGameReady(true); // Set game as ready
+    gameRef.current = newGameInstance;
+    setIsGameReady(true);
 
-    // Check if the finish image exists
     const imagePath = `/models/ppo${size}finish.png`;
     checkImageExists(imagePath, setFinishImageExists);
+  }, [speed, stopActiveGame]);
+
+  // This function is called repeatedly while the user is dragging the slider
+  const handleSliderChange = (e) => {
+    setTempSpeed(Number(e.target.value));
   };
 
-  const updateGameSpeed = (newSpeed) => {
-    setSpeed(newSpeed); // Update speed in state
-    activeGames.forEach((game) => {
-      game.msbetweenframes = newSpeed; // Update speed for all active games
-    });
+  // This function is called when the user releases the mouse/touch
+  const handleSliderChangeDone = () => {
+    setSpeed(tempSpeed); 
+    // Because we want the new speed to take effect now
   };
 
+  // Watch for changes in `speed` with a 0.6s debounce to restart the game
   useEffect(() => {
-    // Start a new game whenever the grid size changes
-    startNewGame(gridSize);
+    if (speedChangeTimer.current) {
+      clearTimeout(speedChangeTimer.current);
+    }
 
-    // Stop all games when the component unmounts
+    // Only if there's already a running game do we schedule a restart
+    if (gameRef.current) {
+      speedChangeTimer.current = setTimeout(() => {
+        stopActiveGame();
+        startNewGame(gridSize);
+      }, 600);
+    }
+
     return () => {
-      stopAllGames();
+      if (speedChangeTimer.current) {
+        clearTimeout(speedChangeTimer.current);
+      }
     };
-  }, [gridSize]);
+  }, [speed, gridSize, stopActiveGame, startNewGame]);
+
+  // Start a new game on mount or whenever `gridSize` changes
+  useEffect(() => {
+    startNewGame(gridSize);
+    return () => {
+      stopActiveGame();
+    };
+  }, [gridSize, startNewGame, stopActiveGame]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        stopAllGames();
+        stopActiveGame();
       }
     };
-
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Cleanup the event listener on component unmount
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [stopActiveGame]);
 
   const handleGridSizeChange = (size) => {
     setGridSize(size);
-  };
-
-  const checkImageExists = (imagePath, callback) => {
-    const img = new Image();
-    img.onload = () => callback(true); // Image exists
-    img.onerror = () => callback(false); // Image does not exist
-    img.src = imagePath;
   };
 
   return (
@@ -97,20 +128,24 @@ export default function Snakeplusai({ repos }) {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
         <p>Snake model trained with Proximal Policy Optimization</p>
         <canvas ref={canvasRef} width={500} height={600}></canvas>
+
         <div style={{ marginTop: '10px' }}>
-          <label htmlFor="speed-slider">Frame Spacing: {speed}ms</label>
+          <label htmlFor="speed-slider">Frame Spacing: {tempSpeed}ms</label>
           <input
             id="speed-slider"
             type="range"
             min="35"
             max="500"
             step="10"
-            value={speed}
-            onChange={(e) => updateGameSpeed(Number(e.target.value))}
+            value={tempSpeed}
+            onChange={handleSliderChange}
+            onMouseUp={handleSliderChangeDone}
+            onTouchEnd={handleSliderChangeDone}
             style={{ width: '300px', marginTop: '5px' }}
           />
         </div>
       </div>
+
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', gap: '10px' }}>
         {[4, 5, 6].map((size) => (
           <button
@@ -132,34 +167,41 @@ export default function Snakeplusai({ repos }) {
         ))}
       </div>
       {isGameReady && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
-          <img
-            src={`/models/ppo${gridSize}graph.png`}
-            alt={`Graph for PPO model with grid size ${gridSize}`}
-            style={{ marginTop: '10px', maxWidth: '100%', height: 'auto' }}
-          />
-          <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#a12aff' }}>
-            {commentary[gridSize]}
-          </p>
-        </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
+              <Image
+                  src={`/models/ppo${gridSize}graph.png`}
+                  alt={`Graph for PPO model with grid size ${gridSize}`}
+                  width={500} // Provide a width (adjust as needed)
+                  height={300} // Provide a height (adjust as needed)
+                  style={{ marginTop: '10px', maxWidth: '100%', height: 'auto' }}
+              />
+              <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#a12aff' }}>
+                  {commentary[gridSize]}
+              </p>
+          </div>
       )}
+
       {finishImageExists && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <img
-            src={`/models/ppo${gridSize}finish.png`}
-            alt={`Finish image for PPO model with grid size ${gridSize}`}
-            style={{ maxWidth: '100%', height: 'auto' }}
-          />
-          <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#555' }}>
-            Evaluated over 1000 games. Note - all snakes start at size 2, so a winning score on a 6x6 is 34 as a length 2 snake eats 34 times before it fills up the 36 cell grid.
-          </p>
-        </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+              <Image
+                  src={`/models/ppo${gridSize}finish.png`}
+                  alt={`Finish image for PPO model with grid size ${gridSize}`}
+                  width={500} // Provide a width (adjust as needed)
+                  height={300} // Provide a height (adjust as needed)
+                  style={{ maxWidth: '100%', height: 'auto' }}
+              />
+              <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#555' }}>
+                  Evaluated over 1000 games. Note - all snakes start at size 2, so the first score is only when they reach length 3.
+              </p>
+          </div>
       )}
+
     </>
   );
 }
 
-// Game class
+
+// Game class (unchanged except for your specific logic)
 class Game {
   constructor(canvas, context, gridsize = 4) {
     this.canvas = canvas;
@@ -174,12 +216,10 @@ class Game {
     this.HEIGHT = canvas.height;
 
     this.top = this.window_height / 6;
-
     this.cellspacing = 3;
     this.cellh = (this.window_height - this.top) / this.gridsize - this.cellspacing;
     this.cellw = this.window_width / this.gridsize - this.cellspacing;
 
-    // Initialize the game grid
     this.gamegrid = [];
     for (let i = 0; i < this.gridsize; i++) {
       this.gamegrid.push(Array(this.gridsize).fill(0));
@@ -188,15 +228,13 @@ class Game {
     this.score = 0;
     this.tries = 0;
     this.states = 0;
-
     this.animationFrameId = null;
     this.lastTime = 0;
-
-    this.model = null; // ONNX Runtime model session
+    this.model = null;
+    this.gameOver = false;
   }
 
   async loadModel(gridSize) {
-    // Same model path logic, but make sure you have a separate ONNX for the 6-grid:
     const modelPath = `/models/ppo_policy${gridSize}.onnx`;
     this.model = await ort.InferenceSession.create(modelPath);
   }
@@ -204,50 +242,28 @@ class Game {
   stop() {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null; 
+      this.animationFrameId = null;
     }
   }
 
-  /**
-   * For gridSize=6, we need to append 4 extra danger booleans (up, right, down, left).
-   * For gridSize=4 or 5, keep the original flattened grid only.
-   */
   getObservation() {
-    // Flatten the grid first
     const flatGrid = this.gamegrid.flat();
 
-    // If the new environment (gridSize=6) needs 4 extra collision booleans:
     if (this.gridsize === 6) {
-      // Get the snake head
       const [headX, headY] = this.player.locations[0];
-
-      // Compute collisions in each direction
       const dangerUp = this.isCollision(headX, headY - 1);
       const dangerRight = this.isCollision(headX + 1, headY);
       const dangerDown = this.isCollision(headX, headY + 1);
       const dangerLeft = this.isCollision(headX - 1, headY);
-
-      // Append these 4 values to the observation
-      const obsWithDanger = flatGrid.concat(dangerUp, dangerRight, dangerDown, dangerLeft);
-      return new Float32Array(obsWithDanger);
-    } else {
-      // For gridSize=4 or 5, use the original approach (no extra booleans)
-      return new Float32Array(flatGrid);
+      return new Float32Array(flatGrid.concat(dangerUp, dangerRight, dangerDown, dangerLeft));
     }
+    return new Float32Array(flatGrid);
   }
 
-  /**
-   * Collision check similar to what the Python SnakeEnv does:
-   *  - Out of bounds = collision
-   *  - Position in the snake's body = collision
-   * Returns 1 if collision, else 0.
-   */
   isCollision(x, y) {
-    // Out of bounds
     if (x < 0 || x >= this.gridsize || y < 0 || y >= this.gridsize) {
       return 1;
     }
-    // Check if (x, y) is already occupied by the snake
     for (let i = 0; i < this.player.locations.length; i++) {
       const [sx, sy] = this.player.locations[i];
       if (sx === x && sy === y) {
@@ -257,70 +273,46 @@ class Game {
     return 0;
   }
 
-  // Get action from the AI model
   async getAction(obs) {
     if (!this.model) {
       console.error('Model not loaded');
-      return 0; // Default action if model isn't ready
+      return 0; 
     }
-
     try {
-      // Prepare input tensor
       const tensor = new ort.Tensor('float32', obs, [1, obs.length]);
-      const feeds = { obs: tensor };
-
-      // Run the model
-      const results = await this.model.run(feeds);
-
+      const results = await this.model.run({ obs: tensor });
       console.log('Model outputs:', results);
 
-      // Access the action tensor
       const actionTensor = results.action;
-
-      let actionArray;
-      if (actionTensor.data instanceof BigInt64Array || actionTensor.data instanceof BigUint64Array) {
-        actionArray = Array.from(actionTensor.data).map(Number);
-      } else if (actionTensor.data instanceof Int32Array || actionTensor.data instanceof Float32Array) {
-        actionArray = Array.from(actionTensor.data);
-      } else {
-        console.error('Unexpected data type for action tensor:', actionTensor.data);
-        return 0; // Default action on error
-      }
+      let actionArray = Array.from(actionTensor.data);
+      // Convert BigInt to Number if needed
+      actionArray = actionArray.map((v) => Number(v));
 
       const action = actionArray[0];
-
-      // Ensure action is within valid bounds
       if (action >= 0 && action <= 3) {
-        return action; // Return valid action
+        return action;
       } else {
         console.error('Invalid action value received:', action);
-        return 0; // Default action on error
+        return 0; 
       }
     } catch (error) {
       console.error('Error running the model:', error);
-      return 0; // Default action on error
+      return 0;
     }
   }
 
   start() {
     this.gameLoop = this.gameLoop.bind(this);
-    requestAnimationFrame(this.gameLoop);
-  }
-
-  stop() {
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-    }
+    this.animationFrameId = requestAnimationFrame(this.gameLoop);
   }
 
   async gameLoop(timestamp) {
     const deltaTime = timestamp - this.lastTime;
     if (deltaTime >= this.msbetweenframes) {
-      await this.update(); // Wait for the async update
+      await this.update();
       this.draw();
       this.lastTime = timestamp;
     }
-
     this.animationFrameId = requestAnimationFrame(this.gameLoop);
   }
 
@@ -330,27 +322,21 @@ class Game {
 
     if (action === undefined || action < 0 || action > 3) {
       console.warn('Invalid action received:', action, '- Using fallback');
-      action = 0; // Default to 'up'
+      action = 0; 
     }
-
     const directionMap = [12, 3, 6, 9]; // Up, Right, Down, Left
     const dir = directionMap[action];
-
     this.player.updatedir(dir);
 
-    // Continue with game logic
     [this.gamegrid, this.score] = this.player.move(this.gamegrid);
 
-    // Handle game over state triggered by move logic
     if (this.gamegrid.length === 1 && this.gamegrid[0][0] === -10) {
       this.reset();
       return;
     }
 
-    // Check if player has won
     if (this.player.hasWon) {
       console.log('Player has won the game.');
-      // Let them see the final position, then reset
       this.gameOver = true;
     }
 
@@ -365,44 +351,43 @@ class Game {
 
   draw() {
     const ctx = this.context;
-  
+
     // Clear canvas
     ctx.fillStyle = RED;
     ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
-  
-    // Draw game grid background
+
+    // Draw background
     ctx.fillStyle = GRAY;
     ctx.fillRect(0, this.HEIGHT / 6, this.WIDTH, this.HEIGHT);
-  
-    // Draw grid cells
+
     for (let y = 0; y < this.gridsize; y++) {
       for (let x = 0; x < this.gridsize; x++) {
         const value = this.gamegrid[y][x];
-        
+
         if (value === 0) {
-          ctx.fillStyle = BLACK; // Empty cell
+          ctx.fillStyle = BLACK;
         } else if (value === 1) {
-          ctx.fillStyle = RED; // Food
+          ctx.fillStyle = RED;
         } else if (this.gridsize === 6) {
-          // Color logic for gridSize === 6
+          // Special coloring for 6x6
           if (value === 2) {
-            ctx.fillStyle = WHITE; // Head
+            ctx.fillStyle = WHITE; 
           } else if (value >= 3 && value < 100) {
-            const shade = Math.max((value - 2) * 10, 150); // Body fades from white to gray
+            const shade = Math.max((value - 2) * 10, 150);
             ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
           } else if (value === 100) {
-            ctx.fillStyle = `rgb(100, 100, 255)`; // Tail gets a unique blue color
+            ctx.fillStyle = 'rgb(100, 100, 255)'; 
           }
         } else {
-          // Color logic for gridSize !== 6 (default behavior)
+          // Default coloring
           if (value === 2) {
-            ctx.fillStyle = WHITE; // Head
+            ctx.fillStyle = WHITE; 
           } else {
-            const shade = Math.min((value - 2) * 5, 255); // Body fades from white to light gray
+            const shade = Math.min((value - 2) * 5, 255);
             ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
           }
         }
-  
+
         ctx.fillRect(
           this.cellspacing * (x + 1) + this.cellw * x,
           this.cellspacing * (y + 1) + this.cellh * y + this.top,
@@ -411,11 +396,9 @@ class Game {
         );
       }
     }
-  
-    // Draw score
+
     this._draw_score();
   }
-  
 
   _draw_score() {
     const ctx = this.context;
@@ -437,23 +420,21 @@ class Game {
     this.score = 0;
     this.tries += 1;
     this.states = 0;
-    this.player.hasWon = false; // Reset the hasWon flag
+    this.player.hasWon = false;
 
     this.player.reset();
 
-    // Reinitialize the grid
     this.gamegrid = [];
     for (let i = 0; i < this.gridsize; i++) {
       this.gamegrid.push(Array(this.gridsize).fill(0));
     }
 
-    // Place the snake and food on the grid
     this.player.locations.forEach(([x, y], index) => {
-      this.gamegrid[y][x] = index === 0 ? 2 : 2 + (47 - index); // Head is 2, body has unique values
+      this.gamegrid[y][x] = index === 0 ? 2 : 2 + (47 - index);
     });
 
     const [foodX, foodY] = this.player.foodplace;
-    this.gamegrid[foodY][foodX] = 1; // Food is 1
+    this.gamegrid[foodY][foodX] = 1;
 
     console.log('Game grid after reset:', this.gamegrid);
   }
@@ -481,33 +462,27 @@ class Player {
     this.static_states = 0;
     this.hasWon = false;
 
-    this.orientation = 3; // Initial direction: Right
-    this.cantgo = oppositeDirection[this.orientation]; 
-
-    // Set initial positions explicitly
+    this.orientation = 3; // Right
+    this.cantgo = oppositeDirection[this.orientation];
     this.locations = [
-      [1, 1], // Head
-      [0, 1], // Body
+      [1, 1], 
+      [0, 1],
     ];
-
-    // Place food randomly on the grid
     this.foodplace = this._generateFoodPlace();
   }
 
   reset() {
-    this.orientation = 3; // Default direction: Right
+    this.orientation = 3;
     this.cantgo = oppositeDirection[this.orientation];
     this.score = 0;
     this.length = 2;
     this.static_states = 0;
 
-    // Explicitly set the snake's starting position
     this.locations = [
-      [1, 1], // Head
-      [0, 1], // Body
+      [1, 1],
+      [0, 1],
     ];
 
-    // Generate food in a random position not overlapping with the snake
     this.foodplace = this._generateFoodPlace();
     console.log('Reset: Snake locations:', this.locations, 'Food:', this.foodplace);
   }
@@ -524,7 +499,7 @@ class Player {
 
     if (emptyCells.length === 0) {
       console.log('No space to place food.');
-      return null; // No space left for food
+      return null;
     }
 
     const [zx, zy] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
@@ -533,6 +508,7 @@ class Player {
   }
 
   updatedir(dir) {
+    // Prevent 180-degree reversal
     if (dir === 0 || dir === this.cantgo) return;
     this.orientation = dir;
     this.cantgo = oppositeDirection[dir];
@@ -541,12 +517,9 @@ class Player {
   move(gamegrid) {
     this.static_states += 1;
     let trimsize = true;
-    const gridsize = this.gridsize;
+    const [curX, curY] = this.locations[0];
 
     let nextplace;
-    const [curX, curY] = this.locations[0]; // Head of the snake
-
-    // Determine the next position based on the direction
     if (this.orientation === 3) {
       nextplace = [curX + 1, curY]; // Right
     } else if (this.orientation === 6) {
@@ -557,77 +530,65 @@ class Player {
       nextplace = [curX, curY - 1]; // Up
     }
 
-    // Check bounds and collisions
+    // Collision?
     if (
-      nextplace[0] < 0 ||
-      nextplace[0] >= gridsize ||
-      nextplace[1] < 0 ||
-      nextplace[1] >= gridsize ||
+      nextplace[0] < 0 || 
+      nextplace[0] >= this.gridsize ||
+      nextplace[1] < 0 || 
+      nextplace[1] >= this.gridsize ||
       this.locations.some(([x, y]) => x === nextplace[0] && y === nextplace[1])
     ) {
       console.log('Collision or out-of-bounds!');
-      return [[[-10]], 0]; // Signal game over
+      return [[[-10]], 0]; // Game over
     }
 
-    // Update snake positions
     this.locations.unshift(nextplace);
 
-    // Check for food
-    if (
-      this.foodplace &&
-      nextplace[0] === this.foodplace[0] &&
-      nextplace[1] === this.foodplace[1]
-    ) {
+    // Eat food?
+    if (this.foodplace && nextplace[0] === this.foodplace[0] && nextplace[1] === this.foodplace[1]) {
       this.foodplace = this._generateFoodPlace();
-      trimsize = false; // Keep snake length
+      trimsize = false;
       this.score += 1;
       this.static_states = 0;
       this.length += 1;
 
       if (this.foodplace === null) {
-        // No space for new food; snake has filled the grid
         console.log('Snake has filled the entire grid.');
         this.hasWon = true;
       }
     }
 
-    // Trim tail if no food eaten
     if (trimsize) {
       this.locations.pop();
     }
 
-    // Update gamegrid with snake and food
-    for (let y = 0; y < gridsize; y++) {
-      for (let x = 0; x < gridsize; x++) {
-        gamegrid[y][x] = 0; // Clear previous values
+    // Rebuild game grid
+    for (let y = 0; y < this.gridsize; y++) {
+      for (let x = 0; x < this.gridsize; x++) {
+        gamegrid[y][x] = 0;
       }
     }
-    if (this.gridsize ==6 ){
+
+    if (this.gridsize === 6) {
       this.locations.forEach(([x, y], idx) => {
         if (idx === this.locations.length - 1) {
-          // Tail
-          gamegrid[y][x] = 100;
+          gamegrid[y][x] = 100; // Tail
         } else {
-          // Head is idx=0 => (2 + 0) = 2
-          // Next segment is idx=1 => 3, next => 4, etc.
-          gamegrid[y][x] = 2 + idx;
+          gamegrid[y][x] = 2 + idx; // Head = 2
         }
       });
-    
-    } else{
+    } else {
       this.locations.forEach(([x, y], index) => {
-        gamegrid[y][x] = index === 0 ? 2 : 2 + (47 - index); // Head = 2, body gets unique values
+        gamegrid[y][x] = index === 0 ? 2 : 2 + (47 - index);
       });
     }
-    
 
     if (this.foodplace) {
       const [foodX, foodY] = this.foodplace;
-      gamegrid[foodY][foodX] = 1; // Food = 1
+      gamegrid[foodY][foodX] = 1;
     }
 
     console.log('Updated gamegrid:', gamegrid);
-
     return [gamegrid, this.score];
   }
 }

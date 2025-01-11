@@ -2,20 +2,16 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect, useRef } from 'react';
-
-var imessageclicked = false;
-var landongptclicked = false;
-var snakeclicked = false;
+import { useState, useEffect, useRef, useMemo } from 'react';
 
 const NavBar = ({ repos = [] }) => {
-    const mainRepoNames = [
+    const mainRepoNames = useMemo(() => [
         'nbodysimulation',
         'imessageanalysisapp',
         'WhartonInvestmentQuant',
         'snakePlusAi-V1-NEAT',
         'LandonGPT',
-    ];
+    ], []);
 
     const buttonLabels = {
         nbodysimulation: 'N-Body Simulation',
@@ -29,6 +25,12 @@ const NavBar = ({ repos = [] }) => {
     const navRef = useRef(null); // Reference for navbar
     const [navHeight, setNavHeight] = useState(100); // Default navbar height
     const [isDropdownOpen, setDropdownOpen] = useState(false);
+
+    const [clickedStates, setClickedStates] = useState({
+        imessageclicked: false,
+        landongptclicked: false,
+        snakeclicked: false,
+    });
 
     useEffect(() => {
         const updateNavHeight = () => {
@@ -62,9 +64,9 @@ const NavBar = ({ repos = [] }) => {
         const styles = {};
         mainRepoNames.forEach((name) => {
             if (
-                (name === 'imessageanalysisapp' && !imessageclicked) ||
-                (name === 'LandonGPT' && !landongptclicked) ||
-                (name === 'snakePlusAi-V1-NEAT' && !snakeclicked)
+                (name === 'imessageanalysisapp' && !clickedStates.imessageclicked) ||
+                (name === 'LandonGPT' && !clickedStates.landongptclicked) ||
+                (name === 'snakePlusAi-V1-NEAT' && !clickedStates.snakeclicked)
             ) {
                 const hue = Math.floor(Math.random() * 360); // Generate a random hue
                 const backgroundColor = `hsl(${hue}, 80%, 60%)`; // Bright color
@@ -87,12 +89,13 @@ const NavBar = ({ repos = [] }) => {
         });
 
         setButtonStyles(styles);
-    }, [imessageclicked, landongptclicked, snakeclicked]);
+    }, [mainRepoNames, clickedStates]);
 
     const handleClick = (repoName) => {
-        if (repoName === 'imessageanalysisapp') imessageclicked = true;
-        if (repoName === 'LandonGPT') landongptclicked = true;
-        if (repoName === 'snakePlusAi-V1-NEAT') snakeclicked = true;
+        setClickedStates((prevStates) => ({
+            ...prevStates,
+            [`${repoName}clicked`]: true,
+        }));
     };
 
     const mainRepos = repos.filter((repo) => mainRepoNames.includes(repo.name));

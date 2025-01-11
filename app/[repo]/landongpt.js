@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import NavBar from '../../components/NavBar'; // Adjust the path as needed
 
-export default function iMessageInterface({ repos }) {
+export default function IMessageInterface({ repos }) {
   const [messages, setMessages] = useState([
     { text: 'Hey there!', sender: 'received' },
   ]);
