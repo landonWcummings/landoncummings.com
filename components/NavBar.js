@@ -4,33 +4,48 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useRef, useMemo } from 'react';
 
+const mainRepoNames = [
+    'nbodysimulation',
+    'imessageanalysisapp',
+    'WhartonInvestmentQuant',
+    'snakePlusAi-V1-NEAT',
+    'LandonGPT',
+];
+
+const specialRepoNames = ['imessageanalysisapp', 'LandonGPT', 'snakePlusAi-V1-NEAT'];
+
+const buttonLabels = {
+    nbodysimulation: 'N-Body Simulation',
+    imessageanalysisapp: 'iMessage Analysis App',
+    WhartonInvestmentQuant: 'Wharton Quant',
+    'snakePlusAi-V1-NEAT': 'Snake AI',
+    'LandonGPT': 'LandonGPT',
+};
+
 const NavBar = ({ repos = [] }) => {
-    const mainRepoNames = useMemo(() => [
-        'nbodysimulation',
-        'imessageanalysisapp',
-        'WhartonInvestmentQuant',
-        'snakePlusAi-V1-NEAT',
-        'LandonGPT',
-    ], []);
-
-    const buttonLabels = {
-        nbodysimulation: 'N-Body Simulation',
-        imessageanalysisapp: 'iMessage Analysis App',
-        WhartonInvestmentQuant: 'Wharton Quant',
-        'snakePlusAi-V1-NEAT': 'Snake AI',
-        'LandonGPT': 'LandonGPT',
-    };
-
-    const [buttonStyles, setButtonStyles] = useState({});
-    const navRef = useRef(null); // Reference for navbar
+    const navRef = useRef(null);
     const [navHeight, setNavHeight] = useState(100); // Default navbar height
     const [isDropdownOpen, setDropdownOpen] = useState(false);
+    const [nonSpecialColors, setNonSpecialColors] = useState({}); // Store non-special button colors
 
-    const [clickedStates, setClickedStates] = useState({
-        imessageclicked: false,
-        landongptclicked: false,
-        snakeclicked: false,
-    });
+    // Generate a consistent light color
+    const generateLightColor = (seed) => {
+        const hue = (seed * 137.5) % 360; // Use a deterministic method to calculate hue
+        const saturation = 75; // Fixed saturation
+        const lightness = 85; // Ensure it's light
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    };
+
+    useEffect(() => {
+        // Assign deterministic colors to non-special buttons after mounting
+        const newColors = mainRepoNames
+            .filter((name) => !specialRepoNames.includes(name))
+            .reduce((acc, name, index) => {
+                acc[name] = generateLightColor(index + 1); // Use index as seed
+                return acc;
+            }, {});
+        setNonSpecialColors(newColors);
+    }, []); // Run only once after mounting
 
     useEffect(() => {
         const updateNavHeight = () => {
@@ -47,77 +62,75 @@ const NavBar = ({ repos = [] }) => {
         };
     }, []);
 
-    useEffect(() => {
-        const generateLightColorStyle = () => {
-            const hue = Math.floor(Math.random() * 360); // Random hue
-            const baseColor = `hsl(${hue}, 80%, 85%)`; // Light color
-            const borderColor = `hsl(${hue}, 80%, 50%)`; // Darker shade for border
-
-            return {
-                backgroundColor: baseColor,
-                color: '#333',
-                border: `2px solid ${borderColor}`,
-                boxShadow: `0 2px 10px ${baseColor}`,
-            };
-        };
-
-        const styles = {};
-        mainRepoNames.forEach((name) => {
-            if (
-                (name === 'imessageanalysisapp' && !clickedStates.imessageclicked) ||
-                (name === 'LandonGPT' && !clickedStates.landongptclicked) ||
-                (name === 'snakePlusAi-V1-NEAT' && !clickedStates.snakeclicked)
-            ) {
-                const hue = Math.floor(Math.random() * 360); // Generate a random hue
-                const backgroundColor = `hsl(${hue}, 80%, 60%)`; // Bright color
-                const borderColor = `hsl(${hue}, 80%, 50%)`; // Slightly darker border color
-                const randomDelay = `${(Math.random() * 2.5).toFixed(2)}s`; // Random delay between 0-2.5 seconds
-
-                styles[name] = {
-                    backgroundColor,
-                    color: '#fff',
-                    fontWeight: 'bold',
-                    border: `6px solid ${borderColor}`,
-                    boxShadow: `0 0 20px ${backgroundColor}, 0 0 30px ${backgroundColor}`, // Glow matches the button color
-                    animation: `pulse 3s infinite ease-in-out`,
-                    animationDelay: randomDelay, // Add random delay
-                    transform: 'scale(1.09)',
-                };
-            } else {
-                styles[name] = generateLightColorStyle();
-            }
-        });
-
-        setButtonStyles(styles);
-    }, [mainRepoNames, clickedStates]);
-
-    const handleClick = (repoName) => {
-        setClickedStates((prevStates) => ({
-            ...prevStates,
-            [`${repoName}clicked`]: true,
-        }));
-    };
-
-    const mainRepos = repos.filter((repo) => mainRepoNames.includes(repo.name));
-    const otherRepos = repos.filter((repo) => !mainRepoNames.includes(repo.name));
+    const mainRepos = useMemo(() => repos.filter((repo) => mainRepoNames.includes(repo.name)), [repos]);
+    const otherRepos = useMemo(() => repos.filter((repo) => !mainRepoNames.includes(repo.name)), [repos]);
 
     return (
         <>
             <style>
                 {`
-                    @keyframes pulse {
+                    @keyframes rainbowRaindrops {
                         0% {
-                            transform: scale(1.1);
-                            box-shadow: 0 0 20px #F50057, 0 0 30px #FF4081;
+                            background-position: -200% -200%;
                         }
                         50% {
-                            transform: scale(1.2);
-                            box-shadow: 0 0 30px #FF4081, 0 0 40px #F50057;
+                            background-position: 200% 200%;
                         }
                         100% {
-                            transform: scale(1.1);
-                            box-shadow: 0 0 20px #F50057, 0 0 30px #FF4081;
+                            background-position: 400% 400%;
                         }
+                    }
+
+                    .button {
+                        position: relative;
+                        display: inline-block;
+                        text-align: center;
+                        padding: 10px 15px;
+                        font-size: 14px;
+                        width: 140px;
+                        border-radius: 6px;
+                        border: 2px solid rgba(255, 255, 255, 0.5);
+                        box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+                        color: #333;
+                        font-weight: bold;
+                        cursor: pointer;
+                        overflow: hidden;
+                    }
+
+                    .button.special {
+                        background: linear-gradient(
+                            120deg,
+                            rgba(255, 255, 255, 0.2),
+                            rgba(255, 255, 255, 0.4)
+                        );
+                    }
+
+                    .button.special::after {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(
+                            45deg,
+                            rgba(255, 0, 0, 0.3),
+                            rgba(255, 255, 0, 0.3),
+                            rgba(0, 255, 0, 0.3),
+                            rgba(0, 255, 255, 0.3),
+                            rgba(0, 0, 255, 0.3),
+                            rgba(255, 0, 255, 0.3)
+                        );
+                        background-size: 300% 300%;
+                        animation: rainbowRaindrops 3s linear infinite;
+                        z-index: 1;
+                        pointer-events: none;
+                        opacity: 0.7; /* Ensure it doesn't overpower the button */
+                    }
+
+                    .button span {
+                        position: relative;
+                        z-index: 2; /* Ensure text is above all effects */
                     }
 
                     @media (max-width: 600px) {
@@ -195,25 +208,29 @@ const NavBar = ({ repos = [] }) => {
                 >
                     {mainRepos.map((repo) => {
                         const displayName = buttonLabels[repo.name] || repo.name;
-                        const style = buttonStyles[repo.name] || {};
+                        const isSpecial = specialRepoNames.includes(repo.name);
 
                         return (
                             <Link
                                 href={`/${repo.name}`}
                                 key={repo.id}
-                                onClick={() => handleClick(repo.name)}
                                 style={{
-                                    display: 'inline-block',
                                     textDecoration: 'none',
-                                    borderRadius: '6px',
-                                    textAlign: 'center',
-                                    padding: '10px 15px',
-                                    fontSize: '14px',
-                                    width: '140px',
-                                    ...style,
                                 }}
                             >
-                                {displayName}
+                                <button
+                                    className={`button ${isSpecial ? 'special' : ''}`}
+                                    style={
+                                        !isSpecial && nonSpecialColors[repo.name]
+                                            ? {
+                                                  backgroundColor: nonSpecialColors[repo.name],
+                                                  border: `2px solid ${nonSpecialColors[repo.name]}`,
+                                              }
+                                            : {}
+                                    }
+                                >
+                                    <span>{displayName}</span>
+                                </button>
                             </Link>
                         );
                     })}
@@ -268,7 +285,6 @@ const NavBar = ({ repos = [] }) => {
                 </div>
             </nav>
 
-            {/* Adjust padding dynamically based on navbar height */}
             <div style={{ paddingTop: `${navHeight}px` }} />
         </>
     );
