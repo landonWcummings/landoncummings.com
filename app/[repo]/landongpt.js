@@ -134,7 +134,7 @@ export default function IMessageInterface({ repos }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <NavBar repos={repos} />
       <div style={{ paddingTop: '60px', textAlign: 'center', fontSize: '18px', color: themeStyles.color }}>
-        <p>Welcome to the LandonGPT Interface <br></br> This is a large language model trained on the corpus of my iMessages <br></br> See below</p>
+        <p>Welcome to the LandonGPT Interface <br></br> This is a large language model trained on the corpus of my iMessages</p>
       </div>
       <div
         style={{
@@ -160,7 +160,7 @@ export default function IMessageInterface({ repos }) {
             fontWeight: 'bold',
           }}
         >
-          iMessage Chat
+          Chat with LandonGPT
         </div>
 
         <div
@@ -245,7 +245,7 @@ export default function IMessageInterface({ repos }) {
         </div>
       </div>
       <div style={{ textAlign: 'center', fontSize: '16px', color: themeStyles.color, padding: '10px' }}>
-        <p>Thank you for visiting the interface! <br></br> NOTE: This model does not know any specific information and is very prone to hallucinating. This model is made to mimic my texting form and tone. <br></br>⬇️ Developer notes below ⬇️</p>
+        <p>Thank you for visiting the interface! <br></br> NOTE: This model does not know any specific information and is very prone to hallucinating. This model is made to mimic my texting form and tone.<br></br> NOTE: model does not have conversational memory. Every input is treated as a stand alone message. <br></br>Contact me at lndncmmngs@gmail.com if you want your own<br></br>⬇️ Developer notes below ⬇️</p>
       </div>
       <div style={{ textAlign: 'center', marginTop: '20px', padding: '10px', color: themeStyles.color }}>
         <h2>README</h2>

@@ -26,25 +26,32 @@ const NavBar = ({ repos = [] }) => {
     const navRef = useRef(null);
     const [navHeight, setNavHeight] = useState(100); // Default navbar height
     const [isDropdownOpen, setDropdownOpen] = useState(false);
-    const [nonSpecialColors, setNonSpecialColors] = useState({}); // Store non-special button colors
+    const [nonSpecialColors, setNonSpecialColors] = useState({});
+    const [specialColors, setSpecialColors] = useState({}); // Store special button colors
 
-    // Generate a consistent light color
-    const generateLightColor = (seed) => {
-        const hue = (seed * 137.5) % 360; // Use a deterministic method to calculate hue
+    const generateLightColor = () => {
+        const hue = Math.floor(Math.random() * 360);
         const saturation = 75; // Fixed saturation
-        const lightness = 85; // Ensure it's light
+        const lightness = 65 + Math.random() * 20; // Ensure it's light
         return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     };
 
     useEffect(() => {
-        // Assign deterministic colors to non-special buttons after mounting
-        const newColors = mainRepoNames
+        // Assign random colors to special buttons
+        const newSpecialColors = specialRepoNames.reduce((acc, name) => {
+            acc[name] = generateLightColor();
+            return acc;
+        }, {});
+        setSpecialColors(newSpecialColors);
+
+        // Assign deterministic colors to non-special buttons
+        const newNonSpecialColors = mainRepoNames
             .filter((name) => !specialRepoNames.includes(name))
-            .reduce((acc, name, index) => {
-                acc[name] = generateLightColor(index + 1); // Use index as seed
+            .reduce((acc, name) => {
+                acc[name] = generateLightColor();
                 return acc;
             }, {});
-        setNonSpecialColors(newColors);
+        setNonSpecialColors(newNonSpecialColors);
     }, []); // Run only once after mounting
 
     useEffect(() => {
@@ -98,11 +105,8 @@ const NavBar = ({ repos = [] }) => {
                     }
 
                     .button.special {
-                        background: linear-gradient(
-                            120deg,
-                            rgba(255, 255, 255, 0.2),
-                            rgba(255, 255, 255, 0.4)
-                        );
+                        position: relative;
+                        overflow: hidden;
                     }
 
                     .button.special::after {
@@ -221,12 +225,12 @@ const NavBar = ({ repos = [] }) => {
                                 <button
                                     className={`button ${isSpecial ? 'special' : ''}`}
                                     style={
-                                        !isSpecial && nonSpecialColors[repo.name]
-                                            ? {
+                                        isSpecial
+                                            ? { backgroundColor: specialColors[repo.name] }
+                                            : {
                                                   backgroundColor: nonSpecialColors[repo.name],
                                                   border: `2px solid ${nonSpecialColors[repo.name]}`,
                                               }
-                                            : {}
                                     }
                                 >
                                     <span>{displayName}</span>
