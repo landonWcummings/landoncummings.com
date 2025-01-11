@@ -16,7 +16,7 @@ export default function Snakeplusai({ repos }) {
   const commentary = {
     4: "Trained in roughly 5 hours. Model is pretty solid overall. Still some rough edges, could be perfected in more training time.",
     5: "Trained in roughly 18 and a half hours. Much harder to perfect a 5x5 grid due to the odd nature. A 5x5 board has an odd number of total cells making it impossible to execute one sustainable pattern as seen in the endgame of the 4x4. Given further training the model could likely perfect a 5x5",
-    6: "Trained in roughly 76 hours. Added 4 inputs on top of the grid. These four new boolean values depict whether or not the model will die if it moves in any of the four directions. This helps the model converge much faster, I had trained a model over 3.5 days to little avail without this addition.",
+    6: "Trained in roughly 76 hours. For 4x4 and 5x5 the input is the entire grid. For the 6x6, 4 inputs were added in addition to the grid. Four new boolean inputs depict whether or not the model will die if it moves in any each the four directions. This helps the model converge much faster. I had trained a model over 3.5 days without this addition and it was innefective.",
   };
 
   const stopAllGames = () => {
@@ -102,7 +102,7 @@ export default function Snakeplusai({ repos }) {
           <input
             id="speed-slider"
             type="range"
-            min="50"
+            min="35"
             max="500"
             step="10"
             value={speed}
@@ -151,7 +151,7 @@ export default function Snakeplusai({ repos }) {
             style={{ maxWidth: '100%', height: 'auto' }}
           />
           <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#555' }}>
-            Evaluated over 1000 games. Note - all snakes start at size 2, so the first score is only when they reach length 3.
+            Evaluated over 1000 games. Note - all snakes start at size 2, so a winning score on a 6x6 is 34 as a length 2 snake eats 34 times before it fills up the 36 cell grid.
           </p>
         </div>
       )}

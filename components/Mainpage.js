@@ -12,76 +12,41 @@ export default function Mainpage() {
     setInput(e.target.value);
 
     // Adjust the height of the textarea dynamically
-    e.target.style.height = 'auto'; // Reset height to auto to shrink if necessary
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 300)}px`; // Grow only up to 300px
+    e.target.style.height = 'auto';
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 300)}px`;
   };
 
   async function handleGenerateResponse() {
-    const apiKey = 'xai-878bgCDzB9QPqT81n407wMaLIxWZsOzshUn9v6ZR5oTw2mAtAh5OU6Itrx2HuKDV88JCKEZCQg1LxmmR';
-
-    const payload = {
-      model: 'grok-beta',
-      messages: [
-        { role: 'system', content: 'You are Grok, a chatbot dedicated to serving the user in the most precise, technical, and conscise manner.' },
-        { role: 'user', content: input },
-      ],
-      stream: true,
-      temperature: 0.7,
-    };
-
     setLoading(true);
     setResponse('');
 
     try {
-      const res = await fetch('https://api.x.ai/v1/chat/completions', {
+      const res = await fetch('/api/converse', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input }),
       });
 
       if (!res.ok) {
         const errorDetails = await res.json();
-        throw new Error(`Failed to fetch AI response: ${res.status} - ${errorDetails.message}`);
+        throw new Error(`Failed to fetch AI response: ${res.status} - ${errorDetails.error}`);
       }
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let fullResponse = '';
+      const responseBody = await res.json();
+      console.log("Full Response:", responseBody.fullResponse);
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
+      const content = responseBody.content;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n').filter((line) => line.trim() !== '');
-
-        for (const line of lines) {
-          if (line.startsWith('data:')) {
-            const json = line.substring(5).trim();
-            if (json === '[DONE]') {
-              break;
-            }
-
-            try {
-              const parsed = JSON.parse(json);
-              const content = parsed.choices?.[0]?.delta?.content;
-              if (content) {
-                fullResponse += content;
-                const formattedContent = marked.parse(fullResponse); // Convert markdown to HTML dynamically
-                setResponse(formattedContent);
-              }
-            } catch (error) {
-              console.error('Error parsing stream chunk:', error);
-            }
-          }
-        }
+      if (content) {
+        const formattedContent = marked.parse(content);
+        setResponse(formattedContent);
+      } else {
+        console.log("No content found in response.");
       }
 
       setLoading(false);
     } catch (error) {
+      console.error("Error during API call:", error);
       setLoading(false);
       setResponse(`Error: ${error.message}`);
     }
@@ -89,7 +54,7 @@ export default function Mainpage() {
 
   function handleKeyPress(event) {
     if (event.key === 'Enter' && !event.shiftKey && input.trim() !== '') {
-      event.preventDefault(); // Prevent default Enter behavior
+      event.preventDefault();
       handleGenerateResponse();
     }
   }
@@ -104,18 +69,16 @@ export default function Mainpage() {
       height: '100vh',
       paddingTop: '20px',
     }}>
-      {/* Top Section */}
       <div style={{ marginBottom: '50px' }}>
         <h1 style={{ fontSize: '2.5rem', marginBottom: '20px' }}>
           Welcome to landoncummings.com
         </h1>
         <p style={{ fontSize: '1.2rem' }}>
           Select a repository from the navigation bar to view its details.<br />
-          ⬇️  or ask Grok something  ⬇️
+          ⬇️  or ask Nova something  ⬇️
         </p>
       </div>
 
-      {/* Centered AI Generation Section */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -128,7 +91,7 @@ export default function Mainpage() {
         <textarea
           value={input}
           onChange={handleInputChange}
-          onKeyDown={handleKeyPress} // Handle Enter and Shift+Enter
+          onKeyDown={handleKeyPress}
           placeholder="Enter a prompt..."
           style={{
             width: '100%',
@@ -139,9 +102,9 @@ export default function Mainpage() {
             marginBottom: '10px',
             color: 'blue',
             minHeight: '50px',
-            maxHeight: '300px', // Set maximum height
-            resize: 'none', // Disable manual resizing
-            overflowY: 'auto', // Add scrollbar if content exceeds 300px
+            maxHeight: '300px',
+            resize: 'none',
+            overflowY: 'auto',
           }}
         />
         <button
@@ -157,10 +120,21 @@ export default function Mainpage() {
           }}
           disabled={loading}
         >
-          {loading ? 'Generating...' : 'Ask xAI\'s Grok'}
+          {loading ? 'Generating...' : 'Ask Amazon\'s Nova model'}
         </button>
 
-        {/* Display AI response */}
+        {loading && (
+          <div style={{
+            marginTop: '20px',
+            width: '50px',
+            height: '50px',
+            border: '5px solid #ccc',
+            borderTop: '5px solid #333',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+          }} />
+        )}
+
         {response && (
           <div
             style={{
@@ -173,10 +147,17 @@ export default function Mainpage() {
               textAlign: 'left',
               whiteSpace: 'pre-wrap',
             }}
-            dangerouslySetInnerHTML={{ __html: response }} // Render formatted HTML
+            dangerouslySetInnerHTML={{ __html: response }}
           />
         )}
       </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

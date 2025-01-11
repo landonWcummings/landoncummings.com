@@ -2,11 +2,18 @@ import NavBar from '../../components/NavBar';
 import { fetchRepos } from '../../lib/github';
 import dynamic from 'next/dynamic';
 
+// In-memory storage for repositories
+let cachedRepos = null;
+
 export async function generateStaticParams() {
   const username = 'landonWcummings';
-  const repos = await fetchRepos(username); // Fetch all repos
 
-  return repos.map((repo) => ({
+  // Fetch repos only if they are not already cached
+  if (!cachedRepos) {
+    cachedRepos = await fetchRepos(username); // Fetch all repos
+  }
+
+  return cachedRepos.map((repo) => ({
     repo: repo.name, // Each route corresponds to a repo name
   }));
 }
@@ -38,24 +45,26 @@ async function fetchReadme(owner, repo) {
 }
 
 export default async function RepoPage({ params }) {
-  const repoName = params.repo; // Safely use params.repo
+  const { repo: repoName } = await params; // Await the params to safely access repo
 
   const username = 'landonWcummings';
 
-  let repos;
-  try {
-    repos = await fetchRepos(username); // Fetch repositories
-  } catch (error) {
-    return (
-      <div style={{ textAlign: 'center', padding: '20px' }}>
-        <h1>Error fetching repositories</h1>
-        <p>{error.message}</p>
-      </div>
-    );
+  // Fetch repos only if they are not already cached
+  if (!cachedRepos) {
+    try {
+      cachedRepos = await fetchRepos(username); // Fetch repositories
+    } catch (error) {
+      return (
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <h1>Error fetching repositories</h1>
+          <p>{error.message}</p>
+        </div>
+      );
+    }
   }
 
-  const repo = repos.find((r) => r.name === repoName);
-  if (!repos || repos.length === 0) {
+  const repo = cachedRepos?.find((r) => r.name === repoName);
+  if (!cachedRepos || cachedRepos.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
         <h1>Error loading repositories</h1>
@@ -78,25 +87,28 @@ export default async function RepoPage({ params }) {
   // Dynamic routing to NBodySimulation page
   if (repo.name === 'nbodysimulation') {
     const NBodySimulation = dynamic(() => import('./nbodysimulation'));
-    return <NBodySimulation repos={repos} />;
+    return <NBodySimulation repos={cachedRepos} />;
   }
 
   if (repo.name === 'imessageanalysisapp') {
     const Imessageanalysisapp = dynamic(() => import('./imessageanalysisapp'));
-    return <Imessageanalysisapp repos={repos} />;
+    return <Imessageanalysisapp repos={cachedRepos} />;
   }
 
   if (repo.name === 'snakePlusAi-V1-NEAT') {
     const Snakeplusai = dynamic(() => import('./snakeplusai'));
-    return <Snakeplusai repos={repos} />;
+    return <Snakeplusai repos={cachedRepos} />;
   }
 
   if (repo.name === 'WhartonInvestmentQuant') {
     const Quant = dynamic(() => import('./WhartonInvestmentQuant'));
-    return <Quant repos={repos} />;
+    return <Quant repos={cachedRepos} />;
   }
 
-  
+  if (repo.name === 'LandonGPT') {
+    const Landongpt = dynamic(() => import('./landongpt'));
+    return <Landongpt repos={cachedRepos} />;
+  }
 
   const videoDemoLinks = {
     'clashroyalebot': 'https://www.youtube.com/embed/bFXPIAsaGCw?autoplay=1&mute=1',
@@ -114,7 +126,7 @@ export default async function RepoPage({ params }) {
 
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
-      <NavBar repos={repos} />
+      <NavBar repos={cachedRepos} />
       <h1 style={{ fontSize: '3rem', margin: '20px 0' }}>
         <a
           href={`https://github.com/${username}/${repo.name}`}

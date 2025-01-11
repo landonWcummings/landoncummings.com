@@ -2,124 +2,221 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+
+var imessageclicked = false;
+var landongptclicked = false;
+var snakeclicked = false;
 
 const NavBar = ({ repos = [] }) => {
-    // Define main repos
     const mainRepoNames = [
         'nbodysimulation',
-        'flappy-bird-plus-ai',
         'imessageanalysisapp',
         'WhartonInvestmentQuant',
         'snakePlusAi-V1-NEAT',
+        'LandonGPT',
     ];
 
-    // Filter main and other repos
+    const buttonLabels = {
+        nbodysimulation: 'N-Body Simulation',
+        imessageanalysisapp: 'iMessage Analysis App',
+        WhartonInvestmentQuant: 'Wharton Quant',
+        'snakePlusAi-V1-NEAT': 'Snake AI',
+        'LandonGPT': 'LandonGPT',
+    };
+
+    const [buttonStyles, setButtonStyles] = useState({});
+    const navRef = useRef(null); // Reference for navbar
+    const [navHeight, setNavHeight] = useState(100); // Default navbar height
+    const [isDropdownOpen, setDropdownOpen] = useState(false);
+
+    useEffect(() => {
+        const updateNavHeight = () => {
+            if (navRef.current) {
+                setNavHeight(navRef.current.offsetHeight); // Update height dynamically
+            }
+        };
+
+        updateNavHeight(); // Initial height calculation
+        window.addEventListener('resize', updateNavHeight); // Update height on resize
+
+        return () => {
+            window.removeEventListener('resize', updateNavHeight); // Cleanup on unmount
+        };
+    }, []);
+
+    useEffect(() => {
+        const generateLightColorStyle = () => {
+            const hue = Math.floor(Math.random() * 360); // Random hue
+            const baseColor = `hsl(${hue}, 80%, 85%)`; // Light color
+            const borderColor = `hsl(${hue}, 80%, 50%)`; // Darker shade for border
+
+            return {
+                backgroundColor: baseColor,
+                color: '#333',
+                border: `2px solid ${borderColor}`,
+                boxShadow: `0 2px 10px ${baseColor}`,
+            };
+        };
+
+        const styles = {};
+        mainRepoNames.forEach((name) => {
+            if (
+                (name === 'imessageanalysisapp' && !imessageclicked) ||
+                (name === 'LandonGPT' && !landongptclicked) ||
+                (name === 'snakePlusAi-V1-NEAT' && !snakeclicked)
+            ) {
+                const hue = Math.floor(Math.random() * 360); // Generate a random hue
+                const backgroundColor = `hsl(${hue}, 80%, 60%)`; // Bright color
+                const borderColor = `hsl(${hue}, 80%, 50%)`; // Slightly darker border color
+                const randomDelay = `${(Math.random() * 2.5).toFixed(2)}s`; // Random delay between 0-2.5 seconds
+
+                styles[name] = {
+                    backgroundColor,
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    border: `6px solid ${borderColor}`,
+                    boxShadow: `0 0 20px ${backgroundColor}, 0 0 30px ${backgroundColor}`, // Glow matches the button color
+                    animation: `pulse 3s infinite ease-in-out`,
+                    animationDelay: randomDelay, // Add random delay
+                    transform: 'scale(1.09)',
+                };
+            } else {
+                styles[name] = generateLightColorStyle();
+            }
+        });
+
+        setButtonStyles(styles);
+    }, [imessageclicked, landongptclicked, snakeclicked]);
+
+    const handleClick = (repoName) => {
+        if (repoName === 'imessageanalysisapp') imessageclicked = true;
+        if (repoName === 'LandonGPT') landongptclicked = true;
+        if (repoName === 'snakePlusAi-V1-NEAT') snakeclicked = true;
+    };
+
     const mainRepos = repos.filter((repo) => mainRepoNames.includes(repo.name));
     const otherRepos = repos.filter((repo) => !mainRepoNames.includes(repo.name));
 
-    const [isDropdownOpen, setDropdownOpen] = useState(false);
-
     return (
         <>
+            <style>
+                {`
+                    @keyframes pulse {
+                        0% {
+                            transform: scale(1.1);
+                            box-shadow: 0 0 20px #F50057, 0 0 30px #FF4081;
+                        }
+                        50% {
+                            transform: scale(1.2);
+                            box-shadow: 0 0 30px #FF4081, 0 0 40px #F50057;
+                        }
+                        100% {
+                            transform: scale(1.1);
+                            box-shadow: 0 0 20px #F50057, 0 0 30px #FF4081;
+                        }
+                    }
+
+                    @media (max-width: 600px) {
+                        nav {
+                            height: auto;
+                            padding: 10px;
+                        }
+                        nav a {
+                            font-size: 11px;
+                            width: 90px;
+                            padding: 6px 8px;
+                        }
+                        button {
+                            font-size: 11px;
+                            padding: 6px 12px;
+                        }
+                    }
+
+                    @media (max-width: 400px) {
+                        nav {
+                            height: auto;
+                            padding: 5px;
+                        }
+                        nav a {
+                            font-size: 10px;
+                            width: 80px;
+                            padding: 4px 6px;
+                        }
+                        button {
+                            font-size: 10px;
+                            padding: 4px 10px;
+                        }
+                    }
+                `}
+            </style>
+
             <nav
+                ref={navRef}
                 style={{
-                    display: 'flex',
+                    display: 'grid',
+                    gridTemplateColumns: '55px auto 95px',
+                    alignItems: 'center',
                     gap: '10px',
                     padding: '10px',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                     position: 'fixed',
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: '80px',
                     backgroundColor: '#fff',
                     borderBottom: '1px solid #ddd',
                     zIndex: 1000,
                     boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
                 }}
             >
-                {/* LC Home Button */}
-                <Link
-                    href="/"
+                <div style={{ gridColumn: '1 / 2', justifySelf: 'start' }}>
+                    <Link href="/">
+                        <Image
+                            src="/LCfancylogo.png"
+                            alt="LC Logo"
+                            width={60}
+                            height={60}
+                            style={{ borderRadius: '50%' }}
+                        />
+                    </Link>
+                </div>
+
+                <div
                     style={{
-                        position: 'absolute',
-                        top: '10px',
-                        left: '10px',
-                        display: 'inline-block',
-                        width: '60px',
-                        height: '60px',
-                        backgroundColor: '#333',
-                        textAlign: 'center',
-                        borderRadius: '50%',
-                        boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-                        overflow: 'hidden', // Ensure the image stays within the circle
+                        gridColumn: '2 / 3',
+                        display: 'flex',
+                        gap: '10px',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
                     }}
                 >
-                    <Image
-                        src="/LCfancylogo.png"
-                        alt="LC Logo"
-                        width={60}
-                        height={60}
-                        style={{ borderRadius: '50%' }}
-                    />
-                </Link>
+                    {mainRepos.map((repo) => {
+                        const displayName = buttonLabels[repo.name] || repo.name;
+                        const style = buttonStyles[repo.name] || {};
 
+                        return (
+                            <Link
+                                href={`/${repo.name}`}
+                                key={repo.id}
+                                onClick={() => handleClick(repo.name)}
+                                style={{
+                                    display: 'inline-block',
+                                    textDecoration: 'none',
+                                    borderRadius: '6px',
+                                    textAlign: 'center',
+                                    padding: '10px 15px',
+                                    fontSize: '14px',
+                                    width: '140px',
+                                    ...style,
+                                }}
+                            >
+                                {displayName}
+                            </Link>
+                        );
+                    })}
+                </div>
 
-                                    {/* Main Repository Links */}
-                <div style={{ display: 'flex', gap: '10px', marginLeft: '80px' }}>
-                    {mainRepos.map((repo) => (
-                        <Link
-                        href={`/${repo.name}`}
-                        key={repo.id}
-                        style={{
-                            display: 'inline-block',
-                            minWidth: '100px',
-                            maxWidth: '150px',
-                            height: '40px',
-                            textDecoration: 'none',
-                            color: '#333',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                            paddingLeft: '10px',
-                            lineHeight: '40px',
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap',
-                            textOverflow: 'ellipsis',
-                            ...(repo.name === 'imessageanalysisapp'
-                            ? {
-                                background: 'linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet)',
-                                backgroundSize: '400% 400%',
-                                animation: 'gradientAnimation 10s ease infinite',
-                                color: '#fff',
-                                fontWeight: 'bold',
-                                }
-                            : { backgroundColor: '#f4f4f4' }),
-                        }}
-                        >
-                        {repo.name}
-                        </Link>
-                    ))}
-                    </div>
-
-                    <style jsx>{`
-                    @keyframes gradientAnimation {
-                        0% {
-                        background-position: 0% 50%;
-                        }
-                        50% {
-                        background-position: 100% 50%;
-                        }
-                        100% {
-                        background-position: 0% 50%;
-                        }
-                    }
-                    `}</style>
-
-
-                {/* Dropdown for Other Repositories */}
-                <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+                <div style={{ gridColumn: '3 / 4', justifySelf: 'end' }}>
                     <button
                         onClick={() => setDropdownOpen(!isDropdownOpen)}
                         style={{
@@ -129,7 +226,7 @@ const NavBar = ({ repos = [] }) => {
                             padding: '10px 20px',
                             borderRadius: '4px',
                             cursor: 'pointer',
-                            fontSize: '16px',
+                            fontSize: '14px',
                         }}
                     >
                         Other Projects
@@ -139,7 +236,7 @@ const NavBar = ({ repos = [] }) => {
                             style={{
                                 position: 'absolute',
                                 top: '40px',
-                                right: '0',
+                                right: '10px',
                                 backgroundColor: '#fff',
                                 border: '1px solid #ccc',
                                 borderRadius: '4px',
@@ -168,7 +265,8 @@ const NavBar = ({ repos = [] }) => {
                 </div>
             </nav>
 
-            <div style={{ paddingTop: '80px' }} />
+            {/* Adjust padding dynamically based on navbar height */}
+            <div style={{ paddingTop: `${navHeight}px` }} />
         </>
     );
 };

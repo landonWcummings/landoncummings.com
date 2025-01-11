@@ -22,20 +22,24 @@ export default function IMessageAnalysisApp({ repos }) {
 
     useEffect(() => {
         let scrollAnimationFrame;
-
+    
         const autoScroll = () => {
-            window.scrollBy(0, 7); // Scroll down by 1px
+            window.scrollBy(0, 7); // Scroll down by 7px
             scrollAnimationFrame = requestAnimationFrame(autoScroll); // Recursively call autoScroll
         };
-
+    
         if (isAutoScrolling) {
-            scrollAnimationFrame = requestAnimationFrame(autoScroll);
+            const delayScroll = setTimeout(() => {
+                scrollAnimationFrame = requestAnimationFrame(autoScroll);
+            }, 2000); // Wait 3 seconds before starting scrolling
+    
+            return () => {
+                clearTimeout(delayScroll); // Cleanup timeout on unmount
+                cancelAnimationFrame(scrollAnimationFrame); // Cleanup animation frame on unmount
+            };
         }
-
-        return () => {
-            cancelAnimationFrame(scrollAnimationFrame); // Cleanup animation frame on unmount
-        };
     }, [isAutoScrolling]);
+    
 
     useEffect(() => {
         const stopScrolling = () => setIsAutoScrolling(false);
@@ -68,7 +72,7 @@ export default function IMessageAnalysisApp({ repos }) {
                 {/* Download Button */}
                 <section style={{ marginBottom: '30px' }}>
                     <a
-                        href="/downloads/imessageanalysis.dmg"
+                        href="/downloads/Imessage_Analysis_Installer.dmg"
                         download
                         style={{
                             display: 'inline-block',
