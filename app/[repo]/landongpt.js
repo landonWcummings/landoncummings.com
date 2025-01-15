@@ -85,16 +85,16 @@ export default function IMessageInterface({ repos }) {
 
   const sendMessage = async () => {
     if (inputValue.trim() === '') return;
-
+  
     // Add the sent message to the messages state
     setMessages((prevMessages) => [
       ...prevMessages,
       { text: inputValue, sender: 'sent' },
     ]);
-
+  
     const userMessage = inputValue; // Save user message
     setInputValue(''); // Clear input field
-
+  
     try {
       // Send the message to the API
       const response = await fetch('/api/landongpt', {
@@ -102,20 +102,20 @@ export default function IMessageInterface({ repos }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to fetch API response');
       }
-
+  
       let replyMessage = await response.text(); // Read as plain text
-
+  
       // Split the reply message on "|" to handle multiple messages
       if (replyMessage.includes("DONE")) {
         // Remove "DONE" from the response
         replyMessage = replyMessage.replace("DONE", "").trim();
       }
       const replyMessages = replyMessage.split('|').map((text) => text.trim());
-
+  
       // Add each part of the API's response as a separate message
       setMessages((prevMessages) => [
         ...prevMessages,
@@ -125,10 +125,11 @@ export default function IMessageInterface({ repos }) {
       console.error('Error fetching API response:', error);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { text: 'Error: Unable to process your message.', sender: 'received' },
+        { text: "Oops Landon's computer is not configured to run this model right now. He has been notified.", sender: 'received' },
       ]);
     }
   };
+  
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -245,7 +246,7 @@ export default function IMessageInterface({ repos }) {
         </div>
       </div>
       <div style={{ textAlign: 'center', fontSize: '16px', color: themeStyles.color, padding: '10px' }}>
-        <p>Thank you for visiting the interface! <br></br> NOTE: This model does not know any specific information and is very prone to hallucinating. This model is made to mimic my texting form and tone.<br></br> NOTE: model does not have conversational memory. Every input is treated as a stand alone message. <br></br>Contact me at lndncmmngs@gmail.com if you want your own<br></br>⬇️ Developer notes below ⬇️</p>
+        <p>NOTE: This model knows very little. It is made to mimic my texting form and tone.<br></br> NOTE: model does not have conversational memory. <br></br>Contact me at lndncmmngs@gmail.com if you want your own<br></br>⬇️ Developer notes below ⬇️</p>
       </div>
       <div style={{ textAlign: 'center', marginTop: '20px', padding: '10px', color: themeStyles.color }}>
         <h2>README</h2>

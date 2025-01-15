@@ -12,16 +12,19 @@ export async function POST(req) {
   
       // Forward the message to the external API
       const externalResponse = await fetch(
-        'https://aeed-64-149-153-183.ngrok-free.app/generate',
+        'https://immense-neatly-condor.ngrok-free.app/generate',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ text: message }),
+          body: JSON.stringify({
+            text: message,
+            inference: true,
+            ID: 'Landon'
+          }),
         }
-      );
-  
+      );      
       if (!externalResponse.ok) {
         const errorText = await externalResponse.text();
         console.error('External API Error:', errorText);
@@ -36,7 +39,7 @@ export async function POST(req) {
         
       // Return the response back to the client
       return new Response(
-        externalData.response || 'No reply received',
+        externalData.response || '',
         { status: 200, headers: { 'Content-Type': 'text/plain' } }
       );
       
