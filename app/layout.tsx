@@ -16,8 +16,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Quite a Website - check it out",
-  description: "One of the websites of all time",
+  title: "LandonCummings.com",
+  description: "Official website of Landon Cummings",
 };
 
 export default function RootLayout({
