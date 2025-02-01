@@ -1,0 +1,751 @@
+Year,State,State House Majority,State Senate Majority,US House Majority,US Senator 1,US Senator 2,Federal Presidential Party
+2010,Alabama,Democrat,Democrat,Democrat,Republican,Democrat,Democratic
+2010,Alaska,Republican,Republican,Republican,Republican,Republican,Democratic
+2010,Arizona,Republican,Republican,Republican,Republican,Republican,Democratic
+2010,Arkansas,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,California,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,Colorado,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,Florida,Republican,Republican,Republican,Republican,Independent,Democratic
+2010,Georgia,Republican,Republican,Republican,Republican,Republican,Democratic
+2010,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,Idaho,Republican,Republican,Republican,Republican,Republican,Democratic
+2010,Illinois,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,Indiana,Republican,Republican,Democrat,Democrat,Republican,Democratic
+2010,Iowa,Democrat,Democrat,Democrat,Democrat,Republican,Democratic
+2010,Kansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2010,Kentucky,Democrat,Republican,Republican,Republican,Republican,Democratic
+2010,Louisiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2010,Maine,Democrat,Democrat,Democrat,Republican,Republican,Democratic
+2010,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,Massachusetts,Democrat,Democrat,Democrat,Republican,Democrat,Democratic
+2010,Michigan,Republican,Republican,Democrat,Democrat,Democrat,Democratic
+2010,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,Mississippi,Republican,Republican,Republican,Republican,Republican,Democratic
+2010,Missouri,Republican,Republican,Republican,Democrat,Republican,Democratic
+2010,Montana,Democrat,Democrat,Republican,Democrat,Republican,Democratic
+2010,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Democrat,Democratic
+2010,Nevada,Democrat,Democrat,Democrat,Democrat,Republican,Democratic
+2010,New Hampshire,Democrat,Democrat,Democrat,Democrat,Republican,Democratic
+2010,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,North Carolina,Democrat,Democrat,Democrat,Democrat,Republican,Democratic
+2010,North Dakota,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2010,Ohio,Democrat,Republican,Republican,Democrat,Republican,Democratic
+2010,Oklahoma,Republican,Republican,Republican,Republican,Republican,Democratic
+2010,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,Pennsylvania,Democrat,Republican,Democrat,Democrat,Republican,Democratic
+2010,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,South Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2010,South Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2010,Tennessee,Republican,Republican,Republican,Republican,Republican,Democratic
+2010,Texas,Republican,Republican,Republican,Republican,Republican,Democratic
+2010,Utah,Republican,Republican,Republican,Republican,Republican,Democratic
+2010,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Democratic
+2010,Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2010,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,West Virginia,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,Wisconsin,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2010,Wyoming,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,Alabama,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,Alaska,Republican,Republican,Republican,Democrat,Republican,Democratic
+2011,Arizona,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,Arkansas,Democrat,Democrat,Republican,Democrat,Democrat,Democratic
+2011,California,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2011,Colorado,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2011,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2011,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2011,Florida,Republican,Republican,Republican,Democrat,Republican,Democratic
+2011,Georgia,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2011,Idaho,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,Illinois,Democrat,Democrat,Democrat,Republican,Democrat,Democratic
+2011,Indiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2011,Iowa,Republican,Democrat,Republican,Democrat,Republican,Democratic
+2011,Kansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,Kentucky,Democrat,Republican,Republican,Republican,Republican,Democratic
+2011,Louisiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2011,Maine,Republican,Republican,Democrat,Republican,Republican,Democratic
+2011,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2011,Massachusetts,Democrat,Democrat,Democrat,Republican,Democrat,Democratic
+2011,Michigan,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2011,Minnesota,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2011,Mississippi,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,Missouri,Republican,Republican,Republican,Democrat,Republican,Democratic
+2011,Montana,Republican,Democrat,Republican,Democrat,Republican,Democratic
+2011,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Democratic
+2011,Nevada,Democrat,Democrat,Democrat,Democrat,Republican,Democratic
+2011,New Hampshire,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2011,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2011,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2011,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2011,North Carolina,Republican,Republican,Democrat,Democrat,Republican,Democratic
+2011,North Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2011,Ohio,Republican,Republican,Republican,Democrat,Republican,Democratic
+2011,Oklahoma,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2011,Pennsylvania,Republican,Republican,Republican,Democrat,Republican,Democratic
+2011,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2011,South Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,South Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2011,Tennessee,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,Texas,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,Utah,Republican,Republican,Republican,Republican,Republican,Democratic
+2011,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Democratic
+2011,Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2011,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2011,West Virginia,Democrat,Democrat,Republican,Democrat,Democrat,Democratic
+2011,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Democratic
+2011,Wyoming,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,Alabama,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,Alaska,Republican,Republican,Republican,Democrat,Republican,Democratic
+2012,Arizona,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,Arkansas,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2012,California,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,Colorado,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2012,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,Florida,Republican,Republican,Republican,Democrat,Republican,Democratic
+2012,Georgia,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,Idaho,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,Illinois,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,Indiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2012,Iowa,Democrat,Democrat,Republican,Democrat,Republican,Democratic
+2012,Kansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,Kentucky,Democrat,Republican,Republican,Republican,Republican,Democratic
+2012,Louisiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2012,Maine,Republican,Republican,Democrat,Independent,Republican,Democratic
+2012,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,Massachusetts,Democrat,Democrat,Democrat,Republican,Democrat,Democratic
+2012,Michigan,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2012,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,Mississippi,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,Missouri,Republican,Republican,Republican,Democrat,Republican,Democratic
+2012,Montana,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2012,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Democratic
+2012,Nevada,Democrat,Democrat,Democrat,Democrat,Republican,Democratic
+2012,New Hampshire,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2012,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,North Carolina,Republican,Republican,Republican,Democrat,Republican,Democratic
+2012,North Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2012,Ohio,Republican,Republican,Republican,Democrat,Republican,Democratic
+2012,Oklahoma,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,Pennsylvania,Republican,Republican,Republican,Democrat,Republican,Democratic
+2012,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,South Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,South Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2012,Tennessee,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,Texas,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,Utah,Republican,Republican,Republican,Republican,Republican,Democratic
+2012,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Democratic
+2012,Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2012,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2012,West Virginia,Democrat,Democrat,Republican,Democrat,Democrat,Democratic
+2012,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Democratic
+2012,Wyoming,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,Alabama,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,Alaska,Republican,Republican,Republican,Democrat,Republican,Democratic
+2013,Arizona,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,Arkansas,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2013,California,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,Colorado,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,Florida,Republican,Republican,Republican,Democrat,Republican,Democratic
+2013,Georgia,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,Idaho,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,Illinois,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,Indiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2013,Iowa,Democrat,Democrat,Republican,Democrat,Republican,Democratic
+2013,Kansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,Kentucky,Democrat,Republican,Republican,Republican,Republican,Democratic
+2013,Louisiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2013,Maine,Republican,Democrat,Democrat,Independent,Republican,Democratic
+2013,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,Michigan,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2013,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,Mississippi,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,Missouri,Republican,Republican,Republican,Democrat,Republican,Democratic
+2013,Montana,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2013,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Democratic
+2013,Nevada,Democrat,Democrat,Democrat,Democrat,Republican,Democratic
+2013,New Hampshire,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2013,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,North Carolina,Republican,Republican,Republican,Democrat,Republican,Democratic
+2013,North Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2013,Ohio,Republican,Republican,Republican,Democrat,Republican,Democratic
+2013,Oklahoma,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,Pennsylvania,Republican,Republican,Republican,Democrat,Republican,Democratic
+2013,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,South Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,South Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2013,Tennessee,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,Texas,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,Utah,Republican,Republican,Republican,Republican,Republican,Democratic
+2013,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Democratic
+2013,Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2013,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2013,West Virginia,Democrat,Democrat,Republican,Democrat,Democrat,Democratic
+2013,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Democratic
+2013,Wyoming,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Alabama,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Alaska,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Arizona,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Arkansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,California,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,Colorado,Democrat,Democrat,Republican,Democrat,Democrat,Democratic
+2014,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,Florida,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Georgia,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,Idaho,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Illinois,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,Indiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2014,Iowa,Republican,Democrat,Republican,Democrat,Republican,Democratic
+2014,Kansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Kentucky,Democrat,Republican,Republican,Republican,Republican,Democratic
+2014,Louisiana,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Maine,Republican,Democrat,Republican,Independent,Republican,Democratic
+2014,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,Michigan,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2014,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,Mississippi,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Missouri,Republican,Republican,Republican,Democrat,Republican,Democratic
+2014,Montana,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2014,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Democratic
+2014,Nevada,Democrat,Democrat,Republican,Democrat,Republican,Democratic
+2014,New Hampshire,Democrat,Democrat,Republican,Democrat,Democrat,Democratic
+2014,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,North Carolina,Republican,Republican,Republican,Democrat,Republican,Democratic
+2014,North Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2014,Ohio,Republican,Republican,Republican,Democrat,Republican,Democratic
+2014,Oklahoma,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,Pennsylvania,Republican,Republican,Republican,Democrat,Republican,Democratic
+2014,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,South Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,South Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2014,Tennessee,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Texas,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Utah,Republican,Republican,Republican,Republican,Republican,Democratic
+2014,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Democratic
+2014,Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2014,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2014,West Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2014,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Democratic
+2014,Wyoming,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Alabama,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Alaska,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Arizona,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Arkansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,California,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,Colorado,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2015,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,Florida,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Georgia,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,Idaho,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Illinois,Democrat,Democrat,Republican,Democrat,Democrat,Democratic
+2015,Indiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2015,Iowa,Republican,Democrat,Republican,Democrat,Republican,Democratic
+2015,Kansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Kentucky,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Louisiana,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Maine,Republican,Democrat,Republican,Independent,Republican,Democratic
+2015,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,Michigan,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2015,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,Mississippi,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Missouri,Republican,Republican,Republican,Democrat,Republican,Democratic
+2015,Montana,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2015,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Democratic
+2015,Nevada,Republican,Republican,Republican,Democrat,Republican,Democratic
+2015,New Hampshire,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2015,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,New Mexico,Republican,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,North Carolina,Republican,Republican,Republican,Democrat,Republican,Democratic
+2015,North Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2015,Ohio,Republican,Republican,Republican,Democrat,Republican,Democratic
+2015,Oklahoma,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,Pennsylvania,Republican,Republican,Republican,Democrat,Republican,Democratic
+2015,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,South Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,South Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2015,Tennessee,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Texas,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Utah,Republican,Republican,Republican,Republican,Republican,Democratic
+2015,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Democratic
+2015,Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2015,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2015,West Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2015,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Democratic
+2015,Wyoming,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Alabama,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Alaska,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Arizona,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Arkansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,California,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,Colorado,Democrat,Democrat,Republican,Democrat,Democrat,Democratic
+2016,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,Florida,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Georgia,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,Idaho,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Illinois,Democrat,Democrat,Republican,Democrat,Democrat,Democratic
+2016,Indiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2016,Iowa,Republican,Republican,Republican,Democrat,Republican,Democratic
+2016,Kansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Kentucky,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Louisiana,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Maine,Republican,Democrat,Democrat,Independent,Republican,Democratic
+2016,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,Michigan,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2016,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,Mississippi,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Missouri,Republican,Republican,Republican,Democrat,Republican,Democratic
+2016,Montana,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2016,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Democratic
+2016,Nevada,Republican,Republican,Democrat,Democrat,Republican,Democratic
+2016,New Hampshire,Democrat,Democrat,Republican,Democrat,Democrat,Democratic
+2016,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,New Mexico,Republican,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,North Carolina,Republican,Republican,Republican,Democrat,Republican,Democratic
+2016,North Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2016,Ohio,Republican,Republican,Republican,Democrat,Republican,Democratic
+2016,Oklahoma,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,Pennsylvania,Republican,Republican,Republican,Democrat,Republican,Democratic
+2016,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,South Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,South Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2016,Tennessee,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Texas,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Utah,Republican,Republican,Republican,Republican,Republican,Democratic
+2016,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Democratic
+2016,Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2016,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2016,West Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2016,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Democratic
+2016,Wyoming,Republican,Republican,Republican,Republican,Republican,Democratic
+2017,Alabama,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Alaska,Republican,Republican,Republican,Independent,Republican,Republican
+2017,Arizona,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Arkansas,Republican,Republican,Republican,Republican,Republican,Republican
+2017,California,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,Colorado,Republican,Democrat,Republican,Democrat,Democrat,Republican
+2017,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,Florida,Republican,Republican,Republican,Democrat,Republican,Republican
+2017,Georgia,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,Idaho,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Illinois,Democrat,Democrat,Republican,Democrat,Democrat,Republican
+2017,Indiana,Republican,Republican,Republican,Democrat,Republican,Republican
+2017,Iowa,Republican,Republican,Republican,Democrat,Republican,Republican
+2017,Kansas,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Kentucky,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Louisiana,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Maine,Republican,Democrat,Republican,Independent,Republican,Republican
+2017,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,Michigan,Republican,Republican,Republican,Democrat,Democrat,Republican
+2017,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,Mississippi,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Missouri,Republican,Republican,Republican,Democrat,Republican,Republican
+2017,Montana,Republican,Democrat,Republican,Democrat,Democrat,Republican
+2017,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Republican
+2017,Nevada,Republican,Republican,Republican,Democrat,Republican,Republican
+2017,New Hampshire,Republican,Republican,Republican,Democrat,Democrat,Republican
+2017,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,New Mexico,Republican,Democrat,Democrat,Democrat,Democrat,Republican
+2017,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,North Carolina,Republican,Republican,Republican,Democrat,Republican,Republican
+2017,North Dakota,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Ohio,Republican,Republican,Republican,Democrat,Republican,Republican
+2017,Oklahoma,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,Pennsylvania,Republican,Republican,Republican,Democrat,Republican,Republican
+2017,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,South Carolina,Republican,Republican,Republican,Republican,Republican,Republican
+2017,South Dakota,Republican,Republican,Republican,Democrat,Republican,Republican
+2017,Tennessee,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Texas,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Utah,Republican,Republican,Republican,Republican,Republican,Republican
+2017,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Republican
+2017,Virginia,Republican,Republican,Republican,Democrat,Democrat,Republican
+2017,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2017,West Virginia,Republican,Republican,Republican,Democrat,Democrat,Republican
+2017,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Republican
+2017,Wyoming,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Alabama,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Alaska,Republican,Republican,Republican,Independent,Republican,Republican
+2018,Arizona,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Arkansas,Republican,Republican,Republican,Republican,Republican,Republican
+2018,California,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,Colorado,Democrat,Democrat,Republican,Democrat,Democrat,Republican
+2018,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,Florida,Republican,Republican,Republican,Democrat,Republican,Republican
+2018,Georgia,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,Idaho,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Illinois,Democrat,Democrat,Republican,Democrat,Democrat,Republican
+2018,Indiana,Republican,Republican,Republican,Democrat,Republican,Republican
+2018,Iowa,Republican,Republican,Republican,Democrat,Republican,Republican
+2018,Kansas,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Kentucky,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Louisiana,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Maine,Democrat,Democrat,Republican,Independent,Republican,Republican
+2018,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,Michigan,Republican,Republican,Republican,Democrat,Democrat,Republican
+2018,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,Mississippi,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Missouri,Republican,Republican,Republican,Democrat,Republican,Republican
+2018,Montana,Republican,Democrat,Republican,Democrat,Democrat,Republican
+2018,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Republican
+2018,Nevada,Democrat,Democrat,Republican,Democrat,Republican,Republican
+2018,New Hampshire,Democrat,Republican,Republican,Democrat,Democrat,Republican
+2018,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,North Carolina,Republican,Republican,Republican,Democrat,Republican,Republican
+2018,North Dakota,Republican,Republican,Republican,Democrat,Republican,Republican
+2018,Ohio,Republican,Republican,Republican,Democrat,Republican,Republican
+2018,Oklahoma,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,Pennsylvania,Republican,Republican,Republican,Democrat,Republican,Republican
+2018,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,South Carolina,Republican,Republican,Republican,Republican,Republican,Republican
+2018,South Dakota,Republican,Republican,Republican,Democrat,Republican,Republican
+2018,Tennessee,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Texas,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Utah,Republican,Republican,Republican,Republican,Republican,Republican
+2018,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Republican
+2018,Virginia,Republican,Republican,Republican,Democrat,Democrat,Republican
+2018,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2018,West Virginia,Republican,Republican,Republican,Democrat,Democrat,Republican
+2018,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Republican
+2018,Wyoming,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Alabama,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Alaska,Republican,Republican,Republican,Independent,Republican,Republican
+2019,Arizona,Republican,Republican,Republican,Democrat,Republican,Republican
+2019,Arkansas,Republican,Republican,Republican,Republican,Republican,Republican
+2019,California,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,Colorado,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,Florida,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Georgia,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,Idaho,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Illinois,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,Indiana,Republican,Republican,Republican,Democrat,Republican,Republican
+2019,Iowa,Republican,Republican,Republican,Democrat,Republican,Republican
+2019,Kansas,Republican,Republican,Republican,Democrat,Republican,Republican
+2019,Kentucky,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Louisiana,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Maine,Democrat,Democrat,Republican,Independent,Republican,Republican
+2019,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,Michigan,Republican,Republican,Democrat,Democrat,Democrat,Republican
+2019,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,Mississippi,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Missouri,Republican,Republican,Republican,Democrat,Republican,Republican
+2019,Montana,Republican,Democrat,Republican,Democrat,Democrat,Republican
+2019,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Republican
+2019,Nevada,Democrat,Democrat,Democrat,Democrat,Republican,Republican
+2019,New Hampshire,Democrat,Democrat,Republican,Democrat,Democrat,Republican
+2019,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,North Carolina,Republican,Republican,Republican,Democrat,Republican,Republican
+2019,North Dakota,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Ohio,Republican,Republican,Republican,Democrat,Republican,Republican
+2019,Oklahoma,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,Pennsylvania,Republican,Republican,Democrat,Democrat,Republican,Republican
+2019,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,South Carolina,Republican,Republican,Republican,Republican,Republican,Republican
+2019,South Dakota,Republican,Republican,Republican,Democrat,Republican,Republican
+2019,Tennessee,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Texas,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Utah,Republican,Republican,Republican,Republican,Republican,Republican
+2019,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Republican
+2019,Virginia,Republican,Republican,Republican,Democrat,Democrat,Republican
+2019,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2019,West Virginia,Republican,Republican,Republican,Democrat,Democrat,Republican
+2019,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Republican
+2019,Wyoming,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Alabama,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Alaska,Republican,Republican,Republican,Independent,Republican,Republican
+2020,Arizona,Republican,Republican,Republican,Democrat,Republican,Republican
+2020,Arkansas,Republican,Republican,Republican,Republican,Republican,Republican
+2020,California,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,Colorado,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,Florida,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Georgia,Republican,Republican,Republican,Democrat,Republican,Republican
+2020,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,Idaho,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Illinois,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,Indiana,Republican,Republican,Republican,Democrat,Republican,Republican
+2020,Iowa,Republican,Republican,Republican,Democrat,Republican,Republican
+2020,Kansas,Republican,Republican,Republican,Democrat,Republican,Republican
+2020,Kentucky,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Louisiana,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Maine,Democrat,Democrat,Democrat,Independent,Republican,Republican
+2020,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,Michigan,Republican,Republican,Democrat,Democrat,Democrat,Republican
+2020,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,Mississippi,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Missouri,Republican,Republican,Republican,Democrat,Republican,Republican
+2020,Montana,Republican,Democrat,Republican,Democrat,Democrat,Republican
+2020,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Republican
+2020,Nevada,Democrat,Democrat,Democrat,Democrat,Republican,Republican
+2020,New Hampshire,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,North Carolina,Republican,Republican,Republican,Democrat,Republican,Republican
+2020,North Dakota,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Ohio,Republican,Republican,Republican,Democrat,Republican,Republican
+2020,Oklahoma,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,Pennsylvania,Republican,Republican,Democrat,Democrat,Republican,Republican
+2020,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,South Carolina,Republican,Republican,Republican,Republican,Republican,Republican
+2020,South Dakota,Republican,Republican,Republican,Democrat,Republican,Republican
+2020,Tennessee,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Texas,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Utah,Republican,Republican,Republican,Republican,Republican,Republican
+2020,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Republican
+2020,Virginia,Republican,Democrat,Republican,Democrat,Democrat,Republican
+2020,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Republican
+2020,West Virginia,Republican,Republican,Republican,Democrat,Democrat,Republican
+2020,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Republican
+2020,Wyoming,Republican,Republican,Republican,Republican,Republican,Republican
+2021,Alabama,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,Alaska,Republican,Republican,Republican,Independent,Republican,Democratic
+2021,Arizona,Republican,Republican,Republican,Democrat,Republican,Democratic
+2021,Arkansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,California,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,Colorado,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,Florida,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,Georgia,Republican,Republican,Republican,Democrat,Republican,Democratic
+2021,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,Idaho,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,Illinois,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,Indiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2021,Iowa,Republican,Republican,Republican,Democrat,Republican,Democratic
+2021,Kansas,Republican,Republican,Republican,Democrat,Republican,Democratic
+2021,Kentucky,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,Louisiana,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,Maine,Democrat,Democrat,Democrat,Independent,Republican,Democratic
+2021,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,Michigan,Republican,Republican,Democrat,Democrat,Democrat,Democratic
+2021,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,Mississippi,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,Missouri,Republican,Republican,Republican,Democrat,Republican,Democratic
+2021,Montana,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2021,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Democratic
+2021,Nevada,Democrat,Democrat,Democrat,Democrat,Republican,Democratic
+2021,New Hampshire,Democrat,Republican,Democrat,Democrat,Democrat,Democratic
+2021,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,North Carolina,Republican,Republican,Republican,Democrat,Republican,Democratic
+2021,North Dakota,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,Ohio,Republican,Republican,Republican,Democrat,Republican,Democratic
+2021,Oklahoma,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,Pennsylvania,Republican,Republican,Democrat,Democrat,Republican,Democratic
+2021,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,South Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,South Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2021,Tennessee,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,Texas,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,Utah,Republican,Republican,Republican,Republican,Republican,Democratic
+2021,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Democratic
+2021,Virginia,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2021,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2021,West Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2021,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Democratic
+2021,Wyoming,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Alabama,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Alaska,Republican,Republican,Republican,Independent,Republican,Democratic
+2022,Arizona,Republican,Republican,Republican,Democrat,Republican,Democratic
+2022,Arkansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,California,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,Colorado,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,Florida,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Georgia,Republican,Republican,Republican,Democrat,Republican,Democratic
+2022,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,Idaho,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Illinois,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,Indiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2022,Iowa,Republican,Republican,Republican,Democrat,Republican,Democratic
+2022,Kansas,Republican,Republican,Republican,Democrat,Republican,Democratic
+2022,Kentucky,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Louisiana,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Maine,Democrat,Democrat,Democrat,Independent,Republican,Democratic
+2022,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,Michigan,Republican,Republican,Democrat,Democrat,Democrat,Democratic
+2022,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,Mississippi,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Missouri,Republican,Republican,Republican,Democrat,Republican,Democratic
+2022,Montana,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2022,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Democratic
+2022,Nevada,Democrat,Democrat,Democrat,Democrat,Republican,Democratic
+2022,New Hampshire,Democrat,Republican,Democrat,Democrat,Democrat,Democratic
+2022,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,North Carolina,Republican,Republican,Republican,Democrat,Republican,Democratic
+2022,North Dakota,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Ohio,Republican,Republican,Republican,Democrat,Republican,Democratic
+2022,Oklahoma,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,Pennsylvania,Republican,Republican,Democrat,Democrat,Republican,Democratic
+2022,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,South Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,South Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2022,Tennessee,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Texas,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Utah,Republican,Republican,Republican,Republican,Republican,Democratic
+2022,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Democratic
+2022,Virginia,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2022,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2022,West Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2022,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Democratic
+2022,Wyoming,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Alabama,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Alaska,Republican,Republican,Republican,Independent,Republican,Democratic
+2023,Arizona,Republican,Republican,Republican,Democrat,Republican,Democratic
+2023,Arkansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,California,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,Colorado,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,Florida,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Georgia,Republican,Republican,Republican,Democrat,Republican,Democratic
+2023,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,Idaho,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Illinois,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,Indiana,Republican,Republican,Republican,Democrat,Republican,Democratic
+2023,Iowa,Republican,Republican,Republican,Democrat,Republican,Democratic
+2023,Kansas,Republican,Republican,Republican,Democrat,Republican,Democratic
+2023,Kentucky,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Louisiana,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Maine,Democrat,Democrat,Democrat,Independent,Republican,Democratic
+2023,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,Michigan,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,Minnesota,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,Mississippi,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Missouri,Republican,Republican,Republican,Democrat,Republican,Democratic
+2023,Montana,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2023,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Democratic
+2023,Nevada,Democrat,Democrat,Democrat,Democrat,Republican,Democratic
+2023,New Hampshire,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,North Carolina,Republican,Republican,Republican,Democrat,Republican,Democratic
+2023,North Dakota,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Ohio,Republican,Republican,Republican,Democrat,Republican,Democratic
+2023,Oklahoma,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,Pennsylvania,Democrat,Democrat,Democrat,Democrat,Republican,Democratic
+2023,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,South Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,South Dakota,Republican,Republican,Republican,Democrat,Republican,Democratic
+2023,Tennessee,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Texas,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Utah,Republican,Republican,Republican,Republican,Republican,Democratic
+2023,Vermont,Democrat,Democrat,Democrat,Independent,Democrat,Democratic
+2023,Virginia,Republican,Democrat,Republican,Democrat,Democrat,Democratic
+2023,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2023,West Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2023,Wisconsin,Republican,Republican,Republican,Democrat,Republican,Democratic
+2023,Wyoming,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Alabama,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Alaska,Multipartisan Coalition,Multipartisan Coalition,Republican,Republican,Republican,Democratic
+2024,Arizona,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Arkansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,California,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,Colorado,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,Connecticut,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,Delaware,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,Florida,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Georgia,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Hawaii,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,Idaho,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Illinois,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,Indiana,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Iowa,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Kansas,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Kentucky,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Louisiana,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Maine,Democrat,Democrat,Democrat,Republican,Independent,Democratic
+2024,Maryland,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,Massachusetts,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,Michigan,Republican,Republican,Democrat,Democrat,Democrat,Democratic
+2024,Minnesota,Tied,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,Mississippi,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Missouri,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Montana,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Nebraska,Nonpartisan,Nonpartisan,Republican,Republican,Republican,Democratic
+2024,Nevada,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,New Hampshire,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2024,New Jersey,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,New Mexico,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,New York,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,North Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,North Dakota,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Ohio,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Oklahoma,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Oregon,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,Pennsylvania,Democrat,Republican,Democrat,Democrat,Democrat,Democratic
+2024,Rhode Island,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,South Carolina,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,South Dakota,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Tennessee,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Texas,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Utah,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Vermont,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,Virginia,Republican,Republican,Republican,Democrat,Democrat,Democratic
+2024,Washington,Democrat,Democrat,Democrat,Democrat,Democrat,Democratic
+2024,West Virginia,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Wisconsin,Republican,Republican,Republican,Republican,Republican,Democratic
+2024,Wyoming,Republican,Republican,Republican,Republican,Republican,Democratic
