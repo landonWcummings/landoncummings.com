@@ -1,134 +1,381 @@
 'use client';
-
 import React, {
-  useEffect,
   useRef,
   useState,
+  useEffect,
   useCallback,
   useMemo
 } from 'react';
-import * as ort from 'onnxruntime-web';
 import NavBar from '../../components/NavBar';
 import Image from 'next/image';
+import { Game } from './snakeGame'; // adjust path if necessary
 
+export default function SnakePlusAI({ repos }) {
+  // Refs for compete mode
+  const userCanvasRef = useRef(null);
+  const aiCanvasRef = useRef(null);
+  const userGameRef = useRef(null);
+  const aiGameRef = useRef(null);
+  // Ref for demo mode
+  const demoCanvasRef = useRef(null);
+  const demoGameRef = useRef(null);
 
-export default function Snakeplusai({ repos }) {
-  const canvasRef = useRef(null);
-  const gameRef = useRef(null); 
-  const speedChangeTimer = useRef(null);
+  // Refs to store pending timeouts so they can be cleared.
+  const popupTimeoutRef = useRef(null);
+  const restartTimeoutRef = useRef(null);
 
+  const [mode, setMode] = useState("compete"); // "compete" or "demo"
   const [gridSize, setGridSize] = useState(4);
-  // `speed` is the actual speed used by the game
-  const [speed, setSpeed] = useState(200);  
-  // `tempSpeed` is used while dragging the slider
+  const [speed, setSpeed] = useState(200);
   const [tempSpeed, setTempSpeed] = useState(200);
-  
+  const [gamesStarted, setGamesStarted] = useState(false);
+  const [winnerMessage, setWinnerMessage] = useState(null);
+  const [inputEnabled, setInputEnabled] = useState(true);
+
+  // States for bottom section (graph & commentary)
   const [isGameReady, setIsGameReady] = useState(false);
   const [finishImageExists, setFinishImageExists] = useState(false);
-
   const commentary = useMemo(() => ({
     4: "Trained in roughly 5 hours. Model is pretty solid overall. Still some rough edges, could be perfected in more training time.",
     5: "Trained in roughly 18 and a half hours. Much harder to perfect a 5x5 grid due to the odd nature. A 5x5 board has an odd number of total cells making it impossible to execute one sustainable pattern as seen in the endgame of the 4x4. Given further training the model could likely perfect a 5x5",
     6: "Trained in roughly 76 hours. For 4x4 and 5x5 the input is the entire grid. For the 6x6, 4 inputs were added in addition to the grid. Four new boolean inputs depict whether or not the model will die if it moves in each of the four directions. This helps the model converge much faster. I had trained a model over 3.5 days without this addition and it was ineffective.",
   }), []);
 
-  const stopActiveGame = useCallback(() => {
-    if (gameRef.current) {
-      gameRef.current.stop();
-      gameRef.current = null;
+  // Initialize the user game (compete mode).
+  const initUserGame = useCallback(() => {
+    if (!userCanvasRef.current) {
+      setTimeout(initUserGame, 50);
+      return;
     }
-  }, []);
+    if (userGameRef.current) userGameRef.current.stop();
+    const canvas = userCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const gameInstance = new Game(canvas, ctx, gridSize, false, handleGameEnd);
+    gameInstance.msbetweenframes = speed;
+    gameInstance.reset();
+    gameInstance.draw();
+    userGameRef.current = gameInstance;
+    console.log('[Main] User game initialized.');
+  }, [gridSize, speed]);
 
-  const checkImageExists = (imagePath, callback) => {
-    const img = new window.Image(); // Use `window.Image` to avoid conflict with `next/image`
-    img.onload = () => callback(true);
-    img.onerror = () => callback(false);
-    img.src = imagePath;
-  };
+  // Initialize the AI game (compete mode).
+  const initAIGame = useCallback(async () => {
+    if (!aiCanvasRef.current) {
+      setTimeout(() => { initAIGame(); }, 50);
+      return;
+    }
+    if (aiGameRef.current) aiGameRef.current.stop();
+    const canvas = aiCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const gameInstance = new Game(canvas, ctx, gridSize, true, handleGameEnd);
+    gameInstance.msbetweenframes = speed;
+    await gameInstance.loadModel(gridSize);
+    gameInstance.reset();
+    gameInstance.draw();
+    aiGameRef.current = gameInstance;
+    console.log('[Main] AI game initialized.');
+  }, [gridSize, speed]);
 
+  // Initialize the demo game (demo mode).
+  const initDemoGame = useCallback(async () => {
+    if (!demoCanvasRef.current) {
+      console.warn("Demo canvas not mounted yet. Retrying in 50ms...");
+      setTimeout(() => { initDemoGame(); }, 50);
+      return;
+    }
+    if (demoGameRef.current) demoGameRef.current.stop();
+    const canvas = demoCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const gameInstance = new Game(canvas, ctx, gridSize, true, handleGameEnd);
+    gameInstance.msbetweenframes = speed;
+    await gameInstance.loadModel(gridSize);
+    gameInstance.reset();
+    gameInstance.draw();
+    demoGameRef.current = gameInstance;
+    console.log('[Main] Demo game initialized.');
+  }, [gridSize, speed]);
 
-  const startNewGame = useCallback(async (size) => {
+  // When a game ends, handle the AI win popup flow or normal restart flow.
+  const handleGameEnd = useCallback((msg) => {
+    if (mode === "compete") {
+      if (userGameRef.current) userGameRef.current.stop();
+      if (aiGameRef.current) aiGameRef.current.stop();
+    } else if (mode === "demo") {
+      if (demoGameRef.current) demoGameRef.current.stop();
+    }
+    setGamesStarted(false);
+    console.log('[Main] Game ended. Winner message:', msg);
+
+    // Clear any pending timeouts.
+    if (popupTimeoutRef.current) {
+      clearTimeout(popupTimeoutRef.current);
+      popupTimeoutRef.current = null;
+    }
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
+    }
+
+    if (mode === "demo") {
+      // In demo mode, immediately restart the demo without any overlay.
+      initDemoGame().then(() => {
+        if (demoGameRef.current && !demoGameRef.current.gameActive) {
+          demoGameRef.current.start();
+          setGamesStarted(true);
+        }
+      });
+    } else {
+      // In compete mode, follow existing flow.
+      if (msg === "AI wins!" || msg === "AI wins") {
+        setWinnerMessage("AI wins");
+        setInputEnabled(false);
+        popupTimeoutRef.current = setTimeout(() => {
+          setWinnerMessage("");
+        }, 1500);
+        restartTimeoutRef.current = setTimeout(() => {
+          initUserGame();
+          initAIGame();
+          setWinnerMessage("Press WASD or arrows to restart");
+          setInputEnabled(true);
+        }, 1800);
+      } else {
+        restartTimeoutRef.current = setTimeout(() => {
+          initUserGame();
+          initAIGame();
+          setWinnerMessage("Press WASD or arrows to restart");
+        }, 1300);
+      }
+    }
+  }, [initUserGame, initAIGame, initDemoGame, mode]);
+
+  // Reinitialize games whenever gridSize or mode changes.
+  useEffect(() => {
+    if (popupTimeoutRef.current) {
+      clearTimeout(popupTimeoutRef.current);
+      popupTimeoutRef.current = null;
+    }
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
+    }
+    setGamesStarted(false);
+    setWinnerMessage(null);
+    setInputEnabled(true);
     setIsGameReady(false);
-    stopActiveGame();
+    if (mode === "compete") {
+      initUserGame();
+      (async () => {
+        await initAIGame();
+        setIsGameReady(true);
+      })();
+    } else if (mode === "demo") {
+      // Delay a tick to ensure demo canvas is mounted.
+      setTimeout(async () => {
+        await initDemoGame();
+        setIsGameReady(true);
+        if (demoGameRef.current && !demoGameRef.current.gameActive) {
+          demoGameRef.current.start();
+          setGamesStarted(true);
+        }
+      }, 50);
+    }
+    return () => {
+      if (userGameRef.current) userGameRef.current.stop();
+      if (aiGameRef.current) aiGameRef.current.stop();
+      if (demoGameRef.current) demoGameRef.current.stop();
+    };
+  }, [gridSize, mode, initUserGame, initAIGame, initDemoGame]);
 
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    const newGameInstance = new Game(canvas, context, size);
+  // Start games (only applicable in compete mode).
+  const startGames = useCallback(() => {
+    if (mode === "compete") {
+      if (userGameRef.current && !userGameRef.current.gameActive) {
+        userGameRef.current.start();
+      }
+      if (aiGameRef.current && !aiGameRef.current.gameActive) {
+        aiGameRef.current.start();
+      }
+      setGamesStarted(true);
+      setWinnerMessage(null);
+      console.log('[Main] Games started.');
+    }
+  }, [mode]);
 
-    newGameInstance.msbetweenframes = speed;
-    await newGameInstance.loadModel(size);
-    newGameInstance.start();
+  // Handle keydown only in compete mode.
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!inputEnabled || mode !== "compete") return;
+      if (winnerMessage) {
+        setWinnerMessage(null);
+        startGames();
+        return;
+      }
+      if (!gamesStarted) {
+        startGames();
+      }
+      const key = e.key.toLowerCase();
+      let dir;
+      if (key === 'arrowup' || key === 'w') {
+        dir = 12;
+      } else if (key === 'arrowright' || key === 'd') {
+        dir = 3;
+      } else if (key === 'arrowdown' || key === 's') {
+        dir = 6;
+      } else if (key === 'arrowleft' || key === 'a') {
+        dir = 9;
+      }
+      if (dir && userGameRef.current) {
+        userGameRef.current.player.updatedir(dir);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gamesStarted, startGames, winnerMessage, inputEnabled, mode]);
 
-    gameRef.current = newGameInstance;
-    setIsGameReady(true);
-
-    const imagePath = `/models/ppo${size}finish.png`;
-    checkImageExists(imagePath, setFinishImageExists);
-  }, [speed, stopActiveGame]);
-
-  // This function is called repeatedly while the user is dragging the slider
   const handleSliderChange = (e) => {
     setTempSpeed(Number(e.target.value));
   };
 
-  // This function is called when the user releases the mouse/touch
   const handleSliderChangeDone = () => {
-    setSpeed(tempSpeed); 
-    // Because we want the new speed to take effect now
+    setSpeed(tempSpeed);
   };
 
-  // Watch for changes in `speed` with a 0.6s debounce to restart the game
-  useEffect(() => {
-    if (speedChangeTimer.current) {
-      clearTimeout(speedChangeTimer.current);
-    }
-
-    // Only if there's already a running game do we schedule a restart
-    if (gameRef.current) {
-      speedChangeTimer.current = setTimeout(() => {
-        stopActiveGame();
-        startNewGame(gridSize);
-      }, 600);
-    }
-
-    return () => {
-      if (speedChangeTimer.current) {
-        clearTimeout(speedChangeTimer.current);
-      }
-    };
-  }, [speed, gridSize, stopActiveGame, startNewGame]);
-
-  // Start a new game on mount or whenever `gridSize` changes
-  useEffect(() => {
-    startNewGame(gridSize);
-    return () => {
-      stopActiveGame();
-    };
-  }, [gridSize, startNewGame, stopActiveGame]);
-
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        stopActiveGame();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [stopActiveGame]);
-
+  // When a board size button is pressed, update gridSize and immediately reset games.
   const handleGridSizeChange = (size) => {
+    if (popupTimeoutRef.current) {
+      clearTimeout(popupTimeoutRef.current);
+      popupTimeoutRef.current = null;
+    }
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
+    }
+    setInputEnabled(true);
     setGridSize(size);
+    setWinnerMessage(null);
+    setGamesStarted(false);
+    if (mode === "compete") {
+      initUserGame();
+      initAIGame();
+    } else if (mode === "demo") {
+      initDemoGame();
+    }
+  };
+
+  // Mode change handler.
+  const handleModeChange = (newMode) => {
+    if (newMode === mode) return;
+    // If changing from demo to compete, reload the page.
+    if (mode === "demo" && newMode === "compete") {
+      window.location.reload();
+      return;
+    }
+    if (popupTimeoutRef.current) {
+      clearTimeout(popupTimeoutRef.current);
+      popupTimeoutRef.current = null;
+    }
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
+    }
+    setInputEnabled(true);
+    setMode(newMode);
+    setWinnerMessage(null);
+    setGamesStarted(false);
+    if (newMode === "compete") {
+      initUserGame();
+      initAIGame();
+    } else if (newMode === "demo") {
+      initDemoGame();
+    }
+  };
+
+  const containerStyle = {
+    position: 'relative',
+    display: 'inline-block'
+  };
+
+  const overlayStyle = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '500px',
+    height: '600px',
+    backgroundColor: 'rgba(128, 128, 128, 0.7)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: '20px',
+    transition: 'opacity 0.5s ease'
   };
 
   return (
     <>
       <NavBar repos={repos} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
-        <p>Snake model trained with Proximal Policy Optimization</p>
-        <canvas ref={canvasRef} width={500} height={600}></canvas>
-
+        <p>Snake Game: {mode === "compete" ? "User vs AI" : "Demo Mode (AI only)"} </p>
+        {mode === "compete" ? (
+          <div style={{ display: 'flex', gap: '20px' }}>
+            <div style={containerStyle}>
+              <canvas
+                ref={userCanvasRef}
+                width={500}
+                height={600}
+                style={{ border: '1px solid black', display: 'block' }}
+              ></canvas>
+              {!gamesStarted && !winnerMessage && (
+                <div style={overlayStyle}>
+                  Press WASD or arrows to start game
+                </div>
+              )}
+              {winnerMessage && (
+                <div style={overlayStyle}>
+                  {winnerMessage}
+                </div>
+              )}
+            </div>
+            <div style={containerStyle}>
+              <canvas
+                ref={aiCanvasRef}
+                width={500}
+                height={600}
+                style={{ border: '1px solid black', display: 'block' }}
+              ></canvas>
+              {!gamesStarted && !winnerMessage && (
+                <div style={overlayStyle}>
+                  Press WASD or arrows to start game
+                </div>
+              )}
+              {winnerMessage && (
+                <div style={overlayStyle}>
+                  {winnerMessage}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          // Demo mode: single canvas centered.
+          <div style={containerStyle}>
+            <canvas
+              ref={demoCanvasRef}
+              width={500}
+              height={600}
+              style={{ border: '1px solid black', display: 'block' }}
+            ></canvas>
+            {!gamesStarted && !winnerMessage && (
+              <div style={overlayStyle}>
+                AI demo running...
+              </div>
+            )}
+            {winnerMessage && (
+              <div style={overlayStyle}>
+                {winnerMessage}
+              </div>
+            )}
+          </div>
+        )}
         <div style={{ marginTop: '10px' }}>
           <label htmlFor="speed-slider">Frame Spacing: {tempSpeed}ms</label>
           <input
@@ -144,451 +391,89 @@ export default function Snakeplusai({ repos }) {
             style={{ width: '300px', marginTop: '5px' }}
           />
         </div>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', gap: '10px' }}>
-        {[4, 5, 6].map((size) => (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', gap: '10px' }}>
+          {[4, 5, 6].map((size) => (
+            <button
+              key={size}
+              onClick={() => handleGridSizeChange(size)}
+              style={{
+                padding: '10px 20px',
+                border: '2px solid #000',
+                borderRadius: '5px',
+                backgroundColor: size === gridSize ? '#4CAF50' : '#FFF',
+                color: size === gridSize ? '#FFF' : '#000',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                outline: size === gridSize ? '2px solid #4CAF50' : 'none',
+              }}
+            >
+              {size}x{size}
+            </button>
+          ))}
+        </div>
+        {/* New Mode Buttons */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', gap: '10px' }}>
           <button
-            key={size}
-            onClick={() => handleGridSizeChange(size)}
+            onClick={() => handleModeChange("compete")}
             style={{
               padding: '10px 20px',
               border: '2px solid #000',
               borderRadius: '5px',
-              backgroundColor: size === gridSize ? '#4CAF50' : '#FFF',
-              color: size === gridSize ? '#FFF' : '#000',
+              backgroundColor: mode === "compete" ? '#4CAF50' : '#FFF',
+              color: mode === "compete" ? '#FFF' : '#000',
               cursor: 'pointer',
               fontWeight: 'bold',
-              outline: size === gridSize ? '2px solid #4CAF50' : 'none',
+              outline: mode === "compete" ? '2px solid #4CAF50' : 'none',
             }}
           >
-            {size}x{size}
+            Compete
           </button>
-        ))}
-      </div>
-      {isGameReady && (
+          <button
+            onClick={() => handleModeChange("demo")}
+            style={{
+              padding: '10px 20px',
+              border: '2px solid #000',
+              borderRadius: '5px',
+              backgroundColor: mode === "demo" ? '#4CAF50' : '#FFF',
+              color: mode === "demo" ? '#FFF' : '#000',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              outline: mode === "demo" ? '2px solid #4CAF50' : 'none',
+            }}
+          >
+            Demo
+          </button>
+        </div>
+        {/* Bottom section from outdated code */}
+        {isGameReady && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
-              <Image
-                  src={`/models/ppo${gridSize}graph.png`}
-                  alt={`Graph for PPO model with grid size ${gridSize}`}
-                  width={500} // Provide a width (adjust as needed)
-                  height={300} // Provide a height (adjust as needed)
-                  style={{ marginTop: '10px', maxWidth: '100%', height: 'auto' }}
-              />
-              <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#a12aff' }}>
-                  {commentary[gridSize]}
-              </p>
+            <Image
+              src={`/models/ppo${gridSize}graph.png`}
+              alt={`Graph for PPO model with grid size ${gridSize}`}
+              width={500}
+              height={300}
+              style={{ marginTop: '10px', maxWidth: '100%', height: 'auto' }}
+            />
+            <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#a12aff' }}>
+              {commentary[gridSize]}
+            </p>
           </div>
-      )}
-
-      {finishImageExists && (
+        )}
+        {finishImageExists && (
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-              <Image
-                  src={`/models/ppo${gridSize}finish.png`}
-                  alt={`Finish image for PPO model with grid size ${gridSize}`}
-                  width={500} // Provide a width (adjust as needed)
-                  height={300} // Provide a height (adjust as needed)
-                  style={{ maxWidth: '100%', height: 'auto' }}
-              />
-              <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#555' }}>
-                  Evaluated over 1000 games. Note - all snakes start at size 2, so the first score is only when they reach length 3.
-              </p>
+            <Image
+              src={`/models/ppo${gridSize}finish.png`}
+              alt={`Finish image for PPO model with grid size ${gridSize}`}
+              width={500}
+              height={300}
+              style={{ maxWidth: '100%', height: 'auto' }}
+            />
+            <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#555' }}>
+              Evaluated over 1000 games. Note - all snakes start at size 2, so the first score is only when they reach length 3.
+            </p>
           </div>
-      )}
-
+        )}
+      </div>
     </>
   );
-}
-
-
-// Game class (unchanged except for your specific logic)
-class Game {
-  constructor(canvas, context, gridsize = 4) {
-    this.canvas = canvas;
-    this.context = context;
-    this.gridsize = gridsize;
-    this.player = new Player(this.gridsize);
-    this.window_width = canvas.width;
-    this.window_height = canvas.height;
-    this.msbetweenframes = 200;
-
-    this.WIDTH = canvas.width;
-    this.HEIGHT = canvas.height;
-
-    this.top = this.window_height / 6;
-    this.cellspacing = 3;
-    this.cellh = (this.window_height - this.top) / this.gridsize - this.cellspacing;
-    this.cellw = this.window_width / this.gridsize - this.cellspacing;
-
-    this.gamegrid = [];
-    for (let i = 0; i < this.gridsize; i++) {
-      this.gamegrid.push(Array(this.gridsize).fill(0));
-    }
-
-    this.score = 0;
-    this.tries = 0;
-    this.states = 0;
-    this.animationFrameId = null;
-    this.lastTime = 0;
-    this.model = null;
-    this.gameOver = false;
-  }
-
-  async loadModel(gridSize) {
-    const modelPath = `/models/ppo_policy${gridSize}.onnx`;
-    this.model = await ort.InferenceSession.create(modelPath);
-  }
-
-  stop() {
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-    }
-  }
-
-  getObservation() {
-    const flatGrid = this.gamegrid.flat();
-
-    if (this.gridsize === 6) {
-      const [headX, headY] = this.player.locations[0];
-      const dangerUp = this.isCollision(headX, headY - 1);
-      const dangerRight = this.isCollision(headX + 1, headY);
-      const dangerDown = this.isCollision(headX, headY + 1);
-      const dangerLeft = this.isCollision(headX - 1, headY);
-      return new Float32Array(flatGrid.concat(dangerUp, dangerRight, dangerDown, dangerLeft));
-    }
-    return new Float32Array(flatGrid);
-  }
-
-  isCollision(x, y) {
-    if (x < 0 || x >= this.gridsize || y < 0 || y >= this.gridsize) {
-      return 1;
-    }
-    for (let i = 0; i < this.player.locations.length; i++) {
-      const [sx, sy] = this.player.locations[i];
-      if (sx === x && sy === y) {
-        return 1;
-      }
-    }
-    return 0;
-  }
-
-  async getAction(obs) {
-    if (!this.model) {
-      console.error('Model not loaded');
-      return 0; 
-    }
-    try {
-      const tensor = new ort.Tensor('float32', obs, [1, obs.length]);
-      const results = await this.model.run({ obs: tensor });
-      console.log('Model outputs:', results);
-
-      const actionTensor = results.action;
-      let actionArray = Array.from(actionTensor.data);
-      // Convert BigInt to Number if needed
-      actionArray = actionArray.map((v) => Number(v));
-
-      const action = actionArray[0];
-      if (action >= 0 && action <= 3) {
-        return action;
-      } else {
-        console.error('Invalid action value received:', action);
-        return 0; 
-      }
-    } catch (error) {
-      console.error('Error running the model:', error);
-      return 0;
-    }
-  }
-
-  start() {
-    this.gameLoop = this.gameLoop.bind(this);
-    this.animationFrameId = requestAnimationFrame(this.gameLoop);
-  }
-
-  async gameLoop(timestamp) {
-    const deltaTime = timestamp - this.lastTime;
-    if (deltaTime >= this.msbetweenframes) {
-      await this.update();
-      this.draw();
-      this.lastTime = timestamp;
-    }
-    this.animationFrameId = requestAnimationFrame(this.gameLoop);
-  }
-
-  async update() {
-    const obs = this.getObservation();
-    let action = await this.getAction(obs);
-
-    if (action === undefined || action < 0 || action > 3) {
-      console.warn('Invalid action received:', action, '- Using fallback');
-      action = 0; 
-    }
-    const directionMap = [12, 3, 6, 9]; // Up, Right, Down, Left
-    const dir = directionMap[action];
-    this.player.updatedir(dir);
-
-    [this.gamegrid, this.score] = this.player.move(this.gamegrid);
-
-    if (this.gamegrid.length === 1 && this.gamegrid[0][0] === -10) {
-      this.reset();
-      return;
-    }
-
-    if (this.player.hasWon) {
-      console.log('Player has won the game.');
-      this.gameOver = true;
-    }
-
-    if (this.gameOver) {
-      this.reset();
-      this.gameOver = false;
-      return;
-    }
-
-    this.states += 1;
-  }
-
-  draw() {
-    const ctx = this.context;
-
-    // Clear canvas
-    ctx.fillStyle = RED;
-    ctx.fillRect(0, 0, this.WIDTH, this.HEIGHT);
-
-    // Draw background
-    ctx.fillStyle = GRAY;
-    ctx.fillRect(0, this.HEIGHT / 6, this.WIDTH, this.HEIGHT);
-
-    for (let y = 0; y < this.gridsize; y++) {
-      for (let x = 0; x < this.gridsize; x++) {
-        const value = this.gamegrid[y][x];
-
-        if (value === 0) {
-          ctx.fillStyle = BLACK;
-        } else if (value === 1) {
-          ctx.fillStyle = RED;
-        } else if (this.gridsize === 6) {
-          // Special coloring for 6x6
-          if (value === 2) {
-            ctx.fillStyle = WHITE; 
-          } else if (value >= 3 && value < 100) {
-            const shade = Math.max((value - 2) * 10, 150);
-            ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
-          } else if (value === 100) {
-            ctx.fillStyle = 'rgb(100, 100, 255)'; 
-          }
-        } else {
-          // Default coloring
-          if (value === 2) {
-            ctx.fillStyle = WHITE; 
-          } else {
-            const shade = Math.min((value - 2) * 5, 255);
-            ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
-          }
-        }
-
-        ctx.fillRect(
-          this.cellspacing * (x + 1) + this.cellw * x,
-          this.cellspacing * (y + 1) + this.cellh * y + this.top,
-          this.cellw,
-          this.cellh
-        );
-      }
-    }
-
-    this._draw_score();
-  }
-
-  _draw_score() {
-    const ctx = this.context;
-    ctx.font = SCORE_FONT;
-    ctx.fillStyle = BLACK;
-    ctx.textBaseline = 'top';
-
-    const scoreText = `${this.score}`;
-    ctx.fillText(scoreText, this.window_width / 2 - 50, 20);
-
-    const triesText = `${this.tries}`;
-    ctx.fillText(triesText, 20, 20);
-
-    const statesText = `${this.player.static_states}`;
-    ctx.fillText(statesText, this.window_width - 50, 20);
-  }
-
-  reset() {
-    this.score = 0;
-    this.tries += 1;
-    this.states = 0;
-    this.player.hasWon = false;
-
-    this.player.reset();
-
-    this.gamegrid = [];
-    for (let i = 0; i < this.gridsize; i++) {
-      this.gamegrid.push(Array(this.gridsize).fill(0));
-    }
-
-    this.player.locations.forEach(([x, y], index) => {
-      this.gamegrid[y][x] = index === 0 ? 2 : 2 + (47 - index);
-    });
-
-    const [foodX, foodY] = this.player.foodplace;
-    this.gamegrid[foodY][foodX] = 1;
-
-    console.log('Game grid after reset:', this.gamegrid);
-  }
-}
-
-// Constants
-const SCORE_FONT = '50px Comic Sans MS';
-const WHITE = '#FFFFFF';
-const BLACK = '#000000';
-const RED = '#FF0000';
-const GRAY = '#6E6E6E';
-
-const oppositeDirection = {
-  3: 9,   // Right's opposite is Left
-  6: 12,  // Down's opposite is Up
-  9: 3,   // Left's opposite is Right
-  12: 6,  // Up's opposite is Down
-};
-
-class Player {
-  constructor(gridsize) {
-    this.length = 2;
-    this.gridsize = gridsize;
-    this.score = 0;
-    this.static_states = 0;
-    this.hasWon = false;
-
-    this.orientation = 3; // Right
-    this.cantgo = oppositeDirection[this.orientation];
-    this.locations = [
-      [1, 1], 
-      [0, 1],
-    ];
-    this.foodplace = this._generateFoodPlace();
-  }
-
-  reset() {
-    this.orientation = 3;
-    this.cantgo = oppositeDirection[this.orientation];
-    this.score = 0;
-    this.length = 2;
-    this.static_states = 0;
-
-    this.locations = [
-      [1, 1],
-      [0, 1],
-    ];
-
-    this.foodplace = this._generateFoodPlace();
-    console.log('Reset: Snake locations:', this.locations, 'Food:', this.foodplace);
-  }
-
-  _generateFoodPlace() {
-    const emptyCells = [];
-    for (let x = 0; x < this.gridsize; x++) {
-      for (let y = 0; y < this.gridsize; y++) {
-        if (!this.locations.some(([locX, locY]) => locX === x && locY === y)) {
-          emptyCells.push([x, y]);
-        }
-      }
-    }
-
-    if (emptyCells.length === 0) {
-      console.log('No space to place food.');
-      return null;
-    }
-
-    const [zx, zy] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-    console.log('Generated food position:', zx, zy);
-    return [zx, zy];
-  }
-
-  updatedir(dir) {
-    // Prevent 180-degree reversal
-    if (dir === 0 || dir === this.cantgo) return;
-    this.orientation = dir;
-    this.cantgo = oppositeDirection[dir];
-  }
-
-  move(gamegrid) {
-    this.static_states += 1;
-    let trimsize = true;
-    const [curX, curY] = this.locations[0];
-
-    let nextplace;
-    if (this.orientation === 3) {
-      nextplace = [curX + 1, curY]; // Right
-    } else if (this.orientation === 6) {
-      nextplace = [curX, curY + 1]; // Down
-    } else if (this.orientation === 9) {
-      nextplace = [curX - 1, curY]; // Left
-    } else if (this.orientation === 12) {
-      nextplace = [curX, curY - 1]; // Up
-    }
-
-    // Collision?
-    if (
-      nextplace[0] < 0 || 
-      nextplace[0] >= this.gridsize ||
-      nextplace[1] < 0 || 
-      nextplace[1] >= this.gridsize ||
-      this.locations.some(([x, y]) => x === nextplace[0] && y === nextplace[1])
-    ) {
-      console.log('Collision or out-of-bounds!');
-      return [[[-10]], 0]; // Game over
-    }
-
-    this.locations.unshift(nextplace);
-
-    // Eat food?
-    if (this.foodplace && nextplace[0] === this.foodplace[0] && nextplace[1] === this.foodplace[1]) {
-      this.foodplace = this._generateFoodPlace();
-      trimsize = false;
-      this.score += 1;
-      this.static_states = 0;
-      this.length += 1;
-
-      if (this.foodplace === null) {
-        console.log('Snake has filled the entire grid.');
-        this.hasWon = true;
-      }
-    }
-
-    if (trimsize) {
-      this.locations.pop();
-    }
-
-    // Rebuild game grid
-    for (let y = 0; y < this.gridsize; y++) {
-      for (let x = 0; x < this.gridsize; x++) {
-        gamegrid[y][x] = 0;
-      }
-    }
-
-    if (this.gridsize === 6) {
-      this.locations.forEach(([x, y], idx) => {
-        if (idx === this.locations.length - 1) {
-          gamegrid[y][x] = 100; // Tail
-        } else {
-          gamegrid[y][x] = 2 + idx; // Head = 2
-        }
-      });
-    } else {
-      this.locations.forEach(([x, y], index) => {
-        gamegrid[y][x] = index === 0 ? 2 : 2 + (47 - index);
-      });
-    }
-
-    if (this.foodplace) {
-      const [foodX, foodY] = this.foodplace;
-      gamegrid[foodY][foodX] = 1;
-    }
-
-    console.log('Updated gamegrid:', gamegrid);
-    return [gamegrid, this.score];
-  }
 }
