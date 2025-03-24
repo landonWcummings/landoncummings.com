@@ -34,14 +34,15 @@ export default function SnakePlusAI({ repos }) {
 
   // States for bottom section (graph & commentary)
   const [isGameReady, setIsGameReady] = useState(false);
-  const [finishImageExists, setFinishImageExists] = useState(false);
   const commentary = useMemo(() => ({
     4: "Trained in roughly 5 hours. Model is pretty solid overall. Still some rough edges, could be perfected in more training time.",
     5: "Trained in roughly 18 and a half hours. Much harder to perfect a 5x5 grid due to the odd nature. A 5x5 board has an odd number of total cells making it impossible to execute one sustainable pattern as seen in the endgame of the 4x4. Given further training the model could likely perfect a 5x5",
     6: "Trained in roughly 76 hours. For 4x4 and 5x5 the input is the entire grid. For the 6x6, 4 inputs were added in addition to the grid. Four new boolean inputs depict whether or not the model will die if it moves in each of the four directions. This helps the model converge much faster. I had trained a model over 3.5 days without this addition and it was ineffective.",
   }), []);
 
+  // ----------------- Initialization Functions -----------------
   // Initialize the user game (compete mode).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initUserGame = useCallback(() => {
     if (!userCanvasRef.current) {
       setTimeout(initUserGame, 50);
@@ -59,6 +60,7 @@ export default function SnakePlusAI({ repos }) {
   }, [gridSize, speed]);
 
   // Initialize the AI game (compete mode).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initAIGame = useCallback(async () => {
     if (!aiCanvasRef.current) {
       setTimeout(() => { initAIGame(); }, 50);
@@ -77,6 +79,7 @@ export default function SnakePlusAI({ repos }) {
   }, [gridSize, speed]);
 
   // Initialize the demo game (demo mode).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initDemoGame = useCallback(async () => {
     if (!demoCanvasRef.current) {
       console.warn("Demo canvas not mounted yet. Retrying in 50ms...");
@@ -95,7 +98,7 @@ export default function SnakePlusAI({ repos }) {
     console.log('[Main] Demo game initialized.');
   }, [gridSize, speed]);
 
-  // When a game ends, handle the AI win popup flow or normal restart flow.
+  // ----------------- Game End Handler -----------------
   const handleGameEnd = useCallback((msg) => {
     if (mode === "compete") {
       if (userGameRef.current) userGameRef.current.stop();
@@ -117,7 +120,7 @@ export default function SnakePlusAI({ repos }) {
     }
 
     if (mode === "demo") {
-      // In demo mode, immediately restart the demo without any overlay.
+      // In demo mode, immediately restart the demo without overlay.
       initDemoGame().then(() => {
         if (demoGameRef.current && !demoGameRef.current.gameActive) {
           demoGameRef.current.start();
@@ -125,7 +128,6 @@ export default function SnakePlusAI({ repos }) {
         }
       });
     } else {
-      // In compete mode, follow existing flow.
       if (msg === "AI wins!" || msg === "AI wins") {
         setWinnerMessage("AI wins");
         setInputEnabled(false);
@@ -146,9 +148,9 @@ export default function SnakePlusAI({ repos }) {
         }, 1300);
       }
     }
-  }, [initUserGame, initAIGame, initDemoGame, mode]);
+  }, [mode, initUserGame, initAIGame, initDemoGame]);
 
-  // Reinitialize games whenever gridSize or mode changes.
+  // ----------------- Reinitialize on Grid Size or Mode Change -----------------
   useEffect(() => {
     if (popupTimeoutRef.current) {
       clearTimeout(popupTimeoutRef.current);
@@ -169,7 +171,6 @@ export default function SnakePlusAI({ repos }) {
         setIsGameReady(true);
       })();
     } else if (mode === "demo") {
-      // Delay a tick to ensure demo canvas is mounted.
       setTimeout(async () => {
         await initDemoGame();
         setIsGameReady(true);
@@ -186,7 +187,7 @@ export default function SnakePlusAI({ repos }) {
     };
   }, [gridSize, mode, initUserGame, initAIGame, initDemoGame]);
 
-  // Start games (only applicable in compete mode).
+  // ----------------- Start Games (Compete Mode) -----------------
   const startGames = useCallback(() => {
     if (mode === "compete") {
       if (userGameRef.current && !userGameRef.current.gameActive) {
@@ -201,7 +202,7 @@ export default function SnakePlusAI({ repos }) {
     }
   }, [mode]);
 
-  // Handle keydown only in compete mode.
+  // ----------------- Keyboard Handling (Compete Mode Only) -----------------
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!inputEnabled || mode !== "compete") return;
@@ -240,7 +241,7 @@ export default function SnakePlusAI({ repos }) {
     setSpeed(tempSpeed);
   };
 
-  // When a board size button is pressed, update gridSize and immediately reset games.
+  // ----------------- Grid Size and Mode Change Handlers -----------------
   const handleGridSizeChange = (size) => {
     if (popupTimeoutRef.current) {
       clearTimeout(popupTimeoutRef.current);
@@ -262,7 +263,6 @@ export default function SnakePlusAI({ repos }) {
     }
   };
 
-  // Mode change handler.
   const handleModeChange = (newMode) => {
     if (newMode === mode) return;
     // If changing from demo to compete, reload the page.
@@ -456,20 +456,6 @@ export default function SnakePlusAI({ repos }) {
             />
             <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#a12aff' }}>
               {commentary[gridSize]}
-            </p>
-          </div>
-        )}
-        {finishImageExists && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <Image
-              src={`/models/ppo${gridSize}finish.png`}
-              alt={`Finish image for PPO model with grid size ${gridSize}`}
-              width={500}
-              height={300}
-              style={{ maxWidth: '100%', height: 'auto' }}
-            />
-            <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#555' }}>
-              Evaluated over 1000 games. Note - all snakes start at size 2, so the first score is only when they reach length 3.
             </p>
           </div>
         )}
