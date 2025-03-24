@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import NavBar from '../../components/NavBar';
 import Image from 'next/image';
-import { Game } from './snakeGame'; // adjust path if necessary
+import { Game } from './snakegame'; // adjust path if necessary
 
 export default function SnakePlusAI({ repos }) {
   // Refs for compete mode
