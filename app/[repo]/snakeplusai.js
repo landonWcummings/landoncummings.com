@@ -311,6 +311,17 @@ export default function SnakePlusAI({ repos }) {
     transition: 'opacity 0.5s ease'
   };
 
+  // ----------------- Disable Arrow Keys Scrolling -----------------
+  useEffect(() => {
+    const preventScroll = (e) => {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", preventScroll, { passive: false });
+    return () => window.removeEventListener("keydown", preventScroll);
+  }, []);
+
   return (
     <>
       <NavBar repos={repos} />
