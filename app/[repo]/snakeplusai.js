@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 import React, {
   useRef,
@@ -42,7 +43,6 @@ export default function SnakePlusAI({ repos }) {
 
   // ----------------- Initialization Functions -----------------
   // Initialize the user game (compete mode).
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initUserGame = useCallback(() => {
     if (!userCanvasRef.current) {
       setTimeout(initUserGame, 50);
@@ -60,7 +60,6 @@ export default function SnakePlusAI({ repos }) {
   }, [gridSize, speed]);
 
   // Initialize the AI game (compete mode).
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initAIGame = useCallback(async () => {
     if (!aiCanvasRef.current) {
       setTimeout(() => { initAIGame(); }, 50);
@@ -79,7 +78,6 @@ export default function SnakePlusAI({ repos }) {
   }, [gridSize, speed]);
 
   // Initialize the demo game (demo mode).
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const initDemoGame = useCallback(async () => {
     if (!demoCanvasRef.current) {
       console.warn("Demo canvas not mounted yet. Retrying in 50ms...");

@@ -10,9 +10,10 @@ const mainRepoNames = [
     'WhartonInvestmentQuant',
     'snakePlusAi-V1-NEAT',
     'LandonGPT',
+    '2048AI',
 ];
 
-const specialRepoNames = ['imessageanalysisapp', 'LandonGPT', 'snakePlusAi-V1-NEAT'];
+const specialRepoNames = ['imessageanalysisapp', 'LandonGPT', 'snakePlusAi-V1-NEAT', '2048AI'];
 
 const buttonLabels = {
     nbodysimulation: 'N-Body Simulation',
@@ -20,6 +21,7 @@ const buttonLabels = {
     WhartonInvestmentQuant: 'Wharton Quant',
     'snakePlusAi-V1-NEAT': 'Snake AI',
     'LandonGPT': 'LandonGPT',
+    '2048AI': '2048 AI',
 };
 
 const NavBar = ({ repos = [] }) => {

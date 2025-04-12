@@ -110,6 +110,11 @@ export default async function RepoPage({ params }) {
     return <Landongpt repos={cachedRepos} />;
   }
 
+  if (repo.name === '2048AI') {
+    const Game2048 = dynamic(() => import('./2048'));
+    return <Game2048 repos={cachedRepos} />;
+  }
+
   const videoDemoLinks = {
     'clashroyalebot': 'https://www.youtube.com/embed/bFXPIAsaGCw?autoplay=1&mute=1',
     'flappy-bird-plus-ai': 'https://www.youtube.com/embed/zO0pvvvpuEU?autoplay=1&mute=1',
