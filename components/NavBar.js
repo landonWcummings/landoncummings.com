@@ -11,6 +11,7 @@ const mainRepoNames = [
     'snakePlusAi-V1-NEAT',
     'LandonGPT',
     '2048AI',
+    'Connect4Bot',
 ];
 
 const specialRepoNames = ['imessageanalysisapp', 'LandonGPT', 'snakePlusAi-V1-NEAT', '2048AI'];
@@ -22,6 +23,7 @@ const buttonLabels = {
     'snakePlusAi-V1-NEAT': 'Snake AI',
     'LandonGPT': 'LandonGPT',
     '2048AI': '2048 AI',
+    'Connect4Bot' : 'Connect4 Bot',
 };
 
 const NavBar = ({ repos = [] }) => {

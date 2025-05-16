@@ -115,6 +115,12 @@ export default async function RepoPage({ params }) {
     return <Game2048 repos={cachedRepos} />;
   }
 
+  if (repo.name === 'Connect4Bot') {
+    const Gameconnect4 = dynamic(() => import('./connect4'));
+    return <Gameconnect4 repos={cachedRepos} />;
+  }
+
+
   const videoDemoLinks = {
     'clashroyalebot': 'https://www.youtube.com/embed/bFXPIAsaGCw?autoplay=1&mute=1',
     'flappy-bird-plus-ai': 'https://www.youtube.com/embed/zO0pvvvpuEU?autoplay=1&mute=1',
