@@ -1,8 +1,15 @@
+// app/[repo]/support/page.js
+
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-const SupportPage = () => {
+export default async function SupportPage({ params }) {
+  const { repo } = await params;
+  if (repo.toLowerCase() !== "pokerpilot") {
+    return null;
+  }
+
   return (
     <div
       style={{
@@ -76,6 +83,4 @@ const SupportPage = () => {
       </div>
     </div>
   );
-};
-
-export default SupportPage;
+}

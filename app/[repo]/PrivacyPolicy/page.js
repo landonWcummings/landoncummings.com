@@ -1,7 +1,14 @@
-import React from "react";
 import Link from "next/link";
 
-const PrivacyPolicy = () => {
+export default async function PrivacyPolicy({ params }) {
+  const { repo } = await params;
+  if (repo.toLowerCase() !== "pokerpilot") {
+    return null;
+  }
+
+  const { repo: repoName } = await params;
+
+
   return (
     <div
       style={{
@@ -13,7 +20,7 @@ const PrivacyPolicy = () => {
       }}
     >
       <Link
-        href="/PokerPilot"
+        href={`/${repoName}`}
         style={{
           position: "absolute",
           top: "1rem",
@@ -45,7 +52,7 @@ const PrivacyPolicy = () => {
             fontSize: "1.1rem",
           }}
         >
-          <strong>Effective Date:</strong> 2&nbsp;June&nbsp;2025
+          <strong>Effective Date:</strong> 2 June 2025
         </p>
 
         <p
@@ -55,13 +62,12 @@ const PrivacyPolicy = () => {
             marginTop: "1.5rem",
           }}
         >
-          Thank you for choosing <strong>PokerPilot</strong> (the &ldquo;App&rdquo;). We
-          respect your privacy. This Privacy Policy explains what information we (the
-          &ldquo;Developer,&rdquo; &ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;)
-          collect when you use PokerPilot, how we use it, and the choices you have. We have
-          designed PokerPilot so that it <strong>does not collect, store, or transmit any
-          personal data</strong>. The App performs all poker-hand simulations entirely on
-          your device, without connecting to external servers.
+          Thank you for choosing <strong>PokerPilot</strong> (the “App”). We respect your
+          privacy. This Privacy Policy explains what information we (the “Developer,” “we,”
+          “our,” or “us”) collect when you use PokerPilot, how we use it, and the choices you
+          have. We have designed PokerPilot so that it <strong>does not collect, store, or
+          transmit any personal data</strong>. The App performs all poker-hand simulations
+          entirely on your device, without connecting to external servers.
         </p>
 
         <hr style={{ borderColor: "#ffffff", margin: "2rem 0" }} />
@@ -73,7 +79,7 @@ const PrivacyPolicy = () => {
             marginTop: "2rem",
           }}
         >
-          1&nbsp;&nbsp;Scope
+          1  Scope
         </h2>
         <p
           style={{
@@ -82,9 +88,9 @@ const PrivacyPolicy = () => {
             margin: "1rem 0",
           }}
         >
-          This Privacy Policy applies to all users of PokerPilot on iOS, iPadOS,
-          and/or macOS who download the App through Apple&nbsp;App&nbsp;Store. By using
-          the App, you agree to the terms described herein.
+          This Privacy Policy applies to all users of PokerPilot on iOS, iPadOS, and/or
+          macOS who download the App through Apple App Store. By using the App, you agree
+          to the terms described herein.
         </p>
 
         <h2
@@ -94,7 +100,7 @@ const PrivacyPolicy = () => {
             marginTop: "2rem",
           }}
         >
-          2&nbsp;&nbsp;Information We Collect
+          2  Information We Collect
         </h2>
         <p
           style={{
@@ -318,7 +324,7 @@ const PrivacyPolicy = () => {
             marginTop: "2rem",
           }}
         >
-          3&nbsp;&nbsp;How We Use Information
+          3  How We Use Information
         </h2>
         <p
           style={{
@@ -339,7 +345,7 @@ const PrivacyPolicy = () => {
             marginTop: "2rem",
           }}
         >
-          4&nbsp;&nbsp;Data Sharing and Disclosure
+          4  Data Sharing and Disclosure
         </h2>
         <p
           style={{
@@ -361,7 +367,7 @@ const PrivacyPolicy = () => {
             marginTop: "2rem",
           }}
         >
-          5&nbsp;&nbsp;Security
+          5  Security
         </h2>
         <p
           style={{
@@ -371,9 +377,8 @@ const PrivacyPolicy = () => {
           }}
         >
           Although PokerPilot does not handle personal data, we employ standard Apple
-          platform security features (App&nbsp;Signing, Sandboxing, and Gatekeeper on
-          macOS) to protect the integrity of the App binary. All computations remain
-          offline.
+          platform security features (App Signing, Sandboxing, and Gatekeeper on macOS) to
+          protect the integrity of the App binary. All computations remain offline.
         </p>
 
         <h2
@@ -383,7 +388,7 @@ const PrivacyPolicy = () => {
             marginTop: "2rem",
           }}
         >
-          6&nbsp;&nbsp;Children’s Privacy
+          6  Children’s Privacy
         </h2>
         <p
           style={{
@@ -392,11 +397,11 @@ const PrivacyPolicy = () => {
             margin: "1rem 0",
           }}
         >
-          PokerPilot is rated <strong>17+</strong> on the App&nbsp;Store due to simulated
+          PokerPilot is rated <strong>17+</strong> on the App Store due to simulated
           gambling content. The App is <strong>not intended for children under 13 years
           of age</strong>. We do not knowingly collect personal information from anyone,
           including children. If you believe a child has provided us with personal data,
-          please contact us (see Section&nbsp;9).
+          please contact us (see Section 9).
         </p>
 
         <h2
@@ -406,7 +411,7 @@ const PrivacyPolicy = () => {
             marginTop: "2rem",
           }}
         >
-          7&nbsp;&nbsp;Responsible Gambling Notice
+          7  Responsible Gambling Notice
         </h2>
         <p
           style={{
@@ -433,7 +438,7 @@ const PrivacyPolicy = () => {
             marginTop: "2rem",
           }}
         >
-          8&nbsp;&nbsp;Changes to This Privacy Policy
+          8  Changes to This Privacy Policy
         </h2>
         <p
           style={{
@@ -456,7 +461,7 @@ const PrivacyPolicy = () => {
             marginTop: "2rem",
           }}
         >
-          9&nbsp;&nbsp;Contact Us
+          9  Contact Us
         </h2>
         <p
           style={{
@@ -485,7 +490,7 @@ const PrivacyPolicy = () => {
               href="mailto:lndncmmngs@gmail.com"
               style={{ color: "#f0c674" }}
             >
-                lndncmmngs@gmail.com
+              lndncmmngs@gmail.com
             </a>
           </p>
         </blockquote>
@@ -499,11 +504,9 @@ const PrivacyPolicy = () => {
           }}
         >
           *This Privacy Policy is provided for submission to Apple in accordance with
-          App&nbsp;Store Review Guideline&nbsp;5.1.*
+          App Store Review Guideline 5.1.*
         </p>
       </div>
     </div>
   );
-};
-
-export default PrivacyPolicy;
+}

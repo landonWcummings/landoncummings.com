@@ -120,6 +120,12 @@ export default async function RepoPage({ params }) {
     return <Gameconnect4 repos={cachedRepos} />;
   }
 
+  if (repo.name === 'PokerPilot') {
+    // dynamic import ensures this isn’t bundled unless needed
+    const PokerPilotPage = dynamic(() => import('./PokerPilot/page'))
+    return <PokerPilotPage repos={cachedRepos} />
+  }
+
 
   const videoDemoLinks = {
     'clashroyalebot': 'https://www.youtube.com/embed/bFXPIAsaGCw?autoplay=1&mute=1',
