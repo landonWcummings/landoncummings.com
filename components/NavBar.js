@@ -26,8 +26,14 @@ const buttonLabels = {
   PokerPilot: 'PokerPilot',
 };
 
+const SCROLL_SPEED = 0.5; // pixels per frame
+
 const NavBar = ({ repos = [] }) => {
   const navRef = useRef(null);
+  const scrollRef = useRef(null);
+  const animationFrameRef = useRef(null);
+  const pausedRef = useRef(false);
+
   const [navHeight, setNavHeight] = useState(100);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [repoColors, setRepoColors] = useState({});
@@ -40,8 +46,8 @@ const NavBar = ({ repos = [] }) => {
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   };
 
+  // Assign random colors once
   useEffect(() => {
-    // Assign a random color to every main repo
     const colors = mainRepoNames.reduce((acc, name) => {
       acc[name] = generateLightColor();
       return acc;
@@ -49,6 +55,7 @@ const NavBar = ({ repos = [] }) => {
     setRepoColors(colors);
   }, []);
 
+  // Update navbar height on resize
   useEffect(() => {
     const updateNavHeight = () => {
       if (navRef.current) {
@@ -59,6 +66,48 @@ const NavBar = ({ repos = [] }) => {
     updateNavHeight();
     window.addEventListener('resize', updateNavHeight);
     return () => window.removeEventListener('resize', updateNavHeight);
+  }, []);
+
+  // Setup three-set scroll, wrapping, and auto-scroll
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    // Each .repo-set has equal width, so singleSetWidth = total scrollWidth / 3
+    const singleSetWidth = container.scrollWidth / 3;
+    // Start in the middle set
+    container.scrollLeft = singleSetWidth;
+
+    const wrapScroll = () => {
+      if (container.scrollLeft >= singleSetWidth * 2) {
+        container.scrollLeft -= singleSetWidth;
+      }
+      if (container.scrollLeft <= 0) {
+        container.scrollLeft += singleSetWidth;
+      }
+    };
+
+    // On user scroll, wrap but do not stop auto-scroll permanently
+    const onScroll = () => {
+      wrapScroll();
+    };
+
+    container.addEventListener('scroll', onScroll);
+
+    // Auto-scroll loop
+    const step = () => {
+      if (!pausedRef.current) {
+        container.scrollLeft += SCROLL_SPEED;
+        wrapScroll();
+      }
+      animationFrameRef.current = requestAnimationFrame(step);
+    };
+    animationFrameRef.current = requestAnimationFrame(step);
+
+    return () => {
+      container.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(animationFrameRef.current);
+    };
   }, []);
 
   // Filter repos into main and other
@@ -75,16 +124,6 @@ const NavBar = ({ repos = [] }) => {
     <>
       <style>
         {`
-          /* SCROLL ANIMATION */
-          @keyframes scroll-right {
-            0% {
-              transform: translateX(-50%);
-            }
-            100% {
-              transform: translateX(0%);
-            }
-          }
-
           /* BUTTON BASE STYLES */
           .button {
             position: relative;
@@ -148,15 +187,20 @@ const NavBar = ({ repos = [] }) => {
 
           /* SCROLL CONTAINER */
           .scroll-container {
-            overflow: hidden;
+            overflow-x: auto; /* always allow horizontal scroll */
             width: 100%;
             position: relative;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE 10+ */
+          }
+          .scroll-container::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
           }
 
+          /* We rely on JS for auto-scroll */
           .scroll-content {
             display: flex;
-            width: calc(2 * 100%);
-            animation: scroll-right 20s linear infinite;
+            width: calc(300%); /* three sets side by side */
           }
 
           /* DUPLICATE SET UP */
@@ -227,7 +271,10 @@ const NavBar = ({ repos = [] }) => {
         {/* SCROLLING REPO BUTTONS */}
         <div
           className="scroll-container"
+          ref={scrollRef}
           style={{ gridColumn: '2 / 3', alignSelf: 'center' }}
+          onMouseEnter={() => (pausedRef.current = true)}
+          onMouseLeave={() => (pausedRef.current = false)}
         >
           <div className="scroll-content">
             {/* FIRST SET OF BUTTONS */}
@@ -250,7 +297,7 @@ const NavBar = ({ repos = [] }) => {
                 );
               })}
             </div>
-            {/* DUPLICATED SET FOR LOOP */}
+            {/* SECOND SET OF BUTTONS */}
             <div className="repo-set">
               {mainRepos.map((repo) => {
                 const displayName = buttonLabels[repo.name] || repo.name;
@@ -258,6 +305,26 @@ const NavBar = ({ repos = [] }) => {
                   <Link
                     href={`/${repo.name}`}
                     key={`second-${repo.id}`}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <button
+                      className="button special"
+                      style={{ backgroundColor: repoColors[repo.name] }}
+                    >
+                      <span>{displayName}</span>
+                    </button>
+                  </Link>
+                );
+              })}
+            </div>
+            {/* THIRD SET OF BUTTONS */}
+            <div className="repo-set">
+              {mainRepos.map((repo) => {
+                const displayName = buttonLabels[repo.name] || repo.name;
+                return (
+                  <Link
+                    href={`/${repo.name}`}
+                    key={`third-${repo.id}`}
                     style={{ textDecoration: 'none' }}
                   >
                     <button
@@ -300,6 +367,8 @@ const NavBar = ({ repos = [] }) => {
                 borderRadius: '4px',
                 boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
                 zIndex: 1000,
+                maxHeight: '70vh', /* dropdown height = 70% of viewport */
+                overflowY: 'auto',
               }}
             >
               {otherRepos.map((repo) => (
