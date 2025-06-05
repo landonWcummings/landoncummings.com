@@ -76,7 +76,7 @@ export default function HomePage() {
 
         {/* Call-to-Action */}
         <a
-          href="https://apps.apple.com/app/pokerpilot"
+          href="https://apps.apple.com/us/app/pokerpilot-pro/id6746423545"
           style={{
             display: "inline-block",
             backgroundColor: "#f0c674",
