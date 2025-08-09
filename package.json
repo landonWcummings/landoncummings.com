@@ -15,10 +15,10 @@
     "aws-sdk": "^2.1692.0",
     "aws4": "^1.13.2",
     "marked": "^15.0.2",
-    "next": "^15.0.3",
+    "next": "^15.4.6",
     "onnxruntime-web": "^1.20.1",
-    "react": "^19.0.0-rc-66855b96-20241106",
-    "react-dom": "^19.0.0-rc-66855b96-20241106"
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
     "@types/node": "^20",

@@ -24,8 +24,18 @@ export default function SnakePlusAI({ repos }) {
   // Refs to store pending timeouts so they can be cleared.
   const popupTimeoutRef = useRef(null);
   const restartTimeoutRef = useRef(null);
+  
+  // Refs to track initialization state and prevent stacking
+  const userInitializingRef = useRef(false);
+  const aiInitializingRef = useRef(false);
+  const demoInitializingRef = useRef(false);
+  
+  // Refs to store init functions to avoid circular dependencies
+  const initUserGameRef = useRef(null);
+  const initAIGameRef = useRef(null);
+  const initDemoGameRef = useRef(null);
 
-  const [mode, setMode] = useState("compete"); // "compete" or "demo"
+  const [mode, setMode] = useState("demo"); // "compete" or "demo"
   const [gridSize, setGridSize] = useState(4);
   const [speed, setSpeed] = useState(200);
   const [tempSpeed, setTempSpeed] = useState(200);
@@ -44,57 +54,138 @@ export default function SnakePlusAI({ repos }) {
   // ----------------- Initialization Functions -----------------
   // Initialize the user game (compete mode).
   const initUserGame = useCallback(() => {
-    if (!userCanvasRef.current) {
-      setTimeout(initUserGame, 50);
+    // Prevent multiple concurrent initializations
+    if (userInitializingRef.current) {
+      console.log('[Main] User game already initializing, skipping...');
       return;
     }
-    if (userGameRef.current) userGameRef.current.stop();
-    const canvas = userCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const gameInstance = new Game(canvas, ctx, gridSize, false, handleGameEnd);
-    gameInstance.msbetweenframes = speed;
-    gameInstance.reset();
-    gameInstance.draw();
-    userGameRef.current = gameInstance;
-    console.log('[Main] User game initialized.');
-  }, [gridSize, speed]);
+    
+    if (!userCanvasRef.current) {
+      userInitializingRef.current = true;
+      setTimeout(() => {
+        userInitializingRef.current = false;
+        if (mode === "compete") { // Only retry if still in compete mode
+          initUserGame();
+        }
+      }, 50);
+      return;
+    }
+    
+    userInitializingRef.current = true;
+    
+    // Ensure complete cleanup of previous game
+    if (userGameRef.current) {
+      userGameRef.current.stop();
+      userGameRef.current = null;
+    }
+    
+    try {
+      const canvas = userCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const gameInstance = new Game(canvas, ctx, gridSize, false, handleGameEnd);
+      gameInstance.msbetweenframes = speed;
+      gameInstance.reset();
+      gameInstance.draw();
+      userGameRef.current = gameInstance;
+      console.log('[Main] User game initialized.');
+    } finally {
+      userInitializingRef.current = false;
+    }
+  }, [gridSize, speed, mode]);
+  
+  // Store the function in ref for use in callbacks
+  initUserGameRef.current = initUserGame;
 
   // Initialize the AI game (compete mode).
   const initAIGame = useCallback(async () => {
-    if (!aiCanvasRef.current) {
-      setTimeout(() => { initAIGame(); }, 50);
+    // Prevent multiple concurrent initializations
+    if (aiInitializingRef.current) {
+      console.log('[Main] AI game already initializing, skipping...');
       return;
     }
-    if (aiGameRef.current) aiGameRef.current.stop();
-    const canvas = aiCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const gameInstance = new Game(canvas, ctx, gridSize, true, handleGameEnd);
-    gameInstance.msbetweenframes = speed;
-    await gameInstance.loadModel(gridSize);
-    gameInstance.reset();
-    gameInstance.draw();
-    aiGameRef.current = gameInstance;
-    console.log('[Main] AI game initialized.');
-  }, [gridSize, speed]);
+    
+    if (!aiCanvasRef.current) {
+      aiInitializingRef.current = true;
+      setTimeout(async () => {
+        aiInitializingRef.current = false;
+        if (mode === "compete" || mode === "demo") { // Retry if still in AI mode
+          await initAIGame();
+        }
+      }, 50);
+      return;
+    }
+    
+    aiInitializingRef.current = true;
+    
+    try {
+      // Ensure complete cleanup of previous game
+      if (aiGameRef.current) {
+        aiGameRef.current.stop();
+        aiGameRef.current = null;
+      }
+      
+      const canvas = aiCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const gameInstance = new Game(canvas, ctx, gridSize, true, handleGameEnd);
+      gameInstance.msbetweenframes = speed;
+      await gameInstance.loadModel(gridSize);
+      gameInstance.reset();
+      gameInstance.draw();
+      aiGameRef.current = gameInstance;
+      console.log('[Main] AI game initialized.');
+    } finally {
+      aiInitializingRef.current = false;
+    }
+  }, [gridSize, speed, mode]);
+  
+  // Store the function in ref for use in callbacks
+  initAIGameRef.current = initAIGame;
 
   // Initialize the demo game (demo mode).
   const initDemoGame = useCallback(async () => {
-    if (!demoCanvasRef.current) {
-      console.warn("Demo canvas not mounted yet. Retrying in 50ms...");
-      setTimeout(() => { initDemoGame(); }, 50);
+    // Prevent multiple concurrent initializations
+    if (demoInitializingRef.current) {
+      console.log('[Main] Demo game already initializing, skipping...');
       return;
     }
-    if (demoGameRef.current) demoGameRef.current.stop();
-    const canvas = demoCanvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const gameInstance = new Game(canvas, ctx, gridSize, true, handleGameEnd);
-    gameInstance.msbetweenframes = speed;
-    await gameInstance.loadModel(gridSize);
-    gameInstance.reset();
-    gameInstance.draw();
-    demoGameRef.current = gameInstance;
-    console.log('[Main] Demo game initialized.');
-  }, [gridSize, speed]);
+    
+    if (!demoCanvasRef.current) {
+      console.warn("Demo canvas not mounted yet. Retrying in 50ms...");
+      demoInitializingRef.current = true;
+      setTimeout(async () => {
+        demoInitializingRef.current = false;
+        if (mode === "demo") { // Only retry if still in demo mode
+          await initDemoGame();
+        }
+      }, 50);
+      return;
+    }
+    
+    demoInitializingRef.current = true;
+    
+    try {
+      // Ensure complete cleanup of previous game
+      if (demoGameRef.current) {
+        demoGameRef.current.stop();
+        demoGameRef.current = null;
+      }
+      
+      const canvas = demoCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const gameInstance = new Game(canvas, ctx, gridSize, true, handleGameEnd);
+      gameInstance.msbetweenframes = speed;
+      await gameInstance.loadModel(gridSize);
+      gameInstance.reset();
+      gameInstance.draw();
+      demoGameRef.current = gameInstance;
+      console.log('[Main] Demo game initialized.');
+    } finally {
+      demoInitializingRef.current = false;
+    }
+  }, [gridSize, speed, mode]);
+  
+  // Store the function in ref for use in callbacks
+  initDemoGameRef.current = initDemoGame;
 
   // ----------------- Game End Handler -----------------
   const handleGameEnd = useCallback((msg) => {
@@ -118,13 +209,21 @@ export default function SnakePlusAI({ repos }) {
     }
 
     if (mode === "demo") {
-      // In demo mode, immediately restart the demo without overlay.
-      initDemoGame().then(() => {
-        if (demoGameRef.current && !demoGameRef.current.gameActive) {
+      // In demo mode, restart the demo with a small delay to prevent overlap
+      setTimeout(async () => {
+        // Double-check we're still in demo mode
+        if (mode !== "demo") return;
+        
+        // Ensure previous game is completely stopped
+        if (demoGameRef.current) {
+          demoGameRef.current.stop();
+        }
+        if (initDemoGameRef.current) await initDemoGameRef.current();
+        if (demoGameRef.current && !demoGameRef.current.gameActive && mode === "demo") {
           demoGameRef.current.start();
           setGamesStarted(true);
         }
-      });
+      }, 100);
     } else {
       if (msg === "AI wins!" || msg === "AI wins") {
         setWinnerMessage("AI wins");
@@ -133,23 +232,24 @@ export default function SnakePlusAI({ repos }) {
           setWinnerMessage("");
         }, 1500);
         restartTimeoutRef.current = setTimeout(() => {
-          initUserGame();
-          initAIGame();
+          if (initUserGameRef.current) initUserGameRef.current();
+          if (initAIGameRef.current) initAIGameRef.current();
           setWinnerMessage("Press WASD or arrows to restart");
           setInputEnabled(true);
         }, 1800);
       } else {
         restartTimeoutRef.current = setTimeout(() => {
-          initUserGame();
-          initAIGame();
+          if (initUserGameRef.current) initUserGameRef.current();
+          if (initAIGameRef.current) initAIGameRef.current();
           setWinnerMessage("Press WASD or arrows to restart");
         }, 1300);
       }
     }
-  }, [mode, initUserGame, initAIGame, initDemoGame]);
+  }, [mode]);
 
   // ----------------- Reinitialize on Grid Size or Mode Change -----------------
   useEffect(() => {
+    // Clear all timeouts first
     if (popupTimeoutRef.current) {
       clearTimeout(popupTimeoutRef.current);
       popupTimeoutRef.current = null;
@@ -158,27 +258,55 @@ export default function SnakePlusAI({ repos }) {
       clearTimeout(restartTimeoutRef.current);
       restartTimeoutRef.current = null;
     }
+    
+    // Stop all existing games immediately to prevent overlap
+    if (userGameRef.current) {
+      userGameRef.current.stop();
+      userGameRef.current = null;
+    }
+    if (aiGameRef.current) {
+      aiGameRef.current.stop();
+      aiGameRef.current = null;
+    }
+    if (demoGameRef.current) {
+      demoGameRef.current.stop();
+      demoGameRef.current = null;
+    }
+    
+    // Reset initialization flags
+    userInitializingRef.current = false;
+    aiInitializingRef.current = false;
+    demoInitializingRef.current = false;
+    
     setGamesStarted(false);
     setWinnerMessage(null);
     setInputEnabled(true);
     setIsGameReady(false);
-    if (mode === "compete") {
-      initUserGame();
-      (async () => {
+    
+    // Use a single initialization approach to avoid race conditions
+    const initializeGames = async () => {
+      if (mode === "compete") {
+        initUserGame();
         await initAIGame();
         setIsGameReady(true);
-      })();
-    } else if (mode === "demo") {
-      setTimeout(async () => {
+      } else if (mode === "demo") {
         await initDemoGame();
         setIsGameReady(true);
-        if (demoGameRef.current && !demoGameRef.current.gameActive) {
-          demoGameRef.current.start();
-          setGamesStarted(true);
-        }
-      }, 50);
-    }
+        // Auto-start demo only after initialization is complete
+        setTimeout(() => {
+          if (demoGameRef.current && !demoGameRef.current.gameActive && mode === "demo") {
+            demoGameRef.current.start();
+            setGamesStarted(true);
+          }
+        }, 50);
+      }
+    };
+    
+    // Small delay to ensure DOM is ready and prevent race conditions
+    const initTimeout = setTimeout(initializeGames, 100);
+    
     return () => {
+      clearTimeout(initTimeout);
       if (userGameRef.current) userGameRef.current.stop();
       if (aiGameRef.current) aiGameRef.current.stop();
       if (demoGameRef.current) demoGameRef.current.stop();
@@ -263,11 +391,8 @@ export default function SnakePlusAI({ repos }) {
 
   const handleModeChange = (newMode) => {
     if (newMode === mode) return;
-    // If changing from demo to compete, reload the page.
-    if (mode === "demo" && newMode === "compete") {
-      window.location.reload();
-      return;
-    }
+    
+    // Clear all timeouts
     if (popupTimeoutRef.current) {
       clearTimeout(popupTimeoutRef.current);
       popupTimeoutRef.current = null;
@@ -276,16 +401,31 @@ export default function SnakePlusAI({ repos }) {
       clearTimeout(restartTimeoutRef.current);
       restartTimeoutRef.current = null;
     }
+    
+    // Stop all games immediately
+    if (userGameRef.current) {
+      userGameRef.current.stop();
+      userGameRef.current = null;
+    }
+    if (aiGameRef.current) {
+      aiGameRef.current.stop();
+      aiGameRef.current = null;
+    }
+    if (demoGameRef.current) {
+      demoGameRef.current.stop();
+      demoGameRef.current = null;
+    }
+    
+    // Reset initialization flags
+    userInitializingRef.current = false;
+    aiInitializingRef.current = false;
+    demoInitializingRef.current = false;
+    
     setInputEnabled(true);
     setMode(newMode);
     setWinnerMessage(null);
     setGamesStarted(false);
-    if (newMode === "compete") {
-      initUserGame();
-      initAIGame();
-    } else if (newMode === "demo") {
-      initDemoGame();
-    }
+    setIsGameReady(false);
   };
 
   const containerStyle = {
@@ -299,20 +439,26 @@ export default function SnakePlusAI({ repos }) {
     left: 0,
     width: '500px',
     height: '600px',
-    backgroundColor: 'rgba(128, 128, 128, 0.7)',
+    background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.95), rgba(139, 92, 246, 0.95))',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     color: '#FFFFFF',
     fontWeight: 'bold',
-    fontSize: '20px',
-    transition: 'opacity 0.5s ease'
+    fontSize: '24px',
+    textAlign: 'center',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)',
+    borderRadius: '8px',
+    border: '2px solid rgba(255, 255, 255, 0.2)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
   };
 
-  // ----------------- Disable Arrow Keys Scrolling -----------------
+  // ----------------- Disable Arrow Keys and Spacebar Scrolling -----------------
   useEffect(() => {
     const preventScroll = (e) => {
-      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
         e.preventDefault();
       }
     };
@@ -324,7 +470,25 @@ export default function SnakePlusAI({ repos }) {
     <>
       <NavBar repos={repos} />
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
-        <p>Snake Game: {mode === "compete" ? "User vs AI" : "Demo Mode (AI only)"} </p>
+        <h1 style={{
+          fontSize: '2.5rem',
+          fontWeight: 'bold',
+          background: 'linear-gradient(135deg, #8b5cf6, #10b981)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          marginBottom: '10px',
+          textAlign: 'center'
+        }}>
+          🐍 Snake AI
+        </h1>
+        <p style={{
+          fontSize: '1.2rem',
+          color: '#6b7280',
+          fontWeight: '500',
+          marginBottom: '20px'
+        }}>
+          {mode === "compete" ? "👤 Human vs 🤖 AI" : "🎮 AI Demo Mode"}
+        </p>
         {mode === "compete" ? (
           <div style={{ display: 'flex', gap: '20px' }}>
             <div style={containerStyle}>
@@ -332,7 +496,13 @@ export default function SnakePlusAI({ repos }) {
                 ref={userCanvasRef}
                 width={500}
                 height={600}
-                style={{ border: '1px solid black', display: 'block' }}
+                style={{ 
+                  border: '3px solid #10b981', 
+                  borderRadius: '12px',
+                  display: 'block',
+                  boxShadow: '0 8px 32px rgba(16, 185, 129, 0.3)',
+                  background: 'linear-gradient(135deg, #1f2937, #111827)'
+                }}
               ></canvas>
               {!gamesStarted && !winnerMessage && (
                 <div style={overlayStyle}>
@@ -350,7 +520,13 @@ export default function SnakePlusAI({ repos }) {
                 ref={aiCanvasRef}
                 width={500}
                 height={600}
-                style={{ border: '1px solid black', display: 'block' }}
+                style={{ 
+                  border: '3px solid #8b5cf6', 
+                  borderRadius: '12px',
+                  display: 'block',
+                  boxShadow: '0 8px 32px rgba(139, 92, 246, 0.3)',
+                  background: 'linear-gradient(135deg, #1f2937, #111827)'
+                }}
               ></canvas>
               {!gamesStarted && !winnerMessage && (
                 <div style={overlayStyle}>
@@ -371,7 +547,13 @@ export default function SnakePlusAI({ repos }) {
               ref={demoCanvasRef}
               width={500}
               height={600}
-              style={{ border: '1px solid black', display: 'block' }}
+              style={{ 
+                border: '3px solid #8b5cf6', 
+                borderRadius: '12px',
+                display: 'block',
+                boxShadow: '0 8px 32px rgba(139, 92, 246, 0.3)',
+                background: 'linear-gradient(135deg, #1f2937, #111827)'
+              }}
             ></canvas>
             {!gamesStarted && !winnerMessage && (
               <div style={overlayStyle}>
@@ -385,8 +567,27 @@ export default function SnakePlusAI({ repos }) {
             )}
           </div>
         )}
-        <div style={{ marginTop: '10px' }}>
-          <label htmlFor="speed-slider">Frame Spacing: {tempSpeed}ms</label>
+        <div style={{ 
+          marginTop: '20px', 
+          padding: '20px',
+          background: 'linear-gradient(135deg, #374151, #1f2937)',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <label 
+            htmlFor="speed-slider" 
+            style={{ 
+              display: 'block',
+              color: '#FFFFFF',
+              fontSize: '16px',
+              fontWeight: 'bold',
+              marginBottom: '10px',
+              textAlign: 'center'
+            }}
+          >
+            🏃 Game Speed: {tempSpeed}ms
+          </label>
           <input
             id="speed-slider"
             type="range"
@@ -397,60 +598,135 @@ export default function SnakePlusAI({ repos }) {
             onChange={handleSliderChange}
             onMouseUp={handleSliderChangeDone}
             onTouchEnd={handleSliderChangeDone}
-            style={{ width: '300px', marginTop: '5px' }}
+            style={{ 
+              width: '100%', 
+              maxWidth: '350px',
+              height: '8px',
+              background: 'linear-gradient(90deg, #10b981, #8b5cf6)',
+              borderRadius: '4px',
+              outline: 'none',
+              appearance: 'none',
+              cursor: 'pointer'
+            }}
           />
         </div>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', gap: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', gap: '12px' }}>
           {[4, 5, 6].map((size) => (
             <button
               key={size}
               onClick={() => handleGridSizeChange(size)}
               style={{
-                padding: '10px 20px',
-                border: '2px solid #000',
-                borderRadius: '5px',
-                backgroundColor: size === gridSize ? '#4CAF50' : '#FFF',
-                color: size === gridSize ? '#FFF' : '#000',
+                padding: '12px 24px',
+                border: '2px solid transparent',
+                borderRadius: '12px',
+                background: size === gridSize 
+                  ? 'linear-gradient(135deg, #10b981, #059669)' 
+                  : 'linear-gradient(135deg, #374151, #1f2937)',
+                color: '#FFFFFF',
                 cursor: 'pointer',
                 fontWeight: 'bold',
-                outline: size === gridSize ? '2px solid #4CAF50' : 'none',
+                fontSize: '16px',
+                transition: 'all 0.3s ease',
+                boxShadow: size === gridSize 
+                  ? '0 4px 20px rgba(16, 185, 129, 0.4)' 
+                  : '0 4px 12px rgba(0, 0, 0, 0.2)',
+                transform: size === gridSize ? 'translateY(-2px)' : 'none',
+                outline: 'none',
+              }}
+              onMouseEnter={(e) => {
+                if (size !== gridSize) {
+                  e.target.style.background = 'linear-gradient(135deg, #4b5563, #374151)';
+                  e.target.style.transform = 'translateY(-1px)';
+                  e.target.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (size !== gridSize) {
+                  e.target.style.background = 'linear-gradient(135deg, #374151, #1f2937)';
+                  e.target.style.transform = 'none';
+                  e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+                }
               }}
             >
-              {size}x{size}
+              {size}×{size}
             </button>
           ))}
         </div>
-        {/* New Mode Buttons */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px', gap: '10px' }}>
+        {/* Mode Buttons */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px', gap: '12px' }}>
           <button
             onClick={() => handleModeChange("compete")}
             style={{
-              padding: '10px 20px',
-              border: '2px solid #000',
-              borderRadius: '5px',
-              backgroundColor: mode === "compete" ? '#4CAF50' : '#FFF',
-              color: mode === "compete" ? '#FFF' : '#000',
+              padding: '12px 28px',
+              border: '2px solid transparent',
+              borderRadius: '12px',
+              background: mode === "compete" 
+                ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' 
+                : 'linear-gradient(135deg, #374151, #1f2937)',
+              color: '#FFFFFF',
               cursor: 'pointer',
               fontWeight: 'bold',
-              outline: mode === "compete" ? '2px solid #4CAF50' : 'none',
+              fontSize: '16px',
+              transition: 'all 0.3s ease',
+              boxShadow: mode === "compete" 
+                ? '0 4px 20px rgba(139, 92, 246, 0.4)' 
+                : '0 4px 12px rgba(0, 0, 0, 0.2)',
+              transform: mode === "compete" ? 'translateY(-2px)' : 'none',
+              outline: 'none',
+            }}
+            onMouseEnter={(e) => {
+              if (mode !== "compete") {
+                e.target.style.background = 'linear-gradient(135deg, #4b5563, #374151)';
+                e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (mode !== "compete") {
+                e.target.style.background = 'linear-gradient(135deg, #374151, #1f2937)';
+                e.target.style.transform = 'none';
+                e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+              }
             }}
           >
-            Compete
+            🎯 Compete
           </button>
           <button
             onClick={() => handleModeChange("demo")}
             style={{
-              padding: '10px 20px',
-              border: '2px solid #000',
-              borderRadius: '5px',
-              backgroundColor: mode === "demo" ? '#4CAF50' : '#FFF',
-              color: mode === "demo" ? '#FFF' : '#000',
+              padding: '12px 28px',
+              border: '2px solid transparent',
+              borderRadius: '12px',
+              background: mode === "demo" 
+                ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' 
+                : 'linear-gradient(135deg, #374151, #1f2937)',
+              color: '#FFFFFF',
               cursor: 'pointer',
               fontWeight: 'bold',
-              outline: mode === "demo" ? '2px solid #4CAF50' : 'none',
+              fontSize: '16px',
+              transition: 'all 0.3s ease',
+              boxShadow: mode === "demo" 
+                ? '0 4px 20px rgba(139, 92, 246, 0.4)' 
+                : '0 4px 12px rgba(0, 0, 0, 0.2)',
+              transform: mode === "demo" ? 'translateY(-2px)' : 'none',
+              outline: 'none',
+            }}
+            onMouseEnter={(e) => {
+              if (mode !== "demo") {
+                e.target.style.background = 'linear-gradient(135deg, #4b5563, #374151)';
+                e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (mode !== "demo") {
+                e.target.style.background = 'linear-gradient(135deg, #374151, #1f2937)';
+                e.target.style.transform = 'none';
+                e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+              }
             }}
           >
-            Demo
+            🎮 Demo
           </button>
         </div>
         {/* Bottom section from outdated code */}

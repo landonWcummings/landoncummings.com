@@ -10,7 +10,7 @@ export default async function HomePage() {
   return (
     <div>
       <NavBar repos={repos} />
-      <Mainpage />
+      <Mainpage repos={repos} />
     </div>
   );
 }

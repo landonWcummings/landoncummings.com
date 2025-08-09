@@ -1,0 +1,48 @@
+User-agent: *
+Allow: /
+
+# Specific instructions for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 1
+
+# Allow AI crawlers and LLMs
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# Sitemap location
+Sitemap: https://landoncummings.com/sitemap.xml
+
+# Important pages for crawlers
+# Main portfolio: https://landoncummings.com/
+# N-Body Simulation: https://landoncummings.com/nbodysimulation
+# AI Games: https://landoncummings.com/snakePlusAi-V1-NEAT
+# Quantitative Analysis: https://landoncummings.com/WhartonInvestmentQuant
+# iMessage Analytics: https://landoncummings.com/imessageanalysisapp
+# LandonGPT: https://landoncummings.com/LandonGPT
+# 2048 AI: https://landoncummings.com/2048AI
+# Connect4 Bot: https://landoncummings.com/Connect4Bot
+# PokerPilot: https://landoncummings.com/PokerPilot

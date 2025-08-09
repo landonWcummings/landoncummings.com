@@ -5,16 +5,16 @@ import Image from 'next/image';
 import { useState, useEffect, useRef, useMemo } from 'react';
 
 const mainRepoNames = [
-  'nbodysimulation',
-  'imessageanalysisapp',
-  'WhartonInvestmentQuant',
-  'snakePlusAi-V1-NEAT',
-  'LandonGPT',
-  '2048AI',
-  'Connect4Bot',
-  'PokerPilot',
+  'nbodysimulation', //☄️
+  'imessageanalysisapp',//💬
+  'WhartonInvestmentQuant', //📈
+  'snakePlusAi-V1-NEAT', //🐍
+  'LandonGPT', //🪞
+  '2048AI', //
+  'Connect4Bot', //
+  'PokerPilot', //
 ];
-
+//     
 const buttonLabels = {
   nbodysimulation: 'N-Body Simulation',
   imessageanalysisapp: 'iMessage Analysis App',

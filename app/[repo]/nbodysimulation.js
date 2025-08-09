@@ -22,11 +22,7 @@ export default function NBodySimulation({ repos }) {
     let animationFrameId;
 
     // Constants
-    const WHITE = 'rgb(255, 255, 255)';
-    const BACKGROUND = WHITE;
-
     const scale = 5;
-    const trace = 1;
     const cap = 10.5;
     const G = GravitationalConst;
     const speedDivisor = 1.3;
@@ -63,11 +59,22 @@ export default function NBodySimulation({ repos }) {
         const x_velocity = randf();
         const y_velocity = randf();
         const mass = (Math.abs(rand()) + 30) / 2.5;
-        const dif = 130 / n;
-        const spot = Math.floor(Math.random() * 3);
-        const color = [100, 100, 100];
-        color[spot] = dif * i;
-        bodies.push({ x, y, x_velocity, y_velocity, mass, color });
+        
+        // Generate more vibrant star/planet colors
+        const colorTypes = [
+          [255, 200, 100], // Golden sun-like
+          [100, 150, 255], // Blue star
+          [255, 150, 150], // Red giant
+          [200, 255, 200], // Green planet
+          [255, 180, 255], // Purple nebula
+          [255, 255, 150], // Yellow star
+          [150, 255, 255], // Cyan ice planet
+          [255, 200, 150], // Orange star
+        ];
+        
+        const color = colorTypes[i % colorTypes.length];
+        const bodyType = Math.random() > 0.7 ? 'star' : 'planet'; // 30% chance of being a star
+        bodies.push({ x, y, x_velocity, y_velocity, mass, color, bodyType });
         tracer.push([]);
       }
     }
@@ -206,36 +213,133 @@ export default function NBodySimulation({ repos }) {
       
 
     function draw() {
-      ctx.fillStyle = BACKGROUND;
+      // Create space background with gradient
+      const gradient = ctx.createRadialGradient(
+        windowWidth / 2, windowHeight / 2, 0,
+        windowWidth / 2, windowHeight / 2, Math.max(windowWidth, windowHeight) / 2
+      );
+      gradient.addColorStop(0, '#1a1a2e');
+      gradient.addColorStop(0.5, '#16213e');
+      gradient.addColorStop(1, '#0a0a15');
+      
+      ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, windowWidth, windowHeight);
 
-      // Draw bodies
-      for (let bod = 0; bod < bodies.length; bod++) {
-        const color = `rgb(${bodies[bod].color[0]}, ${bodies[bod].color[1]}, ${bodies[bod].color[2]})`;
-        ctx.fillStyle = color;
+      // Add starfield background
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      for (let i = 0; i < 100; i++) {
+        const x = (i * 137.5) % windowWidth;
+        const y = (i * 67.3) % windowHeight;
+        const size = (i % 3 === 0) ? 1.5 : 0.5; // Varied star sizes
+        const opacity = (i % 4 === 0) ? 0.9 : 0.4; // Varied brightness
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
         ctx.beginPath();
-        ctx.arc(
-          bodies[bod].x,
-          bodies[bod].y,
-          bodies[bod].mass / scale,
-          0,
-          Math.PI * 2
-        );
+        ctx.arc(x, y, size, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Draw traces
+      // Draw wall boundaries if walls are enabled
+      if (walls) {
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.6)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 10]);
+        ctx.strokeRect(0, 0, windowWidth, windowHeight);
+        ctx.setLineDash([]); // Reset line dash
+        
+        // Add corner indicators
+        const cornerSize = 20;
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+        // Top-left
+        ctx.fillRect(0, 0, cornerSize, 3);
+        ctx.fillRect(0, 0, 3, cornerSize);
+        // Top-right
+        ctx.fillRect(windowWidth - cornerSize, 0, cornerSize, 3);
+        ctx.fillRect(windowWidth - 3, 0, 3, cornerSize);
+        // Bottom-left
+        ctx.fillRect(0, windowHeight - 3, cornerSize, 3);
+        ctx.fillRect(0, windowHeight - cornerSize, 3, cornerSize);
+        // Bottom-right
+        ctx.fillRect(windowWidth - cornerSize, windowHeight - 3, cornerSize, 3);
+        ctx.fillRect(windowWidth - 3, windowHeight - cornerSize, 3, cornerSize);
+      }
+
+      // Draw bodies with enhanced visuals
+      for (let bod = 0; bod < bodies.length; bod++) {
+        const body = bodies[bod];
+        const radius = body.mass / scale;
+        const x = body.x;
+        const y = body.y;
+        const color = body.color;
+        
+        // Create glow effect
+        const glowGradient = ctx.createRadialGradient(x, y, 0, x, y, radius * 3);
+        glowGradient.addColorStop(0, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.8)`);
+        glowGradient.addColorStop(0.3, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.4)`);
+        glowGradient.addColorStop(0.7, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.1)`);
+        glowGradient.addColorStop(1, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0)`);
+        
+        // Draw glow
+        ctx.fillStyle = glowGradient;
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Create body gradient based on type
+        const bodyGradient = ctx.createRadialGradient(
+          x - radius * 0.3, y - radius * 0.3, 0,
+          x, y, radius
+        );
+        
+        if (body.bodyType === 'star') {
+          // Star gradient - bright center
+          bodyGradient.addColorStop(0, `rgb(${Math.min(255, color[0] + 50)}, ${Math.min(255, color[1] + 50)}, ${Math.min(255, color[2] + 50)})`);
+          bodyGradient.addColorStop(0.4, `rgb(${color[0]}, ${color[1]}, ${color[2]})`);
+          bodyGradient.addColorStop(1, `rgb(${Math.max(0, color[0] - 50)}, ${Math.max(0, color[1] - 50)}, ${Math.max(0, color[2] - 50)})`);
+        } else {
+          // Planet gradient - more subdued
+          bodyGradient.addColorStop(0, `rgb(${Math.min(255, color[0] + 30)}, ${Math.min(255, color[1] + 30)}, ${Math.min(255, color[2] + 30)})`);
+          bodyGradient.addColorStop(0.6, `rgb(${color[0]}, ${color[1]}, ${color[2]})`);
+          bodyGradient.addColorStop(1, `rgb(${Math.max(0, color[0] - 30)}, ${Math.max(0, color[1] - 30)}, ${Math.max(0, color[2] - 30)})`);
+        }
+        
+        // Draw main body
+        ctx.fillStyle = bodyGradient;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add subtle border for definition
+        ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.8)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Draw traces with improved visuals
       for (let i = 0; i < tracer.length; i++) {
         const bodyTracer = tracer[i];
-        const color = `rgb(${bodies[i].color[0]}, ${bodies[i].color[1]}, ${bodies[i].color[2]})`;
-        ctx.fillStyle = color;
-        for (let pos of bodyTracer) {
+        const color = bodies[i].color;
+        
+        // Draw trace as connected line with fading opacity
+        if (bodyTracer.length > 1) {
+          ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.6)`;
+          ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.arc(pos[0], pos[1], trace, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.moveTo(bodyTracer[0][0], bodyTracer[0][1]);
+          
+          for (let j = 1; j < bodyTracer.length; j++) {
+            const opacity = (j / bodyTracer.length) * 0.6;
+            ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${opacity})`;
+            ctx.lineTo(bodyTracer[j][0], bodyTracer[j][1]);
+            ctx.stroke();
+            if (j < bodyTracer.length - 1) {
+              ctx.beginPath();
+              ctx.moveTo(bodyTracer[j][0], bodyTracer[j][1]);
+            }
+          }
         }
+        
         bodyTracer.push([bodies[i].x, bodies[i].y]);
-        const maxTraceLength = 100;
+        const maxTraceLength = 150; // Increased for longer, more beautiful trails
         if (bodyTracer.length > maxTraceLength) {
           bodyTracer.shift();
         }
@@ -251,6 +355,7 @@ export default function NBodySimulation({ repos }) {
     // Keydown event for resetting the simulation
     function handleKeyDown(event) {
       if (event.code === 'Space') {
+        event.preventDefault(); // Prevent spacebar from scrolling the page
         initializeBodies();
       }
     }
@@ -294,97 +399,275 @@ export default function NBodySimulation({ repos }) {
 
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
-      <NavBar repos={repos} />
-      <h1 style={{ fontSize: '3rem', marginBottom: '20px' }}>
-        N-Body Simulation
-      </h1>
-      <p>
-        Simulating planetary objects <br />
-        you&apos;ve heard of the three-body problem... <br />
-        let&apos;s take it a step further
-      </p>
+        {/* Hidden SEO content for this specific page */}
+        <div style={{ 
+          position: 'absolute', 
+          left: '-9999px', 
+          top: '-9999px',
+          visibility: 'hidden',
+          overflow: 'hidden',
+          width: '1px',
+          height: '1px'
+        }}>
+          <h1>N-Body Gravitational Physics Simulation - Interactive Celestial Mechanics</h1>
+          <p>
+            Experience an advanced n-body physics simulation that demonstrates gravitational interactions between 
+            multiple celestial bodies in real-time. This interactive simulation features customizable parameters 
+            including gravitational constant, number of bodies, canvas dimensions, wall boundaries, and consumption mechanics.
+            The simulation visualizes complex orbital dynamics, gravitational attractions, and celestial body interactions
+            with beautiful visual effects including glowing bodies, fading trails, and space-like backgrounds.
+          </p>
+          <h2>Physics Simulation Features</h2>
+          <p>
+            Real-time gravitational force calculations, n-body problem solving, orbital mechanics demonstration,
+            interactive parameter controls, visual wall boundaries, body consumption mechanics, customizable gravitational constant,
+            variable number of celestial bodies, dynamic canvas sizing, beautiful space-themed graphics, glowing particle effects,
+            fading orbital trails, star and planet differentiation, responsive design, and educational physics visualization.
+          </p>
+          <h3>Technical Implementation</h3>
+          <p>
+            Built using JavaScript ES6, HTML5 Canvas API, React hooks for state management, real-time animation loops,
+            mathematical physics calculations, gradient rendering, particle systems, and interactive user controls.
+            Demonstrates advanced programming concepts including numerical integration, force calculations, collision detection,
+            and computer graphics programming.
+          </p>
+        </div>
+        
+        <NavBar repos={repos} />
+        <h1 style={{ fontSize: '3rem', marginBottom: '20px' }}>
+          N-Body Simulation
+        </h1>
+        <p>
+          Simulating planetary objects <br />
+          you&apos;ve heard of the three-body problem... <br />
+          let&apos;s take it a step further
+        </p>
 
       <canvas
         ref={canvasRef}
         width={canvasWidth}
         height={canvasHeight}
         style={{
-          border: '1px solid black',
+          border: '3px solid #00d4ff',
+          borderRadius: '15px',
           margin: '20px auto',
           display: 'block',
+          boxShadow: '0 0 30px rgba(0, 212, 255, 0.3), inset 0 0 20px rgba(0, 212, 255, 0.1)',
+          background: 'linear-gradient(135deg, #0a0a15 0%, #1a1a2e 100%)',
         }}
       ></canvas>
-      <div style={{ margin: '20px auto', width: '300px', textAlign: 'left' }}>
-        <label>
-          <input
-            type="checkbox"
-            checked={walls}
-            onChange={handleWallsChange}
-            style={{ marginRight: '10px' }}
-          />
-          Walls
-        </label>
-        <br />
-        <label>
-          <input
-            type="checkbox"
-            checked={consume}
-            onChange={handleConsumeChange}
-            style={{ marginRight: '10px' }}
-          />
-          Consume
-        </label>
-        <br />
-        <label>
-          Number of Bodies: {numBodies}
-          <input
-            type="range"
-            min="2"
-            max="100"
-            value={numBodies}
-            onChange={handleNumBodiesChange}
-            style={{ width: '100%' }}
-          />
-        </label>
+      <div style={{ 
+        margin: '20px auto', 
+        maxWidth: '500px', 
+        padding: '30px',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        borderRadius: '20px',
+        boxShadow: '0 15px 35px rgba(0, 0, 0, 0.1)',
+        color: 'white'
+      }}>
+        <h2 style={{ 
+          textAlign: 'center', 
+          marginBottom: '25px', 
+          fontSize: '1.5rem',
+          fontWeight: '600',
+          textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+        }}>
+          Simulation Controls
+        </h2>
+        
+        {/* Toggle Controls */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-around', 
+          marginBottom: '30px',
+          gap: '20px'
+        }}>
+          <label style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            fontSize: '1.1rem',
+            fontWeight: '500',
+            cursor: 'pointer',
+            background: 'rgba(255, 255, 255, 0.1)',
+            padding: '12px 20px',
+            borderRadius: '25px',
+            transition: 'all 0.3s ease',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <input
+              type="checkbox"
+              checked={walls}
+              onChange={handleWallsChange}
+              style={{ 
+                marginRight: '12px',
+                transform: 'scale(1.3)',
+                accentColor: '#00d4ff'
+              }}
+            />
+            🏗️ Walls
+          </label>
+          
+          <label style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            fontSize: '1.1rem',
+            fontWeight: '500',
+            cursor: 'pointer',
+            background: 'rgba(255, 255, 255, 0.1)',
+            padding: '12px 20px',
+            borderRadius: '25px',
+            transition: 'all 0.3s ease',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <input
+              type="checkbox"
+              checked={consume}
+              onChange={handleConsumeChange}
+              style={{ 
+                marginRight: '12px',
+                transform: 'scale(1.3)',
+                accentColor: '#ff4757'
+              }}
+            />
+            🍽️ Consume
+          </label>
+        </div>
 
-        <br />
-        <label>
-          Gravitational constant: {GravitationalConst}
-          <input
-            type="range"
-            min="0.001"
-            max="1"
-            step="0.001"        
-            value={GravitationalConst}
-            onChange={handleGravitationalConstChange}
-            style={{ width: '100%' }}
-          />
-        </label>
+        {/* Slider Controls */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+          <div style={{ 
+            background: 'rgba(255, 255, 255, 0.1)', 
+            padding: '20px', 
+            borderRadius: '15px',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <label style={{ 
+              display: 'block', 
+              fontSize: '1.1rem', 
+              fontWeight: '600', 
+              marginBottom: '12px',
+              textAlign: 'center'
+            }}>
+              🌌 Number of Bodies: <span style={{ color: '#00d4ff', fontSize: '1.2rem' }}>{numBodies}</span>
+            </label>
+            <input
+              type="range"
+              min="2"
+              max="100"
+              value={numBodies}
+              onChange={handleNumBodiesChange}
+              style={{ 
+                width: '100%',
+                height: '8px',
+                borderRadius: '5px',
+                background: 'linear-gradient(to right, #00d4ff, #0984e3)',
+                outline: 'none',
+                opacity: '0.8',
+                transition: 'opacity 0.2s'
+              }}
+            />
+          </div>
 
-        <br />
-        <label>
-          Canvas Width: {canvasWidth}px
-          <input
-            type="range"
-            min="400"
-            max="1200"
-            value={canvasWidth}
-            onChange={handleCanvasWidthChange}
-            style={{ width: '100%' }}
-          />
-        </label>
-        <br />
-        <label>
-          Canvas Height: {canvasHeight}px
-          <input
-            type="range"
-            min="300"
-            max="900"
-            value={canvasHeight}
-            onChange={handleCanvasHeightChange}
-            style={{ width: '100%' }}
-          />
-        </label>
+          <div style={{ 
+            background: 'rgba(255, 255, 255, 0.1)', 
+            padding: '20px', 
+            borderRadius: '15px',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <label style={{ 
+              display: 'block', 
+              fontSize: '1.1rem', 
+              fontWeight: '600', 
+              marginBottom: '12px',
+              textAlign: 'center'
+            }}>
+              ⚡ Gravitational Constant: <span style={{ color: '#fd79a8', fontSize: '1.2rem' }}>{GravitationalConst.toFixed(3)}</span>
+            </label>
+            <input
+              type="range"
+              min="0.001"
+              max="1"
+              step="0.001"        
+              value={GravitationalConst}
+              onChange={handleGravitationalConstChange}
+              style={{ 
+                width: '100%',
+                height: '8px',
+                borderRadius: '5px',
+                background: 'linear-gradient(to right, #fd79a8, #e84393)',
+                outline: 'none',
+                opacity: '0.8',
+                transition: 'opacity 0.2s'
+              }}
+            />
+          </div>
+
+          <div style={{ 
+            background: 'rgba(255, 255, 255, 0.1)', 
+            padding: '20px', 
+            borderRadius: '15px',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <label style={{ 
+              display: 'block', 
+              fontSize: '1.1rem', 
+              fontWeight: '600', 
+              marginBottom: '12px',
+              textAlign: 'center'
+            }}>
+              📐 Canvas Width: <span style={{ color: '#a29bfe', fontSize: '1.2rem' }}>{canvasWidth}px</span>
+            </label>
+            <input
+              type="range"
+              min="400"
+              max="1200"
+              value={canvasWidth}
+              onChange={handleCanvasWidthChange}
+              style={{ 
+                width: '100%',
+                height: '8px',
+                borderRadius: '5px',
+                background: 'linear-gradient(to right, #a29bfe, #6c5ce7)',
+                outline: 'none',
+                opacity: '0.8',
+                transition: 'opacity 0.2s'
+              }}
+            />
+          </div>
+
+          <div style={{ 
+            background: 'rgba(255, 255, 255, 0.1)', 
+            padding: '20px', 
+            borderRadius: '15px',
+            backdropFilter: 'blur(10px)'
+          }}>
+            <label style={{ 
+              display: 'block', 
+              fontSize: '1.1rem', 
+              fontWeight: '600', 
+              marginBottom: '12px',
+              textAlign: 'center'
+            }}>
+              📏 Canvas Height: <span style={{ color: '#55efc4', fontSize: '1.2rem' }}>{canvasHeight}px</span>
+            </label>
+            <input
+              type="range"
+              min="300"
+              max="900"
+              value={canvasHeight}
+              onChange={handleCanvasHeightChange}
+              style={{ 
+                width: '100%',
+                height: '8px',
+                borderRadius: '5px',
+                background: 'linear-gradient(to right, #55efc4, #00b894)',
+                outline: 'none',
+                opacity: '0.8',
+                transition: 'opacity 0.2s'
+              }}
+            />
+          </div>
+        </div>
       </div>
       <p>
         Press <strong>Spacebar</strong> to reset the simulation.

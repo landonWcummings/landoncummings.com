@@ -8,6 +8,7 @@ export class Game {
     this.gridsize = gridsize;
     this.isAI = isAI;
     this.onGameEnd = onGameEnd;
+    this.instanceId = Math.random().toString(36).substr(2, 9); // Unique instance ID
     this.player = new Player(this.gridsize);
     this.WIDTH = canvas.width;
     this.HEIGHT = canvas.height;
@@ -39,11 +40,15 @@ export class Game {
   }
 
   stop() {
+    this.gameActive = false;
+    this.hasEnded = true; // Ensure the game is marked as ended
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
-      console.log(`[${this.isAI ? 'AI' : 'User'}] Animation loop stopped.`);
+      console.log(`[${this.isAI ? 'AI' : 'User'}][${this.instanceId}] Animation loop stopped.`);
     }
+    // Additional cleanup
+    this.lastTime = 0;
   }
 
   // Resets game state and redraws the board.
@@ -60,7 +65,7 @@ export class Game {
     }
     this.player.locations.forEach(([x, y], index) => {
       if (this.gridsize === 6) {
-        this.gamegrid[y][x] = index === this.player.locations.length - 1 ? 100 : 2 + index;
+        this.gamegrid[y][x] = index === 0 ? 100 : 2 + index;
       } else {
         this.gamegrid[y][x] = index === 0 ? 2 : 2 + (47 - index);
       }
@@ -78,17 +83,23 @@ export class Game {
     this.lastTime = 0;
     this.gameLoop = this.gameLoop.bind(this);
     this.animationFrameId = requestAnimationFrame(this.gameLoop);
-    console.log(`[${this.isAI ? 'AI' : 'User'}] Game started.`);
+    console.log(`[${this.isAI ? 'AI' : 'User'}][${this.instanceId}] Game started.`);
   }
 
   async gameLoop(timestamp) {
+    // Additional safety check to prevent orphaned loops
+    if (!this.gameActive || this.hasEnded) {
+      this.animationFrameId = null;
+      return;
+    }
+    
     const deltaTime = timestamp - this.lastTime;
     if (deltaTime >= this.msbetweenframes && this.gameActive) {
       await this.update();
       this.draw();
       this.lastTime = timestamp;
     }
-    if (this.gameActive) {
+    if (this.gameActive && !this.hasEnded) {
       this.animationFrameId = requestAnimationFrame(this.gameLoop);
     }
   }
@@ -209,15 +220,36 @@ export class Game {
     const ctx = this.context;
     ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
     
-    // Draw top bar.
-    ctx.fillStyle = "#0000FF";
+    // Draw top bar with gradient
+    const topBarGradient = ctx.createLinearGradient(0, 0, 0, this.topBarHeight);
+    if (this.isAI) {
+      topBarGradient.addColorStop(0, PURPLE);
+      topBarGradient.addColorStop(1, DARK_BLUE);
+    } else {
+      topBarGradient.addColorStop(0, GREEN);
+      topBarGradient.addColorStop(1, '#065f46');
+    }
+    ctx.fillStyle = topBarGradient;
     ctx.fillRect(0, 0, this.WIDTH, this.topBarHeight);
-    ctx.font = "bold 50px sans-serif";
-    ctx.fillStyle = "#FFFFFF";
+    
+    // Add subtle border to top bar
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, this.WIDTH - 2, this.topBarHeight - 2);
+    
+    // Draw label with better typography
+    ctx.font = "bold 48px 'Arial', sans-serif";
+    ctx.fillStyle = WHITE;
     ctx.textBaseline = 'middle';
-    const label = this.isAI ? "AI" : "YOU";
-    const textWidth = ctx.measureText(label).width;
-    ctx.fillText(label, (this.WIDTH - textWidth) / 2, this.topBarHeight / 2);
+    ctx.textAlign = 'center';
+    const label = this.isAI ? "🤖 AI" : "👤 YOU";
+    ctx.fillText(label, this.WIDTH / 2, this.topBarHeight / 2);
+    
+    // Add score display
+    ctx.font = "bold 20px 'Arial', sans-serif";
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Score: ${this.score}`, 10, this.topBarHeight - 15);
     
     // Check for collision grid state and avoid out-of-bounds access.
     if (
@@ -232,51 +264,241 @@ export class Game {
       return;
     }
     
-    // Draw game area background.
-    ctx.fillStyle = GRAY;
+    // Draw game area background with gradient
+    const gameAreaGradient = ctx.createLinearGradient(0, this.topBarHeight, 0, this.HEIGHT);
+    gameAreaGradient.addColorStop(0, '#1f2937');
+    gameAreaGradient.addColorStop(1, '#111827');
+    ctx.fillStyle = gameAreaGradient;
     ctx.fillRect(0, this.topBarHeight, this.WIDTH, this.HEIGHT - this.topBarHeight);
     
-    // Draw cells.
+    // Draw cells with enhanced visuals
     for (let y = 0; y < this.gridsize; y++) {
       for (let x = 0; x < this.gridsize; x++) {
         const value = this.gamegrid[y][x];
+        const cellX = this.cellspacing * (x + 1) + this.cellw * x;
+        const cellY = this.cellspacing * (y + 1) + this.cellh * y + this.topBarHeight;
+        
+        // Create rounded rectangles for all cells
+        const radius = 8;
+        
         if (value === 0) {
-          ctx.fillStyle = BLACK;
+          // Empty cell with subtle grid pattern
+          ctx.fillStyle = '#374151';
+          this.drawRoundedRect(ctx, cellX, cellY, this.cellw, this.cellh, radius);
+          ctx.fill();
+          
+          // Add inner shadow effect
+          ctx.strokeStyle = '#1f2937';
+          ctx.lineWidth = 1;
+          this.drawRoundedRect(ctx, cellX + 1, cellY + 1, this.cellw - 2, this.cellh - 2, radius - 1);
+          ctx.stroke();
         } else if (value === 1) {
-          ctx.fillStyle = RED;
+          // Static food
+          const foodSize = Math.min(this.cellw, this.cellh) * 0.9;
+          const offsetX = (this.cellw - foodSize) / 2;
+          const offsetY = (this.cellh - foodSize) / 2;
+          
+          // Glow effect
+          ctx.shadowColor = '#ef4444';
+          ctx.shadowBlur = 15;
+          ctx.fillStyle = '#ef4444';
+          this.drawRoundedRect(ctx, cellX + offsetX, cellY + offsetY, foodSize, foodSize, radius);
+          ctx.fill();
+          
+          // Inner highlight
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#fca5a5';
+          this.drawRoundedRect(ctx, cellX + offsetX + 2, cellY + offsetY + 2, foodSize - 4, foodSize - 4, radius - 2);
+          ctx.fill();
         } else if (this.gridsize === 6) {
-          if (value === 2) {
-            ctx.fillStyle = WHITE;
+          // 6x6 grid snake rendering
+          if (value === 100) {
+            // Snake head - special styling
+            this.drawSnakeHead(ctx, cellX, cellY, this.cellw, this.cellh, radius);
           } else if (value >= 3 && value < 100) {
-            const shade = Math.max((value - 2) * 10, 150);
-            ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
-          } else if (value === 100) {
-            ctx.fillStyle = 'rgb(100, 100, 255)';
+            // Snake body with gradient
+            this.drawSnakeBody(ctx, cellX, cellY, this.cellw, this.cellh, radius, value - 2);
           }
         } else {
+          // 4x4 and 5x5 grid snake rendering
           if (value === 2) {
-            ctx.fillStyle = WHITE;
+            // Snake head
+            this.drawSnakeHead(ctx, cellX, cellY, this.cellw, this.cellh, radius);
           } else {
-            const shade = Math.min((value - 2) * 5, 255);
-            ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
+            // Snake body
+            const bodyIndex = 47 - (value - 2);
+            this.drawSnakeBody(ctx, cellX, cellY, this.cellw, this.cellh, radius, bodyIndex);
           }
         }
-        ctx.fillRect(
-          this.cellspacing * (x + 1) + this.cellw * x,
-          this.cellspacing * (y + 1) + this.cellh * y + this.topBarHeight,
-          this.cellw,
-          this.cellh
-        );
+        
+        // Draw eyes on snake head
+        const isHead = this.gridsize === 6 ? (value === 100) : (value === 2);
+        if (isHead && this.player.locations.length > 0) {
+          const [headX, headY] = this.player.locations[0];
+          if (headX === x && headY === y) {
+            this.drawSnakeEyes(ctx, cellX, cellY, this.cellw, this.cellh, this.player.orientation);
+          }
+        }
       }
     }
+  }
+
+  // Helper method to draw rounded rectangles
+  drawRoundedRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  }
+
+  // Draw snake head with gradient
+  drawSnakeHead(ctx, x, y, width, height, radius) {
+    const gradient = ctx.createRadialGradient(
+      x + width / 2, y + height / 2, 0,
+      x + width / 2, y + height / 2, Math.min(width, height) / 2
+    );
+    
+    if (this.isAI) {
+      gradient.addColorStop(0, '#a855f7');
+      gradient.addColorStop(1, '#7c3aed');
+    } else {
+      gradient.addColorStop(0, '#34d399');
+      gradient.addColorStop(1, '#10b981');
+    }
+    
+    ctx.shadowColor = this.isAI ? '#a855f7' : '#10b981';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = gradient;
+    this.drawRoundedRect(ctx, x, y, width, height, radius);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  // Draw snake body with fading gradient
+  drawSnakeBody(ctx, x, y, width, height, radius, segmentIndex) {
+    const maxSegments = 20;
+    const intensity = Math.max(0.3, 1 - (segmentIndex / maxSegments));
+    
+    if (this.isAI) {
+      const r = Math.floor(168 * intensity + 80 * (1 - intensity));
+      const g = Math.floor(85 * intensity + 60 * (1 - intensity));
+      const b = Math.floor(247 * intensity + 120 * (1 - intensity));
+      ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    } else {
+      const r = Math.floor(52 * intensity + 80 * (1 - intensity));
+      const g = Math.floor(211 * intensity + 120 * (1 - intensity));
+      const b = Math.floor(153 * intensity + 100 * (1 - intensity));
+      ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    }
+    
+    this.drawRoundedRect(ctx, x + 1, y + 1, width - 2, height - 2, radius - 1);
+    ctx.fill();
+    
+    // Add subtle highlight
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.2 * intensity})`;
+    this.drawRoundedRect(ctx, x + 2, y + 2, width - 4, height - 4, radius - 2);
+    ctx.fill();
+  }
+
+  // Draw eyes on the snake head pointing in the direction of movement
+  drawSnakeEyes(ctx, cellX, cellY, cellW, cellH, orientation) {
+    const centerX = cellX + cellW / 2;
+    const centerY = cellY + cellH / 2;
+    
+    // Eye size relative to cell size
+    const eyeRadius = Math.min(cellW, cellH) * 0.08; // Small eyes
+    const pupilRadius = eyeRadius * 0.6; // Pupil is smaller than eye
+    
+    // Calculate eye positions and pupil offsets based on direction
+    let leftEyeX, leftEyeY, rightEyeX, rightEyeY;
+    let pupilOffsetX = 0, pupilOffsetY = 0;
+    
+    // Eye spacing from center
+    const eyeSpacing = Math.min(cellW, cellH) * 0.25;
+    
+    switch (orientation) {
+      case 3: // Moving right
+        leftEyeX = centerX + eyeSpacing * 0.3;
+        leftEyeY = centerY - eyeSpacing * 0.6;
+        rightEyeX = centerX + eyeSpacing * 0.3;
+        rightEyeY = centerY + eyeSpacing * 0.6;
+        pupilOffsetX = eyeRadius * 0.4; // Pupils look right
+        pupilOffsetY = 0;
+        break;
+      case 6: // Moving down
+        leftEyeX = centerX - eyeSpacing * 0.6;
+        leftEyeY = centerY + eyeSpacing * 0.3;
+        rightEyeX = centerX + eyeSpacing * 0.6;
+        rightEyeY = centerY + eyeSpacing * 0.3;
+        pupilOffsetX = 0;
+        pupilOffsetY = eyeRadius * 0.4; // Pupils look down
+        break;
+      case 9: // Moving left
+        leftEyeX = centerX - eyeSpacing * 0.3;
+        leftEyeY = centerY - eyeSpacing * 0.6;
+        rightEyeX = centerX - eyeSpacing * 0.3;
+        rightEyeY = centerY + eyeSpacing * 0.6;
+        pupilOffsetX = -eyeRadius * 0.4; // Pupils look left
+        pupilOffsetY = 0;
+        break;
+      case 12: // Moving up
+        leftEyeX = centerX - eyeSpacing * 0.6;
+        leftEyeY = centerY - eyeSpacing * 0.3;
+        rightEyeX = centerX + eyeSpacing * 0.6;
+        rightEyeY = centerY - eyeSpacing * 0.3;
+        pupilOffsetX = 0;
+        pupilOffsetY = -eyeRadius * 0.4; // Pupils look up
+        break;
+      default:
+        // Default to right-facing
+        leftEyeX = centerX + eyeSpacing * 0.3;
+        leftEyeY = centerY - eyeSpacing * 0.6;
+        rightEyeX = centerX + eyeSpacing * 0.3;
+        rightEyeY = centerY + eyeSpacing * 0.6;
+        pupilOffsetX = eyeRadius * 0.4;
+        pupilOffsetY = 0;
+    }
+    
+    // Draw left eye
+    ctx.fillStyle = WHITE;
+    ctx.beginPath();
+    ctx.arc(leftEyeX, leftEyeY, eyeRadius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw left pupil
+    ctx.fillStyle = BLACK;
+    ctx.beginPath();
+    ctx.arc(leftEyeX + pupilOffsetX, leftEyeY + pupilOffsetY, pupilRadius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw right eye
+    ctx.fillStyle = WHITE;
+    ctx.beginPath();
+    ctx.arc(rightEyeX, rightEyeY, eyeRadius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Draw right pupil
+    ctx.fillStyle = BLACK;
+    ctx.beginPath();
+    ctx.arc(rightEyeX + pupilOffsetX, rightEyeY + pupilOffsetY, pupilRadius, 0, Math.PI * 2);
+    ctx.fill();
   }
 }
 
 // Drawing constants.
 const WHITE = '#FFFFFF';
-const BLACK = '#000000';
-const RED = '#FF0000';
-const GRAY = '#6E6E6E';
+const BLACK = '#1a1a1a';
+const RED = '#FF4444';
+const DARK_BLUE = '#1e3a8a';
+const GREEN = '#10b981';
+const PURPLE = '#8b5cf6';
 
 export class Player {
   constructor(gridsize) {
@@ -387,7 +609,7 @@ export class Player {
     // Now assign snake cells and food.
     if (this.gridsize === 6) {
       this.locations.forEach(([x, y], idx) => {
-        gamegrid[y][x] = idx === this.locations.length - 1 ? 100 : 2 + idx;
+        gamegrid[y][x] = idx === 0 ? 100 : 2 + idx;
       });
     } else {
       this.locations.forEach(([x, y], index) => {
