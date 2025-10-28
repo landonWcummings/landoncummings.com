@@ -75,7 +75,7 @@ export default function Mainpage({ repos = [] }) {
       {/* Resume Button */}
       <div style={{ marginBottom: '30px' }}>
         <a 
-          href="https://docs.google.com/document/d/10n6B0KAU8nGX9PGbnB8PhCj_YijuZEVDpixpRAyo3eQ/edit?tab=t.0" 
+          href="https://docs.google.com/document/d/1ihujI0lxKJIDJ_z9fOseysUII43JQiTHZuxr9J_VUMo/edit?usp=sharing" 
           target="_blank" 
           rel="noopener noreferrer"
           style={{
@@ -206,7 +206,7 @@ export default function Mainpage({ repos = [] }) {
           </div>
           
           <a 
-            href="https://docs.google.com/document/d/10n6B0KAU8nGX9PGbnB8PhCj_YijuZEVDpixpRAyo3eQ/edit?tab=t.0"
+            href="https://docs.google.com/document/d/1ihujI0lxKJIDJ_z9fOseysUII43JQiTHZuxr9J_VUMo/edit?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"
             style={{

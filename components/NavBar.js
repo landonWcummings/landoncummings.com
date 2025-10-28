@@ -36,24 +36,6 @@ const NavBar = ({ repos = [] }) => {
 
   const [navHeight, setNavHeight] = useState(100);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const [repoColors, setRepoColors] = useState({});
-
-  // Generate a light HSL color
-  const generateLightColor = () => {
-    const hue = Math.floor(Math.random() * 360);
-    const saturation = 75;
-    const lightness = 65 + Math.random() * 20;
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-  };
-
-  // Assign random colors once
-  useEffect(() => {
-    const colors = mainRepoNames.reduce((acc, name) => {
-      acc[name] = generateLightColor();
-      return acc;
-    }, {});
-    setRepoColors(colors);
-  }, []);
 
   // Update navbar height on resize
   useEffect(() => {
@@ -129,42 +111,76 @@ const NavBar = ({ repos = [] }) => {
             position: relative;
             display: inline-block;
             text-align: center;
-            padding: 10px 15px;
-            font-size: 14px;
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 500;
             width: 140px;
-            border-radius: 6px;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            color: #333;
-            font-weight: bold;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
             cursor: pointer;
             overflow: hidden;
-            margin-right: 10px;
+            margin-right: 12px;
             white-space: nowrap;
+            transition: all 0.3s ease;
           }
 
-          /* SPECIAL RAINBOW OVERLAY */
-          .button.special::after {
+          /* GLOWING BORDER EFFECT */
+          .button::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            border-radius: 8px;
+            padding: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+          }
+
+          /* SHIMMER ANIMATION EFFECT */
+          .button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(
-              45deg,
-              rgba(255, 0, 0, 0.3),
-              rgba(255, 255, 0, 0.3),
-              rgba(0, 255, 0, 0.3),
-              rgba(0, 255, 255, 0.3),
-              rgba(0, 0, 255, 0.3),
-              rgba(255, 0, 255, 0.3)
+              90deg,
+              transparent 0%,
+              rgba(255, 255, 255, 0.1) 50%,
+              transparent 100%
             );
-            background-size: 300% 300%;
-            animation: rainbowRaindrops 3s linear infinite;
+            animation: shimmer 3s infinite;
             z-index: 1;
-            pointer-events: none;
-            opacity: 0.7;
+          }
+
+          /* HOVER EFFECTS */
+          .button:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            border-color: rgba(102, 126, 234, 0.5);
+            color: #ffffff;
+          }
+
+          .button:hover::before {
+            opacity: 1;
+          }
+
+          /* ACTIVE/FOCUS STATE */
+          .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
           }
 
           .button span {
@@ -172,38 +188,38 @@ const NavBar = ({ repos = [] }) => {
             z-index: 2;
           }
 
-          /* RAINBOW KEYFRAMES */
-          @keyframes rainbowRaindrops {
+          /* SHIMMER ANIMATION */
+          @keyframes shimmer {
             0% {
-              background-position: -200% -200%;
+              left: -100%;
             }
             50% {
-              background-position: 200% 200%;
+              left: 100%;
             }
             100% {
-              background-position: 400% 400%;
+              left: 100%;
             }
           }
 
           /* SCROLL CONTAINER */
           .scroll-container {
-            overflow-x: auto; /* always allow horizontal scroll */
+            overflow-x: auto;
             width: 100%;
             position: relative;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE 10+ */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
           }
+          
           .scroll-container::-webkit-scrollbar {
-            display: none; /* Safari and Chrome */
+            display: none;
           }
 
-          /* We rely on JS for auto-scroll */
+          /* SCROLL CONTENT */
           .scroll-content {
             display: flex;
-            width: calc(300%); /* three sets side by side */
+            width: calc(300%);
           }
 
-          /* DUPLICATE SET UP */
           .scroll-content > .repo-set {
             display: flex;
           }
@@ -216,9 +232,9 @@ const NavBar = ({ repos = [] }) => {
             }
             .scroll-content .button {
               font-size: 11px;
-              width: 90px;
-              padding: 6px 8px;
-              margin-right: 6px;
+              width: 110px;
+              padding: 8px 12px;
+              margin-right: 8px;
             }
           }
 
@@ -229,9 +245,9 @@ const NavBar = ({ repos = [] }) => {
             }
             .scroll-content .button {
               font-size: 10px;
-              width: 80px;
-              padding: 4px 6px;
-              margin-right: 4px;
+              width: 95px;
+              padding: 6px 10px;
+              margin-right: 6px;
             }
           }
         `}
@@ -249,10 +265,10 @@ const NavBar = ({ repos = [] }) => {
           top: 0,
           left: 0,
           right: 0,
-          backgroundColor: '#fff',
-          borderBottom: '1px solid #ddd',
+          background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 100%)',
+          borderBottom: '2px solid rgba(102, 126, 234, 0.3)',
           zIndex: 1000,
-          boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3)',
         }}
       >
         {/* LOGO */}
@@ -287,10 +303,7 @@ const NavBar = ({ repos = [] }) => {
                     key={`first-${repo.id}`}
                     style={{ textDecoration: 'none' }}
                   >
-                    <button
-                      className="button special"
-                      style={{ backgroundColor: repoColors[repo.name] }}
-                    >
+                    <button className="button">
                       <span>{displayName}</span>
                     </button>
                   </Link>
@@ -307,10 +320,7 @@ const NavBar = ({ repos = [] }) => {
                     key={`second-${repo.id}`}
                     style={{ textDecoration: 'none' }}
                   >
-                    <button
-                      className="button special"
-                      style={{ backgroundColor: repoColors[repo.name] }}
-                    >
+                    <button className="button">
                       <span>{displayName}</span>
                     </button>
                   </Link>
@@ -327,10 +337,7 @@ const NavBar = ({ repos = [] }) => {
                     key={`third-${repo.id}`}
                     style={{ textDecoration: 'none' }}
                   >
-                    <button
-                      className="button special"
-                      style={{ backgroundColor: repoColors[repo.name] }}
-                    >
+                    <button className="button">
                       <span>{displayName}</span>
                     </button>
                   </Link>
@@ -345,13 +352,30 @@ const NavBar = ({ repos = [] }) => {
           <button
             onClick={() => setDropdownOpen(!isDropdownOpen)}
             style={{
-              backgroundColor: '#333',
-              color: '#fff',
-              border: 'none',
+              background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+              color: '#e0e0e0',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               padding: '10px 20px',
-              borderRadius: '4px',
+              borderRadius: '8px',
               cursor: 'pointer',
-              fontSize: '14px',
+              fontSize: '13px',
+              fontWeight: '500',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
+              e.target.style.borderColor = 'rgba(102, 126, 234, 0.5)';
+              e.target.style.color = '#ffffff';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+              e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+              e.target.style.color = '#e0e0e0';
             }}
           >
             Other Projects
@@ -360,15 +384,17 @@ const NavBar = ({ repos = [] }) => {
             <div
               style={{
                 position: 'absolute',
-                top: '40px',
-                right: '10px',
-                backgroundColor: '#fff',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                top: '45px',
+                right: '0',
+                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '8px',
+                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.5), 0 2px 10px rgba(0, 0, 0, 0.3)',
                 zIndex: 1000,
-                maxHeight: '70vh', /* dropdown height = 70% of viewport */
+                maxHeight: '70vh',
                 overflowY: 'auto',
+                minWidth: '200px',
+                maxWidth: '300px',
               }}
             >
               {otherRepos.map((repo) => (
@@ -377,12 +403,24 @@ const NavBar = ({ repos = [] }) => {
                   key={repo.id}
                   style={{
                     display: 'block',
-                    padding: '10px 20px',
+                    padding: '12px 20px',
                     textDecoration: 'none',
-                    color: '#333',
-                    borderBottom: '1px solid #ddd',
+                    color: '#e0e0e0',
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                    fontSize: '14px',
+                    transition: 'all 0.2s ease',
                   }}
                   onClick={() => setDropdownOpen(false)}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+                    e.target.style.color = '#ffffff';
+                    e.target.style.paddingLeft = '25px';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = 'transparent';
+                    e.target.style.color = '#e0e0e0';
+                    e.target.style.paddingLeft = '20px';
+                  }}
                 >
                   {repo.name}
                 </Link>
