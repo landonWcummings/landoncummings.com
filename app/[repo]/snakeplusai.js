@@ -36,9 +36,9 @@ export default function SnakePlusAI({ repos }) {
   const initDemoGameRef = useRef(null);
 
   const [mode, setMode] = useState("demo"); // "compete" or "demo"
-  const [gridSize, setGridSize] = useState(4);
-  const [speed, setSpeed] = useState(200);
-  const [tempSpeed, setTempSpeed] = useState(200);
+  const [gridSize, setGridSize] = useState(6); // Default 6x6 grid
+  const [speed, setSpeed] = useState(50); // Default 50ms for demo mode
+  const [tempSpeed, setTempSpeed] = useState(50);
   const [gamesStarted, setGamesStarted] = useState(false);
   const [winnerMessage, setWinnerMessage] = useState(null);
   const [inputEnabled, setInputEnabled] = useState(true);
@@ -209,7 +209,8 @@ export default function SnakePlusAI({ repos }) {
     }
 
     if (mode === "demo") {
-      // In demo mode, restart the demo with a small delay to prevent overlap
+      // In demo mode, pause for 1 second when AI wins before restarting
+      const pauseTime = msg && (msg.includes("wins") || msg.includes("wins!")) ? 1000 : 100;
       setTimeout(async () => {
         // Double-check we're still in demo mode
         if (mode !== "demo") return;
@@ -223,7 +224,7 @@ export default function SnakePlusAI({ repos }) {
           demoGameRef.current.start();
           setGamesStarted(true);
         }
-      }, 100);
+      }, pauseTime);
     } else {
       if (msg === "AI wins!" || msg === "AI wins") {
         setWinnerMessage("AI wins");

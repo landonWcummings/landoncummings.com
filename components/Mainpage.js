@@ -72,29 +72,6 @@ export default function Mainpage({ repos = [] }) {
         </h1>
       </div>
 
-      {/* Resume Button */}
-      <div style={{ marginBottom: '30px' }}>
-        <a 
-          href="https://docs.google.com/document/d/1ihujI0lxKJIDJ_z9fOseysUII43JQiTHZuxr9J_VUMo/edit?usp=sharing" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          style={{
-            display: 'inline-block',
-            padding: '15px 30px',
-            fontSize: '18px',
-            backgroundColor: '#007BFF',
-            color: '#fff',
-            textDecoration: 'none',
-            borderRadius: '5px',
-            transition: 'background-color 0.3s',
-          }}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#0056b3'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#007BFF'}
-        >
-          View My Resume
-        </a>
-      </div>
-
       {/* Project Wheel Section - Moved up */}
       <div style={{
         width: '100%',

@@ -34,8 +34,15 @@ export class Game {
   async loadModel(gridSize) {
     if (this.isAI) {
       const modelPath = `/models/ppo_policy${gridSize}.onnx`;
-      this.model = await ort.InferenceSession.create(modelPath);
-      console.log(`[${this.isAI ? 'AI' : 'User'}] Model loaded from ${modelPath}`);
+      try {
+        this.model = await ort.InferenceSession.create(modelPath);
+        console.log(`[${this.isAI ? 'AI' : 'User'}] Model loaded from ${modelPath}`);
+      } catch (error) {
+        console.error(`[AI] Failed to load model from ${modelPath}:`, error.message);
+        console.warn(`[AI] No model available for grid size ${gridSize}. AI mode disabled.`);
+        this.isAI = false;
+        this.model = null;
+      }
     }
   }
 
@@ -63,9 +70,16 @@ export class Game {
     for (let i = 0; i < this.gridsize; i++) {
       this.gamegrid.push(Array(this.gridsize).fill(0));
     }
+    // Match training encoding: head (idx=0) = 2, tail (last) = 100, body = 2+idx
     this.player.locations.forEach(([x, y], index) => {
       if (this.gridsize === 6) {
-        this.gamegrid[y][x] = index === 0 ? 100 : 2 + index;
+        if (index === this.player.locations.length - 1) {
+          // Tail is 100
+          this.gamegrid[y][x] = 100;
+        } else {
+          // Head (idx=0) is 2, body is 2+idx
+          this.gamegrid[y][x] = 2 + index;
+        }
       } else {
         this.gamegrid[y][x] = index === 0 ? 2 : 2 + (47 - index);
       }
@@ -312,9 +326,12 @@ export class Game {
           ctx.fill();
         } else if (this.gridsize === 6) {
           // 6x6 grid snake rendering
-          if (value === 100) {
-            // Snake head - special styling
+          if (value === 2) {
+            // Snake head (idx=0) = 2
             this.drawSnakeHead(ctx, cellX, cellY, this.cellw, this.cellh, radius);
+          } else if (value === 100) {
+            // Snake tail (last idx) = 100
+            this.drawSnakeBody(ctx, cellX, cellY, this.cellw, this.cellh, radius, this.player.locations.length - 1);
           } else if (value >= 3 && value < 100) {
             // Snake body with gradient
             this.drawSnakeBody(ctx, cellX, cellY, this.cellw, this.cellh, radius, value - 2);
@@ -332,7 +349,7 @@ export class Game {
         }
         
         // Draw eyes on snake head
-        const isHead = this.gridsize === 6 ? (value === 100) : (value === 2);
+        const isHead = (value === 2); // Head is always 2 for all grid sizes
         if (isHead && this.player.locations.length > 0) {
           const [headX, headY] = this.player.locations[0];
           if (headX === x && headY === y) {
@@ -607,9 +624,16 @@ export class Player {
     }
     
     // Now assign snake cells and food.
+    // Match training encoding: head (idx=0) = 2, tail (last) = 100, body = 2+idx
     if (this.gridsize === 6) {
       this.locations.forEach(([x, y], idx) => {
-        gamegrid[y][x] = idx === 0 ? 100 : 2 + idx;
+        if (idx === this.locations.length - 1) {
+          // Tail is 100
+          gamegrid[y][x] = 100;
+        } else {
+          // Head (idx=0) is 2, body is 2+idx
+          gamegrid[y][x] = 2 + idx;
+        }
       });
     } else {
       this.locations.forEach(([x, y], index) => {

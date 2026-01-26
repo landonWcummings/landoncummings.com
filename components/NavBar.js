@@ -9,10 +9,12 @@ const mainRepoNames = [
   'imessageanalysisapp',//💬
   'WhartonInvestmentQuant', //📈
   'snakePlusAi-V1-NEAT', //🐍
-  'LandonGPT', //🪞
   '2048AI', //
   'Connect4Bot', //
   'PokerPilot', //
+];
+const staticProjects = [
+  { slug: 'landonGPT', label: 'LandonGPT 2' },
 ];
 //     
 const buttonLabels = {
@@ -20,19 +22,13 @@ const buttonLabels = {
   imessageanalysisapp: 'iMessage Analysis App',
   WhartonInvestmentQuant: 'Wharton Quant',
   'snakePlusAi-V1-NEAT': 'Snake AI',
-  LandonGPT: 'LandonGPT',
   '2048AI': '2048 AI',
   Connect4Bot: 'Connect4 Bot',
   PokerPilot: 'PokerPilot',
 };
 
-const SCROLL_SPEED = 0.5; // pixels per frame
-
 const NavBar = ({ repos = [] }) => {
   const navRef = useRef(null);
-  const scrollRef = useRef(null);
-  const animationFrameRef = useRef(null);
-  const pausedRef = useRef(false);
 
   const [navHeight, setNavHeight] = useState(100);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
@@ -50,57 +46,36 @@ const NavBar = ({ repos = [] }) => {
     return () => window.removeEventListener('resize', updateNavHeight);
   }, []);
 
-  // Setup three-set scroll, wrapping, and auto-scroll
-  useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
-
-    // Each .repo-set has equal width, so singleSetWidth = total scrollWidth / 3
-    const singleSetWidth = container.scrollWidth / 3;
-    // Start in the middle set
-    container.scrollLeft = singleSetWidth;
-
-    const wrapScroll = () => {
-      if (container.scrollLeft >= singleSetWidth * 2) {
-        container.scrollLeft -= singleSetWidth;
-      }
-      if (container.scrollLeft <= 0) {
-        container.scrollLeft += singleSetWidth;
-      }
-    };
-
-    // On user scroll, wrap but do not stop auto-scroll permanently
-    const onScroll = () => {
-      wrapScroll();
-    };
-
-    container.addEventListener('scroll', onScroll);
-
-    // Auto-scroll loop
-    const step = () => {
-      if (!pausedRef.current) {
-        container.scrollLeft += SCROLL_SPEED;
-        wrapScroll();
-      }
-      animationFrameRef.current = requestAnimationFrame(step);
-    };
-    animationFrameRef.current = requestAnimationFrame(step);
-
-    return () => {
-      container.removeEventListener('scroll', onScroll);
-      cancelAnimationFrame(animationFrameRef.current);
-    };
-  }, []);
-
   // Filter repos into main and other
   const mainRepos = useMemo(
     () => repos.filter((repo) => mainRepoNames.includes(repo.name)),
     [repos]
   );
   const otherRepos = useMemo(
-    () => repos.filter((repo) => !mainRepoNames.includes(repo.name)),
+    () => repos.filter((repo) => !mainRepoNames.includes(repo.name) && repo.name !== 'LandonGPT'),
     [repos]
   );
+  const mainButtons = useMemo(() => {
+    const repoButtons = mainRepos.map((repo) => ({
+      key: `repo-${repo.id}`,
+      href: `/${repo.name}`,
+      label: buttonLabels[repo.name] || repo.name,
+    }));
+    const staticButtons = staticProjects.map((project) => ({
+      key: `static-${project.slug}`,
+      href: `/${project.slug}`,
+      label: project.label,
+    }));
+    return [...repoButtons, ...staticButtons];
+  }, [mainRepos]);
+  const expandedButtons = useMemo(() => {
+    const repeats = Math.max(10, Math.ceil(30 / Math.max(mainButtons.length, 1)));
+    const list = [];
+    for (let i = 0; i < repeats; i += 1) {
+      list.push(...mainButtons.map((btn) => ({ ...btn, key: `${btn.key}-${i}` })));
+    }
+    return list;
+  }, [mainButtons]);
 
   return (
     <>
@@ -203,7 +178,7 @@ const NavBar = ({ repos = [] }) => {
 
           /* SCROLL CONTAINER */
           .scroll-container {
-            overflow-x: auto;
+            overflow: hidden;
             width: 100%;
             position: relative;
             scrollbar-width: none;
@@ -217,11 +192,22 @@ const NavBar = ({ repos = [] }) => {
           /* SCROLL CONTENT */
           .scroll-content {
             display: flex;
-            width: calc(300%);
+            width: max-content;
+            animation: marquee 78s linear infinite;
+            will-change: transform;
           }
 
           .scroll-content > .repo-set {
             display: flex;
+          }
+
+          nav:hover .scroll-content {
+            animation-play-state: paused;
+          }
+
+          @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
           }
 
           /* RESPONSIVE ADJUSTMENTS */
@@ -287,62 +273,36 @@ const NavBar = ({ repos = [] }) => {
         {/* SCROLLING REPO BUTTONS */}
         <div
           className="scroll-container"
-          ref={scrollRef}
           style={{ gridColumn: '2 / 3', alignSelf: 'center' }}
-          onMouseEnter={() => (pausedRef.current = true)}
-          onMouseLeave={() => (pausedRef.current = false)}
         >
           <div className="scroll-content">
             {/* FIRST SET OF BUTTONS */}
             <div className="repo-set">
-              {mainRepos.map((repo) => {
-                const displayName = buttonLabels[repo.name] || repo.name;
-                return (
-                  <Link
-                    href={`/${repo.name}`}
-                    key={`first-${repo.id}`}
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <button className="button">
-                      <span>{displayName}</span>
-                    </button>
-                  </Link>
-                );
-              })}
+              {expandedButtons.map((button) => (
+                <Link
+                  href={button.href}
+                  key={`first-${button.key}`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <button className="button" suppressHydrationWarning>
+                    <span>{button.label}</span>
+                  </button>
+                </Link>
+              ))}
             </div>
             {/* SECOND SET OF BUTTONS */}
             <div className="repo-set">
-              {mainRepos.map((repo) => {
-                const displayName = buttonLabels[repo.name] || repo.name;
-                return (
-                  <Link
-                    href={`/${repo.name}`}
-                    key={`second-${repo.id}`}
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <button className="button">
-                      <span>{displayName}</span>
-                    </button>
-                  </Link>
-                );
-              })}
-            </div>
-            {/* THIRD SET OF BUTTONS */}
-            <div className="repo-set">
-              {mainRepos.map((repo) => {
-                const displayName = buttonLabels[repo.name] || repo.name;
-                return (
-                  <Link
-                    href={`/${repo.name}`}
-                    key={`third-${repo.id}`}
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <button className="button">
-                      <span>{displayName}</span>
-                    </button>
-                  </Link>
-                );
-              })}
+              {expandedButtons.map((button) => (
+                <Link
+                  href={button.href}
+                  key={`second-${button.key}`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <button className="button" suppressHydrationWarning>
+                    <span>{button.label}</span>
+                  </button>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
@@ -351,6 +311,8 @@ const NavBar = ({ repos = [] }) => {
         <div style={{ gridColumn: '3 / 4', justifySelf: 'end', position: 'relative' }}>
           <button
             onClick={() => setDropdownOpen(!isDropdownOpen)}
+            suppressHydrationWarning
+            type="button"
             style={{
               background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
               color: '#e0e0e0',
@@ -431,7 +393,7 @@ const NavBar = ({ repos = [] }) => {
       </nav>
 
       {/* Spacer to offset content under navbar */}
-      <div style={{ paddingTop: `${navHeight}px` }} />
+      <div style={{ paddingTop: `${navHeight}px` }} suppressHydrationWarning />
     </>
   );
 };

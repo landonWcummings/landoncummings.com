@@ -64,6 +64,15 @@ export default async function RepoPage({ params }) {
   }
 
   const repo = cachedRepos?.find((r) => r.name === repoName);
+  const localProjectLoaders = {
+    nbodysimulation: () => import('./nbodysimulation'),
+    imessageanalysisapp: () => import('./imessageanalysisapp'),
+    'snakePlusAi-V1-NEAT': () => import('./snakeplusai'),
+    WhartonInvestmentQuant: () => import('./WhartonInvestmentQuant'),
+    '2048AI': () => import('./2048'),
+    Connect4Bot: () => import('./connect4'),
+    PokerPilot: () => import('./PokerPilot/page'),
+  };
   if (!cachedRepos || cachedRepos.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
@@ -73,9 +82,15 @@ export default async function RepoPage({ params }) {
     );
   }
 
+  if (localProjectLoaders[repoName]) {
+    const ProjectPage = dynamic(localProjectLoaders[repoName]);
+    return <ProjectPage repos={cachedRepos} />;
+  }
+
   if (!repo) {
     return (
       <div style={{ textAlign: 'center', padding: '20px' }}>
+        <NavBar repos={cachedRepos} />
         <h1>Repository Not Found</h1>
       </div>
     );
@@ -83,48 +98,6 @@ export default async function RepoPage({ params }) {
 
   // Fetch README content
   const readmeContent = await fetchReadme(username, repo.name);
-
-  // Dynamic routing to NBodySimulation page
-  if (repo.name === 'nbodysimulation') {
-    const NBodySimulation = dynamic(() => import('./nbodysimulation'));
-    return <NBodySimulation repos={cachedRepos} />;
-  }
-
-  if (repo.name === 'imessageanalysisapp') {
-    const Imessageanalysisapp = dynamic(() => import('./imessageanalysisapp'));
-    return <Imessageanalysisapp repos={cachedRepos} />;
-  }
-
-  if (repo.name === 'snakePlusAi-V1-NEAT') {
-    const Snakeplusai = dynamic(() => import('./snakeplusai'));
-    return <Snakeplusai repos={cachedRepos} />;
-  }
-
-  if (repo.name === 'WhartonInvestmentQuant') {
-    const Quant = dynamic(() => import('./WhartonInvestmentQuant'));
-    return <Quant repos={cachedRepos} />;
-  }
-
-  if (repo.name === 'LandonGPT') {
-    const Landongpt = dynamic(() => import('./landongpt'));
-    return <Landongpt repos={cachedRepos} />;
-  }
-
-  if (repo.name === '2048AI') {
-    const Game2048 = dynamic(() => import('./2048'));
-    return <Game2048 repos={cachedRepos} />;
-  }
-
-  if (repo.name === 'Connect4Bot') {
-    const Gameconnect4 = dynamic(() => import('./connect4'));
-    return <Gameconnect4 repos={cachedRepos} />;
-  }
-
-  if (repo.name === 'PokerPilot') {
-    // dynamic import ensures this isn’t bundled unless needed
-    const PokerPilotPage = dynamic(() => import('./PokerPilot/page'))
-    return <PokerPilotPage repos={cachedRepos} />
-  }
 
 
   const videoDemoLinks = {
