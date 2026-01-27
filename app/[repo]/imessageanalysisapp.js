@@ -65,8 +65,12 @@ export default function IMessageAnalysisApp({ repos }) {
             <div style={{ paddingTop: '100px', padding: '20px' }}>
                 {/* Introduction Section */}
                 <section style={{ marginBottom: '20px' }}>
-                    <h1>iMessage Analysis App</h1>
-                    <p>Discover insights and trends from your iMessage data.</p>
+                    <h1>Imessage Analysis</h1>
+                    <p>
+                        A macOS app that analyzes your full iMessage history to surface patterns in how and when you
+                        communicate. It highlights activity over time, most active hours, top group chats, participation
+                        rates, and the contacts you interact with most — plus deeper dives into any selected chat.
+                    </p>
                 </section>
 
                 {/* Download Button */}

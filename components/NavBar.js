@@ -19,7 +19,7 @@ const staticProjects = [
 //     
 const buttonLabels = {
   nbodysimulation: 'N-Body Simulation',
-  imessageanalysisapp: 'iMessage Analysis App',
+  imessageanalysisapp: 'Imessage Analysis',
   WhartonInvestmentQuant: 'Wharton Quant',
   'snakePlusAi-V1-NEAT': 'Snake AI',
   '2048AI': '2048 AI',

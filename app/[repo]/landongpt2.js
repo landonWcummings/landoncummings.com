@@ -33,6 +33,7 @@ export default function LandonGPT2Interface({ repos }) {
   const [wheelFontSize, setWheelFontSize] = useState(15);
 
   const messagesRef = useRef(null);
+  const inputRef = useRef(null);
   const [autoScroll, setAutoScroll] = useState(true);
 
   useEffect(() => {
@@ -153,6 +154,9 @@ export default function LandonGPT2Interface({ repos }) {
       ]);
     } finally {
       setIsLoading(false);
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
     }
   };
 
@@ -302,33 +306,15 @@ export default function LandonGPT2Interface({ repos }) {
         <div
           style={{
             display: 'flex',
+            flexDirection: 'column',
             padding: '16px',
             gap: '12px',
             borderTop: isDarkMode ? '1px solid #2f2f2f' : '1px solid #e5e5e5',
             backgroundColor: isDarkMode ? '#1f1f1f' : '#fff',
-            alignItems: 'center',
             position: 'relative',
           }}
         >
-          <button
-            type="button"
-            onClick={startNewChat}
-            disabled={isLoading}
-            suppressHydrationWarning
-            style={{
-              padding: '12px 14px',
-              borderRadius: '12px',
-              border: 'none',
-              background: '#007aff',
-              color: '#fff',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            New Chat
-          </button>
-          <div style={{ position: 'relative', flex: 1 }}>
+          <div style={{ position: 'relative', width: '100%' }}>
             <div
               style={{
                 position: 'absolute',
@@ -363,6 +349,7 @@ export default function LandonGPT2Interface({ repos }) {
               </span>
             </div>
             <textarea
+              ref={inputRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => {
@@ -403,25 +390,45 @@ export default function LandonGPT2Interface({ repos }) {
               <option key={prompt} value={prompt} />
             ))}
           </datalist>
-          <button
-            onClick={sendMessage}
-            disabled={isLoading}
-            style={{
-              padding: '12px 18px',
-              backgroundColor: isLoading ? '#999' : '#007aff',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '12px',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              fontSize: '16px',
-            }}
-          >
-            Send
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '12px' }}>
+            <button
+              type="button"
+              onClick={startNewChat}
+              disabled={isLoading}
+              suppressHydrationWarning
+              style={{
+                padding: '12px 14px',
+                borderRadius: '12px',
+                border: 'none',
+                background: '#007aff',
+                color: '#fff',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                fontSize: '14px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              New Chat
+            </button>
+            <div style={{ flex: 1, textAlign: 'center', fontSize: '14px', color: isDarkMode ? '#d6d6d6' : '#1f2937' }}>
+              Interested in a custom model? Email landoncummings@gmail.com.
+            </div>
+            <button
+              onClick={sendMessage}
+              disabled={isLoading}
+              style={{
+                padding: '12px 18px',
+                backgroundColor: isLoading ? '#999' : '#007aff',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '12px',
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                fontSize: '16px',
+              }}
+            >
+              Send
+            </button>
+          </div>
         </div>
-      </div>
-      <div style={{ textAlign: 'center', fontSize: '15px', color: isDarkMode ? '#d6d6d6' : '#1f2937', padding: '0 12px 30px' }}>
-        Interested in a custom model? Email landoncummings@gmail.com.
       </div>
     </div>
   );

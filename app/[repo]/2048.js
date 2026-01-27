@@ -272,9 +272,9 @@ class Game2048 {
 }
 
 export default function Game2048App({ repos }) {
-  // Default move delay is 200ms; slider range is 20–700ms.
+  // Default move delay is 50ms; slider range is 20–700ms.
   const [gameState, setGameState] = useState({ board: [], score: 0, done: false, lastAction: null });
-  const [moveDelay, setMoveDelay] = useState(200);
+  const [moveDelay, setMoveDelay] = useState(50);
   const [autoMoveEnabled, setAutoMoveEnabled] = useState(true);
   const gameRef = useRef(null);
   const sessionRef = useRef(null);
