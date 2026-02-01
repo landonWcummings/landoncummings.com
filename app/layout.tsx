@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
@@ -17,8 +17,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Landon Cummings - AI Engineer & Software Developer Portfolio",
-  description: "Landon Cummings portfolio website featuring AI projects, machine learning applications, web development, and interactive simulations. Experience n-body physics simulations, AI-powered games, quantitative finance tools, and more innovative software solutions.",
+  title: "Landon Cummings | AI Engineer & Software Developer Portfolio",
+  description: "Landon Cummings - AI engineer and software developer specializing in machine learning, artificial intelligence, and web development. Explore interactive AI projects, physics simulations, and innovative software solutions by Landon Cummings.",
   keywords: [
     "Landon Cummings",
     "AI engineer",
@@ -104,6 +104,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -119,9 +125,11 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Person",
               "name": "Landon Cummings",
+              "alternateName": "Landon W. Cummings",
               "jobTitle": "AI Engineer & Software Developer",
-              "description": "AI Engineer and Software Developer specializing in machine learning, web development, and interactive simulations",
+              "description": "Landon Cummings is an AI engineer and software developer specializing in machine learning, artificial intelligence, web development, and interactive simulations. Portfolio showcases AI projects, physics simulations, and innovative software solutions.",
               "url": "https://landoncummings.com",
+              "image": "https://landoncummings.com/LCfancylogo.png",
               "sameAs": [
                 "https://github.com/landonWcummings",
                 "https://linkedin.com/in/landon-cummings"
@@ -145,7 +153,32 @@ export default function RootLayout({
               ],
               "mainEntityOfPage": {
                 "@type": "WebPage",
-                "@id": "https://landoncummings.com"
+                "@id": "https://landoncummings.com",
+                "name": "Landon Cummings Portfolio",
+                "description": "Portfolio website of Landon Cummings, AI engineer and software developer"
+              }
+            }
+          `}
+        </Script>
+        
+        {/* Website Structured Data */}
+        <Script id="website-data" type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Landon Cummings Portfolio",
+              "alternateName": "Landon Cummings - AI Engineer & Software Developer",
+              "url": "https://landoncummings.com",
+              "description": "Portfolio website of Landon Cummings, AI engineer and software developer specializing in machine learning, artificial intelligence, and web development",
+              "author": {
+                "@type": "Person",
+                "name": "Landon Cummings"
+              },
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://landoncummings.com/?s={search_term_string}",
+                "query-input": "required name=search_term_string"
               }
             }
           `}
@@ -158,7 +191,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "CreativeWork",
               "name": "Landon Cummings Portfolio",
-              "description": "Interactive portfolio showcasing AI projects, physics simulations, and software development work",
+              "description": "Interactive portfolio showcasing AI projects, physics simulations, and software development work by Landon Cummings",
               "creator": {
                 "@type": "Person",
                 "name": "Landon Cummings"

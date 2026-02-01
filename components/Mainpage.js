@@ -1,8 +1,43 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import ProjectWheel from './ProjectWheel.js';
 
 export default function Mainpage({ repos = [] }) {
+  const [isMobile, setIsMobile] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const update = () => setIsDark(media.matches);
+    update();
+    if (media.addEventListener) {
+      media.addEventListener('change', update);
+      return () => media.removeEventListener('change', update);
+    }
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
+
+  const theme = {
+    background: isDark ? '#0b1220' : '#ffffff',
+    text: isDark ? '#e2e8f0' : '#0f172a',
+    subtext: isDark ? '#cbd5f5' : '#475569',
+    cardBg: isDark ? '#1f2937' : '#f8f9fa',
+    cardBorder: isDark ? 'rgba(148, 163, 184, 0.2)' : '#dee2e6',
+    cardHover: isDark ? '#374151' : '#e9ecef',
+  };
 
   return (
     <div style={{
@@ -14,6 +49,8 @@ export default function Mainpage({ repos = [] }) {
       minHeight: '100vh',
       paddingTop: '20px',
       paddingBottom: '60px',
+      background: theme.background,
+      color: theme.text,
     }}>
       {/* Hidden SEO Content - Will be indexed but not visible */}
       <div style={{ 
@@ -66,47 +103,65 @@ export default function Mainpage({ repos = [] }) {
       </div>
       
       {/* Welcome Section */}
-      <div style={{ marginBottom: '50px' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '20px' }}>
-          Welcome
+      <div style={{ marginBottom: isMobile ? '30px' : '50px', padding: isMobile ? '0 15px' : '0' }}>
+        <h1 style={{ 
+          fontSize: isMobile ? '1.8rem' : '2.5rem', 
+          marginBottom: '20px',
+          color: theme.text,
+        }}>
+          Landon Cummings
         </h1>
+        <p style={{ 
+          fontSize: isMobile ? '1rem' : '1.2rem', 
+          color: theme.subtext, 
+          marginTop: '10px' 
+        }}>
+          AI Engineer & Software Developer
+        </p>
       </div>
 
-      {/* Project Wheel Section - Moved up */}
+      {/* Project Wheel Section */}
       <div style={{
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        marginBottom: '60px',
+        marginBottom: isMobile ? '40px' : '60px',
       }}>
         <h2 style={{
-          fontSize: '2rem',
-          color: '#333',
-          marginBottom: '20px',
+          fontSize: isMobile ? '1.5rem' : '2rem',
+          color: theme.text,
+          marginBottom: '40px',
           textAlign: 'center',
+          padding: isMobile ? '0 15px' : '0',
         }}>
           Explore My Projects
         </h2>
-        <p style={{
-          fontSize: '1.1rem',
-          color: '#666',
-          textAlign: 'center',
-          marginBottom: '40px',
-          maxWidth: '600px',
-          lineHeight: '1.5',
-        }}>
-          Discover my portfolio through this interactive wheel. Hover to pause rotation, click any project to dive deeper into the details.
-        </p>
         <ProjectWheel repos={repos} />
       </div>
 
-      {/* Navigation Instruction */}
-      <div style={{ fontSize: '1.2rem', marginBottom: '50px' }}>
-        <strong>Navigate</strong> to a button above to view a demonstration of one of my major projects.
+      {/* Introduction Section */}
+      <div style={{
+        maxWidth: '700px',
+        margin: '0 auto',
+        marginBottom: isMobile ? '40px' : '60px',
+        padding: isMobile ? '0 20px' : '0 40px',
+        textAlign: 'center',
+      }}>
+        <p style={{
+          fontSize: isMobile ? '1rem' : '1.15rem',
+          color: theme.subtext,
+          lineHeight: '1.8',
+        }}>
+          Hey, I'm Landon Cummings, a senior at The Westminster Schools in Atlanta, and I'll be attending Duke next year. 
+          I play varsity tennis and squash. Outside of sports, I build AI and robotics projects: I intern at Undaunted 
+          working on robotic security quadrupeds, compete in global Kaggle ML contests, train AIs to master games like 
+          Connect 4 and Clash Royale, have published apps like Poker Pilot Pro, and fine-tune LLMs, including one that 
+          writes like me and knows everything about me. Check out my projects above.
+        </p>
       </div>
 
-      {/* Content Section - Moved below wheel */}
+      {/* Content Section */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -117,17 +172,6 @@ export default function Mainpage({ repos = [] }) {
         maxWidth: '800px',
         padding: '20px',
       }}>
-        <div style={{ 
-          fontSize: '1.4rem', 
-          color: '#555', 
-          textAlign: 'center',
-          lineHeight: '1.6',
-          marginBottom: '40px'
-        }}>
-          <p>Welcome to my portfolio website! Here you can explore my various projects and see what I&apos;ve been working on.</p>
-          <p>Use the navigation above to browse through my different projects, or check out my resume for a comprehensive overview of my experience.</p>
-        </div>
-        
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -154,31 +198,26 @@ export default function Mainpage({ repos = [] }) {
             }}
             style={{
               padding: '20px',
-              backgroundColor: '#f8f9fa',
+              backgroundColor: theme.cardBg,
               borderRadius: '8px',
-              border: '1px solid #dee2e6',
+              border: `1px solid ${theme.cardBorder}`,
               textAlign: 'center',
               cursor: 'pointer',
               transition: 'all 0.3s ease',
-              ':hover': {
-                backgroundColor: '#e9ecef',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-              }
             }}
             onMouseOver={(e) => {
-              e.target.style.backgroundColor = '#e9ecef';
+              e.target.style.backgroundColor = theme.cardHover;
               e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+              e.target.style.boxShadow = isDark ? '0 4px 8px rgba(0,0,0,0.3)' : '0 4px 8px rgba(0,0,0,0.1)';
             }}
             onMouseOut={(e) => {
-              e.target.style.backgroundColor = '#f8f9fa';
+              e.target.style.backgroundColor = theme.cardBg;
               e.target.style.transform = 'translateY(0px)';
               e.target.style.boxShadow = 'none';
             }}
           >
-            <h3 style={{ color: '#333', marginBottom: '10px' }}>🚀 Random Project</h3>
-            <p style={{ color: '#666', fontSize: '14px' }}>
+            <h3 style={{ color: theme.text, marginBottom: '10px' }}>🚀 Random Project</h3>
+            <p style={{ color: theme.subtext, fontSize: '14px' }}>
               Click to explore a random featured project from my portfolio. Discover something new!
             </p>
           </div>
@@ -189,9 +228,9 @@ export default function Mainpage({ repos = [] }) {
             rel="noopener noreferrer"
             style={{
               padding: '20px',
-              backgroundColor: '#f8f9fa',
+              backgroundColor: theme.cardBg,
               borderRadius: '8px',
-              border: '1px solid #dee2e6',
+              border: `1px solid ${theme.cardBorder}`,
               textAlign: 'center',
               textDecoration: 'none',
               display: 'block',
@@ -199,18 +238,18 @@ export default function Mainpage({ repos = [] }) {
               transition: 'all 0.3s ease',
             }}
             onMouseOver={(e) => {
-              e.target.style.backgroundColor = '#e9ecef';
+              e.target.style.backgroundColor = theme.cardHover;
               e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+              e.target.style.boxShadow = isDark ? '0 4px 8px rgba(0,0,0,0.3)' : '0 4px 8px rgba(0,0,0,0.1)';
             }}
             onMouseOut={(e) => {
-              e.target.style.backgroundColor = '#f8f9fa';
+              e.target.style.backgroundColor = theme.cardBg;
               e.target.style.transform = 'translateY(0px)';
               e.target.style.boxShadow = 'none';
             }}
           >
-            <h3 style={{ color: '#333', marginBottom: '10px' }}>📄 Resume</h3>
-            <p style={{ color: '#666', fontSize: '14px' }}>
+            <h3 style={{ color: theme.text, marginBottom: '10px' }}>📄 Resume</h3>
+            <p style={{ color: theme.subtext, fontSize: '14px' }}>
               View my professional experience, education, and skills in detail.
             </p>
           </a>

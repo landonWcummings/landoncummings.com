@@ -115,9 +115,14 @@ export default async function RepoPage({ params }) {
   }
 
   return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
+    <div style={{ 
+      textAlign: 'center', 
+      padding: '20px',
+      color: 'inherit',
+      minHeight: '100vh'
+    }}>
       <NavBar repos={cachedRepos} />
-      <h1 style={{ fontSize: '3rem', margin: '20px 0' }}>
+      <h1 style={{ fontSize: '3rem', margin: '20px 0', color: 'inherit' }}>
         <a
           href={`https://github.com/${username}/${repo.name}`}
           target="_blank"
@@ -127,24 +132,33 @@ export default async function RepoPage({ params }) {
           {repo.name}
         </a>
       </h1>
-      <p>{repo.description || 'No description provided.'}</p>
+      <p style={{ 
+        color: 'inherit',
+        fontSize: '1.1rem',
+        marginBottom: '20px'
+      }}>{repo.description || 'No description provided.'}</p>
 
       {readmeContent && (
         <div
           style={{
             marginTop: '20px',
             padding: '10px',
-            border: '1px solid #ccc',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
             borderRadius: '5px',
-            backgroundColor: '#f9f9f9',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
             textAlign: 'left',
             maxWidth: '800px',
             margin: '0 auto',
             overflowX: 'auto',
+            color: 'inherit',
           }}
         >
-          <h3>README</h3>
-          <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>{readmeContent}</pre>
+          <h3 style={{ color: 'inherit' }}>README</h3>
+          <pre style={{ 
+            whiteSpace: 'pre-wrap', 
+            wordWrap: 'break-word',
+            color: 'inherit'
+          }}>{readmeContent}</pre>
         </div>
       )}
 
@@ -169,15 +183,18 @@ export default async function RepoPage({ params }) {
           ></iframe>
 
           {videoDetails?.description && (
-            <div style={{ fontStyle: 'italic', maxWidth: '700px', textAlign: 'center' }}>
-              <h3>Video Description</h3>
-              <p>{videoDetails.description}</p>
+            <div style={{ 
+              fontStyle: 'italic', 
+              maxWidth: '700px', 
+              textAlign: 'center',
+              color: 'inherit'
+            }}>
+              <h3 style={{ color: 'inherit' }}>Video Description</h3>
+              <p style={{ color: 'inherit' }}>{videoDetails.description}</p>
             </div>
           )}
         </div>
-      ) : (
-        <p>No video demo available for this repository.</p>
-      )}
+      ) : null}
     </div>
   );
 }

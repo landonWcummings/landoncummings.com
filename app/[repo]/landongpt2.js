@@ -12,6 +12,7 @@ export default function LandonGPT2Interface({ repos }) {
   const [inputValue, setInputValue] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [sessionId, setSessionId] = useState(() => {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       return crypto.randomUUID();
@@ -46,6 +47,17 @@ export default function LandonGPT2Interface({ repos }) {
 
     mediaQuery.addEventListener('change', handleThemeChange);
     return () => mediaQuery.removeEventListener('change', handleThemeChange);
+  }, []);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   const handlePromptCycle = () => {
@@ -205,11 +217,25 @@ export default function LandonGPT2Interface({ repos }) {
         }
       `}</style>
       <NavBar repos={repos} />
-      <div style={{ paddingTop: '70px', textAlign: 'center', color: themeStyles.color }}>
-        <h1 style={{ fontSize: '32px', margin: '10px 0', color: isDarkMode ? '#ffffff' : '#111827' }}>
+      <div style={{ 
+        paddingTop: isMobile ? '90px' : '70px', 
+        textAlign: 'center', 
+        color: themeStyles.color,
+        paddingLeft: isMobile ? '10px' : '0',
+        paddingRight: isMobile ? '10px' : '0',
+      }}>
+        <h1 style={{ 
+          fontSize: isMobile ? '24px' : '32px', 
+          margin: '10px 0', 
+          color: isDarkMode ? '#ffffff' : '#111827' 
+        }}>
           LandonGPT 2.0
         </h1>
-        <p style={{ fontSize: '16px', margin: '0 0 20px 0', color: isDarkMode ? '#b0b0b0' : '#555' }}>
+        <p style={{ 
+          fontSize: isMobile ? '14px' : '16px', 
+          margin: '0 0 20px 0', 
+          color: isDarkMode ? '#b0b0b0' : '#555' 
+        }}>
           A fast, clean chat trained on my writing style.
         </p>
       </div>
@@ -217,16 +243,16 @@ export default function LandonGPT2Interface({ repos }) {
         style={{
           ...themeStyles,
           backgroundColor: isDarkMode ? '#2a2a2a' : '#f3f4f6',
-          width: 'min(1100px, 92vw)',
+          width: isMobile ? '100%' : 'min(1100px, 92vw)',
           minHeight: '70vh',
-          borderRadius: '16px',
-          margin: '0 auto 30px',
+          borderRadius: isMobile ? '0' : '16px',
+          margin: isMobile ? '0' : '0 auto 30px',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
-          boxShadow: isDarkMode
+          boxShadow: isMobile ? 'none' : (isDarkMode
             ? '0 10px 30px rgba(0, 0, 0, 0.45)'
-            : '0 12px 24px rgba(0, 0, 0, 0.08)',
+            : '0 12px 24px rgba(0, 0, 0, 0.08)'),
         }}
       >
 
@@ -236,21 +262,21 @@ export default function LandonGPT2Interface({ repos }) {
           style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '28px',
+            padding: isMobile ? '16px 12px' : '28px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '14px',
+            gap: isMobile ? '10px' : '14px',
           }}
         >
           {messages.map((message, index) => (
             <div
               key={index}
               style={{
-                maxWidth: '72%',
-                padding: '12px 18px',
-                borderRadius: '18px',
-                fontSize: '16px',
-                lineHeight: 1.4,
+                maxWidth: isMobile ? '85%' : '72%',
+                padding: isMobile ? '8px 12px' : '12px 18px',
+                borderRadius: isMobile ? '16px' : '18px',
+                fontSize: isMobile ? '14px' : '16px',
+                lineHeight: isMobile ? '1.35' : '1.4',
                 overflowWrap: 'anywhere',
                 alignSelf: message.sender === 'sent' ? 'flex-end' : 'flex-start',
                 backgroundColor:
@@ -276,11 +302,11 @@ export default function LandonGPT2Interface({ repos }) {
             <div
               style={{
                 alignSelf: 'flex-start',
-                padding: '12px 18px',
-                borderRadius: '18px',
+                padding: isMobile ? '8px 12px' : '12px 18px',
+                borderRadius: isMobile ? '16px' : '18px',
                 backgroundColor: isDarkMode ? '#2c2c2c' : '#f0f0f0',
                 color: isDarkMode ? '#fff' : '#000',
-                fontSize: '16px',
+                fontSize: isMobile ? '14px' : '16px',
               }}
             >
               <span
@@ -307,8 +333,8 @@ export default function LandonGPT2Interface({ repos }) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            padding: '16px',
-            gap: '12px',
+            padding: isMobile ? '12px' : '16px',
+            gap: isMobile ? '10px' : '12px',
             borderTop: isDarkMode ? '1px solid #2f2f2f' : '1px solid #e5e5e5',
             backgroundColor: isDarkMode ? '#1f1f1f' : '#fff',
             position: 'relative',
@@ -318,10 +344,10 @@ export default function LandonGPT2Interface({ repos }) {
             <div
               style={{
                 position: 'absolute',
-                left: '14px',
-                right: '14px',
-                top: '12px',
-                height: '28px',
+                left: isMobile ? '12px' : '14px',
+                right: isMobile ? '12px' : '14px',
+                top: isMobile ? '10px' : '12px',
+                height: isMobile ? '24px' : '28px',
                 overflow: 'hidden',
                 display: inputValue || hasChatted ? 'none' : 'flex',
                 alignItems: 'flex-start',
@@ -371,15 +397,15 @@ export default function LandonGPT2Interface({ repos }) {
               rows={2}
               style={{
                 width: '100%',
-                padding: '12px 14px',
-                borderRadius: '12px',
+                padding: isMobile ? '10px 12px' : '12px 14px',
+                borderRadius: isMobile ? '10px' : '12px',
                 border: isDarkMode ? '1px solid #2f2f2f' : '1px solid #e5e5e5',
-                fontSize: '16px',
+                fontSize: isMobile ? '14px' : '16px',
                 color: "black",
                 backgroundColor: isDarkMode ? '#f2f2f2' : '#ffffff',
                 opacity: isLoading ? 0.6 : 1,
                 resize: 'vertical',
-                minHeight: '48px',
+                minHeight: isMobile ? '44px' : '48px',
                 maxHeight: '160px',
                 lineHeight: 1.4,
               }}
@@ -390,44 +416,95 @@ export default function LandonGPT2Interface({ repos }) {
               <option key={prompt} value={prompt} />
             ))}
           </datalist>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '12px' }}>
-            <button
-              type="button"
-              onClick={startNewChat}
-              disabled={isLoading}
-              suppressHydrationWarning
-              style={{
-                padding: '12px 14px',
-                borderRadius: '12px',
-                border: 'none',
-                background: '#007aff',
-                color: '#fff',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                fontSize: '14px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              New Chat
-            </button>
-            <div style={{ flex: 1, textAlign: 'center', fontSize: '14px', color: isDarkMode ? '#d6d6d6' : '#1f2937' }}>
-              Interested in a custom model? Email landoncummings@gmail.com.
+          {isMobile ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={startNewChat}
+                  disabled={isLoading}
+                  suppressHydrationWarning
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: '#007aff',
+                    color: '#fff',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    fontSize: '13px',
+                    whiteSpace: 'nowrap',
+                    flex: '0 0 auto',
+                  }}
+                >
+                  New Chat
+                </button>
+                <button
+                  onClick={sendMessage}
+                  disabled={isLoading}
+                  style={{
+                    padding: '10px 16px',
+                    backgroundColor: isLoading ? '#999' : '#007aff',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '10px',
+                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                    fontSize: '14px',
+                    flex: '0 0 auto',
+                  }}
+                >
+                  Send
+                </button>
+              </div>
+              <div style={{ 
+                textAlign: 'center', 
+                fontSize: '11px', 
+                color: isDarkMode ? '#9ca3af' : '#6b7280',
+                lineHeight: '1.4',
+                paddingTop: '4px',
+              }}>
+                Interested in a custom model? Email landoncummings@gmail.com
+              </div>
+            </>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={startNewChat}
+                disabled={isLoading}
+                suppressHydrationWarning
+                style={{
+                  padding: '12px 14px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: '#007aff',
+                  color: '#fff',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                New Chat
+              </button>
+              <div style={{ flex: 1, textAlign: 'center', fontSize: '14px', color: isDarkMode ? '#d6d6d6' : '#1f2937' }}>
+                Interested in a custom model? Email landoncummings@gmail.com.
+              </div>
+              <button
+                onClick={sendMessage}
+                disabled={isLoading}
+                style={{
+                  padding: '12px 18px',
+                  backgroundColor: isLoading ? '#999' : '#007aff',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  cursor: isLoading ? 'not-allowed' : 'pointer',
+                  fontSize: '16px',
+                }}
+              >
+                Send
+              </button>
             </div>
-            <button
-              onClick={sendMessage}
-              disabled={isLoading}
-              style={{
-                padding: '12px 18px',
-                backgroundColor: isLoading ? '#999' : '#007aff',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '12px',
-                cursor: isLoading ? 'not-allowed' : 'pointer',
-                fontSize: '16px',
-              }}
-            >
-              Send
-            </button>
-          </div>
+          )}
         </div>
       </div>
     </div>

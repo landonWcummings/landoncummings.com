@@ -38,13 +38,21 @@ const NavBar = ({ repos = [] }) => {
   useEffect(() => {
     const updateNavHeight = () => {
       if (navRef.current) {
-        setNavHeight(navRef.current.offsetHeight);
+        // Use getBoundingClientRect for more accurate measurement including padding
+        const rect = navRef.current.getBoundingClientRect();
+        const height = rect.height;
+        setNavHeight(Math.ceil(height));
       }
     };
 
+    // Small delay to ensure DOM is ready
+    const timeoutId = setTimeout(updateNavHeight, 0);
     updateNavHeight();
     window.addEventListener('resize', updateNavHeight);
-    return () => window.removeEventListener('resize', updateNavHeight);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', updateNavHeight);
+    };
   }, []);
 
   // Filter repos into main and other
@@ -78,325 +86,225 @@ const NavBar = ({ repos = [] }) => {
     return list;
   }, [mainButtons]);
 
+  // Mobile projects - 6 main projects in 2x3 grid
+  const mobileProjects = [
+    { slug: 'landonGPT', label: 'LandonGPT', emoji: '🤖' },
+    { slug: 'snakePlusAi-V1-NEAT', label: 'Snake AI', emoji: '🐍' },
+    { slug: '2048AI', label: '2048 AI', emoji: '🎯' },
+    { slug: 'ai-sandbox', label: 'AI Sandbox', emoji: '🧪' },
+    { slug: 'Connect4Bot', label: 'Connect4', emoji: '🔴' },
+    { slug: 'PokerPilot', label: 'PokerPilot', emoji: '🃏' },
+  ];
+
+  // Simplified navbar for all screen sizes
   return (
     <>
-      <style>
-        {`
-          /* BUTTON BASE STYLES */
-          .button {
-            position: relative;
-            display: inline-block;
-            text-align: center;
-            padding: 10px 20px;
-            font-size: 13px;
-            font-weight: 500;
-            width: 140px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            color: #e0e0e0;
-            cursor: pointer;
-            overflow: hidden;
-            margin-right: 12px;
-            white-space: nowrap;
-            transition: all 0.3s ease;
-          }
-
-          /* GLOWING BORDER EFFECT */
-          .button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 8px;
-            padding: 2px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: -1;
-          }
-
-          /* SHIMMER ANIMATION EFFECT */
-          .button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-              90deg,
-              transparent 0%,
-              rgba(255, 255, 255, 0.1) 50%,
-              transparent 100%
-            );
-            animation: shimmer 3s infinite;
-            z-index: 1;
-          }
-
-          /* HOVER EFFECTS */
-          .button:hover {
-            transform: translateY(-2px);
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            border-color: rgba(102, 126, 234, 0.5);
-            color: #ffffff;
-          }
-
-          .button:hover::before {
-            opacity: 1;
-          }
-
-          /* ACTIVE/FOCUS STATE */
-          .button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-          }
-
-          .button span {
-            position: relative;
-            z-index: 2;
-          }
-
-          /* SHIMMER ANIMATION */
-          @keyframes shimmer {
-            0% {
-              left: -100%;
-            }
-            50% {
-              left: 100%;
-            }
-            100% {
-              left: 100%;
-            }
-          }
-
-          /* SCROLL CONTAINER */
-          .scroll-container {
-            overflow: hidden;
-            width: 100%;
-            position: relative;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-          }
-          
-          .scroll-container::-webkit-scrollbar {
-            display: none;
-          }
-
-          /* SCROLL CONTENT */
-          .scroll-content {
-            display: flex;
-            width: max-content;
-            animation: marquee 78s linear infinite;
-            will-change: transform;
-          }
-
-          .scroll-content > .repo-set {
-            display: flex;
-          }
-
-          nav:hover .scroll-content {
-            animation-play-state: paused;
-          }
-
-          @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-
-          /* RESPONSIVE ADJUSTMENTS */
-          @media (max-width: 600px) {
-            nav {
-              height: auto;
-              padding: 10px;
-            }
-            .scroll-content .button {
-              font-size: 11px;
-              width: 110px;
-              padding: 8px 12px;
-              margin-right: 8px;
-            }
-          }
-
-          @media (max-width: 400px) {
-            nav {
-              height: auto;
-              padding: 5px;
-            }
-            .scroll-content .button {
-              font-size: 10px;
-              width: 95px;
-              padding: 6px 10px;
-              margin-right: 6px;
-            }
-          }
-        `}
-      </style>
-
       <nav
         ref={navRef}
         style={{
-          display: 'grid',
-          gridTemplateColumns: '55px auto 95px',
-          alignItems: 'center',
-          gap: '10px',
-          padding: '10px',
           position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
+          width: '100%',
           background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 100%)',
           borderBottom: '2px solid rgba(102, 126, 234, 0.3)',
           zIndex: 1000,
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3)',
+          padding: '12px',
         }}
       >
-        {/* LOGO */}
-        <div style={{ gridColumn: '1 / 2', justifySelf: 'start' }}>
-          <Link href="/">
-            <Image
-              src="/LCfancylogo.png"
-              alt="LC Logo"
-              width={60}
-              height={60}
-              style={{ borderRadius: '50%' }}
-            />
-          </Link>
-        </div>
-
-        {/* SCROLLING REPO BUTTONS */}
-        <div
-          className="scroll-container"
-          style={{ gridColumn: '2 / 3', alignSelf: 'center' }}
-        >
-          <div className="scroll-content">
-            {/* FIRST SET OF BUTTONS */}
-            <div className="repo-set">
-              {expandedButtons.map((button) => (
-                <Link
-                  href={button.href}
-                  key={`first-${button.key}`}
-                  style={{ textDecoration: 'none' }}
-                >
-                  <button className="button" suppressHydrationWarning>
-                    <span>{button.label}</span>
-                  </button>
-                </Link>
-              ))}
-            </div>
-            {/* SECOND SET OF BUTTONS */}
-            <div className="repo-set">
-              {expandedButtons.map((button) => (
-                <Link
-                  href={button.href}
-                  key={`second-${button.key}`}
-                  style={{ textDecoration: 'none' }}
-                >
-                  <button className="button" suppressHydrationWarning>
-                    <span>{button.label}</span>
-                  </button>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* OTHER PROJECTS DROPDOWN */}
-        <div style={{ gridColumn: '3 / 4', justifySelf: 'end', position: 'relative' }}>
-          <button
-            onClick={() => setDropdownOpen(!isDropdownOpen)}
-            suppressHydrationWarning
-            type="button"
-            style={{
-              background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-              color: '#e0e0e0',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              padding: '10px 20px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '13px',
-              fontWeight: '500',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-              transition: 'all 0.3s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
-              e.target.style.borderColor = 'rgba(102, 126, 234, 0.5)';
-              e.target.style.color = '#ffffff';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
-              e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-              e.target.style.color = '#e0e0e0';
-            }}
-          >
-            Other Projects
-          </button>
-          {isDropdownOpen && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '45px',
-                right: '0',
-                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '8px',
-                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.5), 0 2px 10px rgba(0, 0, 0, 0.3)',
-                zIndex: 1000,
-                maxHeight: '70vh',
-                overflowY: 'auto',
-                minWidth: '200px',
-                maxWidth: '300px',
-              }}
-            >
-              {otherRepos.map((repo) => (
-                <Link
-                  href={`/${repo.name}`}
-                  key={repo.id}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'auto 1fr auto', 
+            alignItems: 'center',
+            gap: '10px',
+            maxWidth: '1200px',
+            margin: '0 auto',
+            width: '100%',
+          }}>
+            {/* Home button on left */}
+            <div>
+              <Link href="/" style={{ textDecoration: 'none' }}>
+                <button
+                  suppressHydrationWarning
                   style={{
-                    display: 'block',
-                    padding: '12px 20px',
-                    textDecoration: 'none',
+                    padding: '8px 10px',
+                    fontSize: '18px',
+                    fontWeight: '500',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
                     color: '#e0e0e0',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                    fontSize: '14px',
-                    transition: 'all 0.2s ease',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    whiteSpace: 'nowrap',
+                    minWidth: '40px',
+                    textAlign: 'center',
                   }}
-                  onClick={() => setDropdownOpen(false)}
                   onMouseEnter={(e) => {
                     e.target.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
+                    e.target.style.borderColor = 'rgba(102, 126, 234, 0.5)';
                     e.target.style.color = '#ffffff';
-                    e.target.style.paddingLeft = '25px';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.background = 'transparent';
+                    e.target.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
                     e.target.style.color = '#e0e0e0';
-                    e.target.style.paddingLeft = '20px';
                   }}
                 >
-                  {repo.name}
+                  🏠
+                </button>
+              </Link>
+            </div>
+
+            {/* Project grid in middle */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '8px',
+              }}
+            >
+              {mobileProjects.map((project) => (
+                <Link
+                  href={`/${project.slug}`}
+                  key={project.slug}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <button
+                    suppressHydrationWarning
+                    style={{
+                      width: '100%',
+                      padding: '10px 8px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      borderRadius: '8px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                      color: '#e0e0e0',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      textAlign: 'center',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
+                      e.target.style.borderColor = 'rgba(102, 126, 234, 0.5)';
+                      e.target.style.color = '#ffffff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                      e.target.style.color = '#e0e0e0';
+                    }}
+                  >
+                    {project.emoji} {project.label}
+                  </button>
                 </Link>
               ))}
             </div>
-          )}
-        </div>
-      </nav>
 
-      {/* Spacer to offset content under navbar */}
-      <div style={{ paddingTop: `${navHeight}px` }} suppressHydrationWarning />
-    </>
-  );
+            {/* Others button on right */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setDropdownOpen(!isDropdownOpen)}
+                suppressHydrationWarning
+                type="button"
+                style={{
+                  background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                  color: '#e0e0e0',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                  transition: 'all 0.3s ease',
+                  whiteSpace: 'nowrap',
+                  minWidth: '40px',
+                  textAlign: 'center',
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
+                  e.target.style.borderColor = 'rgba(102, 126, 234, 0.5)';
+                  e.target.style.color = '#ffffff';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                  e.target.style.color = '#e0e0e0';
+                }}
+              >
+                ☰
+              </button>
+              {isDropdownOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '45px',
+                    right: '0',
+                    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.5), 0 2px 10px rgba(0, 0, 0, 0.3)',
+                    zIndex: 1000,
+                    maxHeight: '70vh',
+                    overflowY: 'auto',
+                    minWidth: '200px',
+                    maxWidth: '300px',
+                  }}
+                >
+                  {otherRepos.map((repo) => (
+                    <Link
+                      href={`/${repo.name}`}
+                      key={repo.id}
+                      style={{
+                        display: 'block',
+                        padding: '12px 20px',
+                        textDecoration: 'none',
+                        color: '#e0e0e0',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                        fontSize: '14px',
+                        transition: 'all 0.2s ease',
+                      }}
+                      onClick={() => setDropdownOpen(false)}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+                        e.target.style.color = '#ffffff';
+                        e.target.style.paddingLeft = '25px';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = 'transparent';
+                        e.target.style.color = '#e0e0e0';
+                        e.target.style.paddingLeft = '20px';
+                      }}
+                    >
+                      {repo.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </nav>
+        <div style={{ paddingTop: `${navHeight}px` }} suppressHydrationWarning />
+      </>
+    );
 };
 
 export default NavBar;

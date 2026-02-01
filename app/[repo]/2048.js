@@ -276,6 +276,7 @@ export default function Game2048App({ repos }) {
   const [gameState, setGameState] = useState({ board: [], score: 0, done: false, lastAction: null });
   const [moveDelay, setMoveDelay] = useState(50);
   const [autoMoveEnabled, setAutoMoveEnabled] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const gameRef = useRef(null);
   const sessionRef = useRef(null);
   const intervalRef = useRef(null);
@@ -294,12 +295,56 @@ export default function Game2048App({ repos }) {
 
   // Load the ONNX model.
   useEffect(() => {
+    // Configure ONNX Runtime logging to suppress warnings
+    if (ort.env && ort.env.logLevel !== undefined) {
+      ort.env.logLevel = 'error'; // Only show errors, suppress warnings
+    }
+
+    // Also filter console output as a backup
+    const originalWarn = console.warn;
+    const filterONNXWarnings = (...args) => {
+      const message = args[0];
+      if (message && typeof message === 'string') {
+        // Suppress ONNX CPU vendor warnings and other harmless ONNX warnings
+        if (message.includes('onnxruntime') || 
+            message.includes('Unknown CPU vendor') ||
+            message.includes('cpuid_info') ||
+            message.includes('[W:onnxruntime')) {
+          return; // Suppress these warnings
+        }
+      }
+      // Also check for ANSI color codes that ONNX uses
+      const fullMessage = args.join(' ');
+      if (fullMessage.includes('onnxruntime') && fullMessage.includes('cpuid_info')) {
+        return; // Suppress
+      }
+      originalWarn.apply(console, args);
+    };
+    
+    console.warn = filterONNXWarnings;
+
     (async () => {
       try {
-        sessionRef.current = await ort.InferenceSession.create('/models/ppo_2048_model_huge_mlp.onnx');
+        // Try to create session with minimal logging options
+        const sessionOptions = {};
+        try {
+          // Try setting log severity if supported
+          if (ort.env && typeof ort.env.logLevel !== 'undefined') {
+            ort.env.logLevel = 'error';
+          }
+        } catch (e) {
+          // Ignore if not supported
+        }
+
+        sessionRef.current = await ort.InferenceSession.create('/models/ppo_2048_model_huge_mlp.onnx', sessionOptions);
         console.log("Model loaded successfully.");
       } catch (err) {
         console.error("Failed to load model:", err);
+      } finally {
+        // Restore original console methods after a delay to allow ONNX to finish loading
+        setTimeout(() => {
+          console.warn = originalWarn;
+        }, 2000);
       }
     })();
   }, []);
@@ -309,6 +354,17 @@ export default function Game2048App({ repos }) {
     gameRef.current = new Game2048(handleGameState);
     gameRef.current.reset();
   }, [handleGameState]);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Auto AI move using the current delay.
   useEffect(() => {
@@ -340,26 +396,47 @@ export default function Game2048App({ repos }) {
     return prevBoardRef.current[i][j] !== gameState.board[i][j];
   };
 
+  const cellSize = isMobile && typeof window !== 'undefined' 
+    ? Math.min(70, (window.innerWidth - 80) / 4) 
+    : 100;
+  const gridGap = isMobile ? 6 : 10;
+  const gridPadding = isMobile ? 6 : 10;
+  const gridWidth = cellSize * 4 + gridGap * 3 + gridPadding * 2;
+
   return (
     <div style={{ fontFamily: 'Arial, sans-serif', textAlign: 'center' }}>
       <NavBar repos={repos} links={navLinks} />
-      <div style={{ paddingTop: '80px', padding: '20px' }}>
-        <h1>2048 AI Game</h1>
-        <div id="score" style={{ fontSize: '20px', marginBottom: '10px' }}>
+      <div style={{ 
+        paddingTop: isMobile ? '60px' : '80px', 
+        padding: isMobile ? '15px' : '20px' 
+      }}>
+        <h1 style={{ fontSize: isMobile ? '1.5rem' : '2rem' }}>2048 AI Game</h1>
+        <div id="score" style={{ 
+          fontSize: isMobile ? '16px' : '20px', 
+          marginBottom: '10px' 
+        }}>
           Score: {gameState.score}
         </div>
         {/* Grid container positioned relatively to enable arrow overlay. */}
-        <div style={{ position: 'relative', display: 'inline-block' }}>
+        <div style={{ 
+          position: 'relative', 
+          display: 'inline-block',
+          width: '100%',
+          maxWidth: `${gridWidth}px`,
+          margin: '0 auto'
+        }}>
           <div
             id="grid"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(4, 100px)',
-              gridGap: '10px',
+              gridTemplateColumns: `repeat(4, ${cellSize}px)`,
+              gridGap: `${gridGap}px`,
               background: '#bbada0',
-              padding: '10px',
+              padding: `${gridPadding}px`,
               borderRadius: '5px',
-              width: 'max-content'
+              width: '100%',
+              maxWidth: `${gridWidth}px`,
+              margin: '0 auto'
             }}
           >
             {gameState.board.map((row, i) =>
@@ -371,10 +448,10 @@ export default function Game2048App({ repos }) {
                     className={`tile ${animate ? "anim-move" : ""}`}
                     data-direction={gameState.lastAction}
                     style={{
-                      width: '100px',
-                      height: '100px',
-                      lineHeight: '100px',
-                      fontSize: '24px',
+                      width: `${cellSize}px`,
+                      height: `${cellSize}px`,
+                      lineHeight: `${cellSize}px`,
+                      fontSize: isMobile ? `${Math.max(14, cellSize * 0.24)}px` : '24px',
                       fontWeight: 'bold',
                       textAlign: 'center',
                       borderRadius: '5px',
@@ -391,18 +468,35 @@ export default function Game2048App({ repos }) {
           </div>
           {/* Arrow overlay: positioned so its vertical center is at the gap between the 2nd and 3rd rows. */}
           {gameState.lastAction !== null ? (
-            <div className="arrow-overlay">
+            <div style={{
+              position: 'absolute',
+              top: `${gridPadding + cellSize * 2 + gridGap}px`,
+              left: 0,
+              right: 0,
+              pointerEvents: 'none',
+              textAlign: 'center',
+              fontSize: isMobile ? `${Math.min(50, cellSize * 0.7)}px` : '80px',
+              color: 'rgba(0, 0, 255, 0.3)',
+              transform: 'translateY(-50%)',
+            }}>
               {getArrowSymbol(gameState.lastAction)}
             </div>
           ) : null}
         </div>
-        <div id="controls" style={{ marginTop: '10px' }}>
+        <div id="controls" style={{ 
+          marginTop: '10px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          gap: isMobile ? '8px' : '10px',
+          padding: isMobile ? '0 10px' : '0'
+        }}>
           <button
             onClick={handleReset}
+            suppressHydrationWarning
             style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              margin: '0 5px',
+              padding: isMobile ? '8px 16px' : '10px 20px',
+              fontSize: isMobile ? '14px' : '16px',
               cursor: 'pointer',
               border: 'none',
               borderRadius: '3px',
@@ -415,10 +509,10 @@ export default function Game2048App({ repos }) {
           </button>
           <button
             onClick={toggleAutoMove}
+            suppressHydrationWarning
             style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              margin: '0 5px',
+              padding: isMobile ? '8px 16px' : '10px 20px',
+              fontSize: isMobile ? '14px' : '16px',
               cursor: 'pointer',
               border: 'none',
               borderRadius: '3px',
@@ -427,11 +521,16 @@ export default function Game2048App({ repos }) {
               transition: 'background 0.2s'
             }}
           >
-            {autoMoveEnabled ? 'Stop Auto Move' : 'Start Auto Move'}
+            {autoMoveEnabled ? 'Pause' : 'Resume'}
           </button>
         </div>
-        <div style={{ marginTop: '20px' }}>
-          <label htmlFor="moveDelay">Move Delay (ms): </label>
+        <div style={{ 
+          marginTop: '20px',
+          padding: isMobile ? '0 15px' : '0'
+        }}>
+          <label htmlFor="moveDelay" style={{
+            fontSize: isMobile ? '14px' : '16px'
+          }}>Move Delay (ms): </label>
           <input
             id="moveDelay"
             type="range"
@@ -439,9 +538,16 @@ export default function Game2048App({ repos }) {
             max="700"
             value={moveDelay}
             onChange={(e) => setMoveDelay(Number(e.target.value))}
-            style={{ verticalAlign: 'middle' }}
+            style={{ 
+              verticalAlign: 'middle',
+              width: isMobile ? '200px' : '300px',
+              maxWidth: '100%'
+            }}
           />
-          <span style={{ marginLeft: '10px' }}>{moveDelay} ms</span>
+          <span style={{ 
+            marginLeft: '10px',
+            fontSize: isMobile ? '14px' : '16px'
+          }}>{moveDelay} ms</span>
         </div>
         <style jsx>{`
         .tile.anim-move[data-direction="0"] {
@@ -471,17 +577,6 @@ export default function Game2048App({ repos }) {
         @keyframes tileSlideRight {
             from { transform: translateX(-10px); }
             to { transform: translateX(0); }
-        }
-        .arrow-overlay {
-            position: absolute;
-            top: 218px;
-            left: 0;
-            right: 0;
-            pointer-events: none;
-            text-align: center;
-            font-size: 80px;
-            color: rgba(0, 0, 255, 0.3);
-            transform: translateY(-50%);
         }
         `}</style>
 

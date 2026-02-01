@@ -131,6 +131,7 @@ export default function Connect4WithBot({ repos }) {
   });
   const [winratesLoading, setWinratesLoading] = useState(true);
   const lastSaveTimeRef = useRef(0); // Track last save time for rate limiting (60 seconds)
+  const [isMobile, setIsMobile] = useState(false);
   
   // Keep difficultyRef in sync with difficulty state
   useEffect(() => {
@@ -221,6 +222,17 @@ export default function Connect4WithBot({ repos }) {
       }
     };
     fetchWinrates();
+  }, []);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // ─── Update winrates locally ────────────────────────────────────────────────
@@ -534,6 +546,7 @@ export default function Connect4WithBot({ repos }) {
       background: '#FFFFFF',         // white background around difficulty
       padding: 8,
       borderRadius: 8,
+      flexWrap: 'wrap',
     },
     button: (level) => ({
       padding: '8px 16px',
@@ -560,51 +573,90 @@ export default function Connect4WithBot({ repos }) {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: 'auto', fontFamily: 'sans-serif' }}>
+    <div style={{ 
+      maxWidth: 600, 
+      margin: 'auto', 
+      fontFamily: 'sans-serif',
+      padding: isMobile ? '0 15px' : '0 20px',
+      paddingTop: isMobile ? '10px' : '0',
+      paddingBottom: isMobile ? '60px' : '80px'
+    }}>
       <NavBar repos={repos} links={navLinks} />
-      <h2 style={{ textAlign: 'center', margin: '16px 0', fontSize: '2.5rem', color: '#333' }}>Connect 4 vs Bot</h2>
+      <h2 style={{ 
+        textAlign: 'center', 
+        margin: isMobile ? '20px 0 15px' : '16px 0', 
+        fontSize: isMobile ? '1.8rem' : '2.5rem', 
+        color: '#333' 
+      }}>Connect 4 vs Bot</h2>
       
       {/* Description Section */}
       <div style={{ 
         textAlign: 'center', 
-        padding: '20px', 
-        marginBottom: '20px',
+        padding: isMobile ? '18px 15px' : '20px', 
+        marginBottom: isMobile ? '25px' : '20px',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         borderRadius: '15px',
         color: 'white',
         boxShadow: '0 8px 25px rgba(0, 0, 0, 0.1)'
       }}>
-        <p style={{ fontSize: '1.1rem', marginBottom: '10px', fontWeight: '500' }}>
+        <p style={{ 
+          fontSize: isMobile ? '1rem' : '1.1rem', 
+          marginBottom: isMobile ? '12px' : '10px', 
+          fontWeight: '500' 
+        }}>
           🔴 Challenge our AI in the classic Connect 4 game! 🔵
         </p>
-        <p style={{ fontSize: '0.95rem', opacity: '0.9', lineHeight: '1.5' }}>
+        <p style={{ 
+          fontSize: isMobile ? '0.9rem' : '0.95rem', 
+          opacity: '0.9', 
+          lineHeight: '1.6',
+          marginBottom: isMobile ? '12px' : '0'
+        }}>
           You play as <strong>Blue</strong>, the bot plays as <strong>White</strong>. 
           Get four in a row horizontally, vertically, or diagonally to win!
         </p>
         <div style={{ 
-          marginTop: '15px', 
-          padding: '10px', 
+          marginTop: isMobile ? '12px' : '15px', 
+          padding: isMobile ? '12px' : '10px', 
           background: 'rgba(255, 255, 255, 0.1)', 
           borderRadius: '10px',
           backdropFilter: 'blur(10px)'
         }}>
-          <p style={{ fontSize: '0.9rem', margin: '0' }}>
+          <p style={{ fontSize: isMobile ? '0.85rem' : '0.9rem', margin: '0' }}>
             <strong>💡 How to play:</strong> Click on any column to drop your piece. Choose your difficulty below!
           </p>
         </div>
       </div>
 
       {/* Difficulty selectors */}
-      <div style={{ marginBottom: '15px' }}>
-        <h3 style={{ textAlign: 'center', marginBottom: '10px', color: '#555', fontSize: '1.2rem' }}>
+      <div style={{ marginBottom: isMobile ? '25px' : '15px' }}>
+        <h3 style={{ 
+          textAlign: 'center', 
+          marginBottom: isMobile ? '12px' : '10px', 
+          color: '#555', 
+          fontSize: isMobile ? '1.1rem' : '1.2rem' 
+        }}>
           🎯 Choose Your Challenge
         </h3>
-        <div style={{ textAlign: 'center', marginBottom: '15px' }}>
-          <p style={{ fontSize: '0.9rem', color: '#666', margin: '0' }}>
+        <div style={{ 
+          textAlign: 'center', 
+          marginBottom: isMobile ? '18px' : '15px',
+          padding: isMobile ? '0 10px' : '0'
+        }}>
+          <p style={{ 
+            fontSize: isMobile ? '0.85rem' : '0.9rem', 
+            color: '#666', 
+            margin: '0',
+            lineHeight: '1.5'
+          }}>
             <strong>Easy:</strong> Random moves • <strong>Medium:</strong> Blocks your wins • <strong>Hard:</strong> Uses trained AI model
           </p>
         </div>
-        <div style={difficultyStyles.container}>
+        <div style={{
+          ...difficultyStyles.container,
+          padding: isMobile ? '12px 8px' : '8px',
+          gap: isMobile ? 8 : 12
+        }}>
           {['easy', 'medium', 'hard'].map((level) => (
             <button
               key={level}
@@ -612,7 +664,11 @@ export default function Connect4WithBot({ repos }) {
                 setDifficulty(level);
                 resetGame();
               }}
-              style={difficultyStyles.button(level)}
+              style={{
+                ...difficultyStyles.button(level),
+                padding: isMobile ? '10px 14px' : '8px 16px',
+                fontSize: isMobile ? '14px' : '16px'
+              }}
             >
               {level.charAt(0).toUpperCase() + level.slice(1)}
             </button>
@@ -622,22 +678,31 @@ export default function Connect4WithBot({ repos }) {
 
       {/* Winrates Display */}
       <div style={{ 
-        marginBottom: '20px', 
-        padding: '15px', 
+        marginBottom: isMobile ? '30px' : '20px', 
+        padding: isMobile ? '18px 12px' : '15px', 
         background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
         borderRadius: '12px',
         boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
       }}>
-        <h3 style={{ textAlign: 'center', marginBottom: '15px', color: '#333', fontSize: '1.3rem' }}>
+        <h3 style={{ 
+          textAlign: 'center', 
+          marginBottom: isMobile ? '18px' : '15px', 
+          color: '#333', 
+          fontSize: isMobile ? '1.1rem' : '1.3rem' 
+        }}>
           📊 Global Human Win Rate
         </h3>
         {winratesLoading ? (
-          <p style={{ textAlign: 'center', color: '#666' }}>Loading statistics...</p>
+          <p style={{ 
+            textAlign: 'center', 
+            color: '#666',
+            fontSize: isMobile ? '0.9rem' : '1rem'
+          }}>Loading statistics...</p>
         ) : (
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
-            gap: '15px' 
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(150px, 1fr))', 
+            gap: isMobile ? '12px' : '15px' 
           }}>
             {['easy', 'medium', 'hard'].map((level) => {
               const stats = winrates[level] || { total: 0, userWins: 0, botWins: 0, draws: 0, userWinRate: 0 };
@@ -647,28 +712,41 @@ export default function Connect4WithBot({ repos }) {
                   key={level}
                   style={{
                     background: 'white',
-                    padding: '12px',
+                    padding: isMobile ? '16px' : '12px',
                     borderRadius: '8px',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                     textAlign: 'center',
                   }}
                 >
                   <div style={{ 
-                    fontSize: '1.1rem', 
+                    fontSize: isMobile ? '1rem' : '1.1rem', 
                     fontWeight: 'bold', 
                     color: '#333',
-                    marginBottom: '8px',
+                    marginBottom: isMobile ? '10px' : '8px',
                     textTransform: 'capitalize'
                   }}>
                     {level}
                   </div>
-                  <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#667eea', marginBottom: '5px' }}>
+                  <div style={{ 
+                    fontSize: isMobile ? '1.5rem' : '1.8rem', 
+                    fontWeight: 'bold', 
+                    color: '#667eea', 
+                    marginBottom: isMobile ? '8px' : '5px' 
+                  }}>
                     {winRate}%
                   </div>
-                  <div style={{ fontSize: '0.85rem', color: '#666' }}>
+                  <div style={{ 
+                    fontSize: isMobile ? '0.9rem' : '0.85rem', 
+                    color: '#666',
+                    marginBottom: isMobile ? '6px' : '0'
+                  }}>
                     {stats.userWins || 0}W / {stats.botWins || 0}L / {stats.draws || 0}D
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#999', marginTop: '4px' }}>
+                  <div style={{ 
+                    fontSize: isMobile ? '0.8rem' : '0.75rem', 
+                    color: '#999', 
+                    marginTop: isMobile ? '6px' : '4px' 
+                  }}>
                     {stats.total || 0} games
                   </div>
                 </div>
@@ -686,6 +764,7 @@ export default function Connect4WithBot({ repos }) {
           maxWidth: 560,
           margin: '0 auto',
           aspectRatio: '7 / 6',
+          marginBottom: isMobile ? '30px' : '0',
         }}
       >
         <div
@@ -801,15 +880,24 @@ export default function Connect4WithBot({ repos }) {
 
       {/* Winner and Restart below the board */}
       {gameOver && (
-        <div style={{ textAlign: 'center', marginTop: 24 }}>
-          <h3 style={{ fontSize: 20, marginBottom: 12 }}>
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: isMobile ? '30px' : '24px',
+          marginBottom: isMobile ? '20px' : '0',
+          padding: isMobile ? '20px 0' : '0'
+        }}>
+          <h3 style={{ 
+            fontSize: isMobile ? '1.4rem' : '20px', 
+            marginBottom: isMobile ? '16px' : '12px',
+            color: '#333'
+          }}>
             {winner === 'Draw' ? "It's a draw!" : winner === 'You' ? 'You win!' : 'Bot wins!'}
           </h3>
           <button
             onClick={resetGame}
             style={{
-              padding: '10px 24px',
-              fontSize: 16,
+              padding: isMobile ? '12px 28px' : '10px 24px',
+              fontSize: isMobile ? '16px' : '16px',
               fontWeight: 600,
               borderRadius: 8,
               border: 'none',

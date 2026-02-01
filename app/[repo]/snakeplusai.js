@@ -12,6 +12,8 @@ import Image from 'next/image';
 import { Game } from './snakegame'; // adjust path if necessary
 
 export default function SnakePlusAI({ repos }) {
+  const [isMobile, setIsMobile] = useState(false);
+
   // Refs for compete mode
   const userCanvasRef = useRef(null);
   const aiCanvasRef = useRef(null);
@@ -42,6 +44,13 @@ export default function SnakePlusAI({ repos }) {
   const [gamesStarted, setGamesStarted] = useState(false);
   const [winnerMessage, setWinnerMessage] = useState(null);
   const [inputEnabled, setInputEnabled] = useState(true);
+  
+  // Force demo mode on mobile
+  useEffect(() => {
+    if (isMobile && mode === "compete") {
+      setMode("demo");
+    }
+  }, [isMobile, mode]);
 
   // States for bottom section (graph & commentary)
   const [isGameReady, setIsGameReady] = useState(false);
@@ -393,6 +402,11 @@ export default function SnakePlusAI({ repos }) {
   const handleModeChange = (newMode) => {
     if (newMode === mode) return;
     
+    // Prevent switching to compete mode on mobile
+    if (isMobile && newMode === "compete") {
+      return;
+    }
+    
     // Clear all timeouts
     if (popupTimeoutRef.current) {
       clearTimeout(popupTimeoutRef.current);
@@ -438,22 +452,23 @@ export default function SnakePlusAI({ repos }) {
     position: 'absolute',
     top: 0,
     left: 0,
-    width: '500px',
-    height: '600px',
+    width: '100%',
+    height: '100%',
     background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.95), rgba(139, 92, 246, 0.95))',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     color: '#FFFFFF',
     fontWeight: 'bold',
-    fontSize: '24px',
+    fontSize: isMobile ? '18px' : '24px',
     textAlign: 'center',
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(10px)',
     borderRadius: '8px',
     border: '2px solid rgba(255, 255, 255, 0.2)',
     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-    textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
+    textShadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
+    padding: isMobile ? '10px' : '0'
   };
 
   // ----------------- Disable Arrow Keys and Spacebar Scrolling -----------------
@@ -467,12 +482,30 @@ export default function SnakePlusAI({ repos }) {
     return () => window.removeEventListener("keydown", preventScroll);
   }, []);
 
+  // Detect mobile screen size
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <>
       <NavBar repos={repos} />
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        marginTop: '20px',
+        padding: isMobile ? '0 15px' : '0',
+        width: '100%'
+      }}>
         <h1 style={{
-          fontSize: '2.5rem',
+          fontSize: isMobile ? '1.8rem' : '2.5rem',
           fontWeight: 'bold',
           background: 'linear-gradient(135deg, #8b5cf6, #10b981)',
           WebkitBackgroundClip: 'text',
@@ -483,16 +516,25 @@ export default function SnakePlusAI({ repos }) {
           🐍 Snake AI
         </h1>
         <p style={{
-          fontSize: '1.2rem',
+          fontSize: isMobile ? '1rem' : '1.2rem',
           color: '#6b7280',
           fontWeight: '500',
-          marginBottom: '20px'
+          marginBottom: '20px',
+          textAlign: 'center'
         }}>
-          {mode === "compete" ? "👤 Human vs 🤖 AI" : "🎮 AI Demo Mode"}
+          🎮 AI Demo Mode
         </p>
         {mode === "compete" ? (
-          <div style={{ display: 'flex', gap: '20px' }}>
-            <div style={containerStyle}>
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '15px' : '20px',
+            alignItems: 'center',
+            width: '100%',
+            maxWidth: isMobile ? '100%' : '1040px',
+            padding: isMobile ? '0 10px' : '0'
+          }}>
+            <div style={{...containerStyle, width: '100%', maxWidth: isMobile ? '100%' : '500px'}}>
               <canvas
                 ref={userCanvasRef}
                 width={500}
@@ -502,7 +544,10 @@ export default function SnakePlusAI({ repos }) {
                   borderRadius: '12px',
                   display: 'block',
                   boxShadow: '0 8px 32px rgba(16, 185, 129, 0.3)',
-                  background: 'linear-gradient(135deg, #1f2937, #111827)'
+                  background: 'linear-gradient(135deg, #1f2937, #111827)',
+                  width: '100%',
+                  height: 'auto',
+                  maxWidth: isMobile ? '100%' : '500px'
                 }}
               ></canvas>
               {!gamesStarted && !winnerMessage && (
@@ -516,7 +561,7 @@ export default function SnakePlusAI({ repos }) {
                 </div>
               )}
             </div>
-            <div style={containerStyle}>
+            <div style={{...containerStyle, width: '100%', maxWidth: isMobile ? '100%' : '500px'}}>
               <canvas
                 ref={aiCanvasRef}
                 width={500}
@@ -526,7 +571,10 @@ export default function SnakePlusAI({ repos }) {
                   borderRadius: '12px',
                   display: 'block',
                   boxShadow: '0 8px 32px rgba(139, 92, 246, 0.3)',
-                  background: 'linear-gradient(135deg, #1f2937, #111827)'
+                  background: 'linear-gradient(135deg, #1f2937, #111827)',
+                  width: '100%',
+                  height: 'auto',
+                  maxWidth: isMobile ? '100%' : '500px'
                 }}
               ></canvas>
               {!gamesStarted && !winnerMessage && (
@@ -543,7 +591,12 @@ export default function SnakePlusAI({ repos }) {
           </div>
         ) : (
           // Demo mode: single canvas centered.
-          <div style={containerStyle}>
+          <div style={{
+            ...containerStyle, 
+            width: '100%', 
+            maxWidth: isMobile ? '100%' : '500px',
+            padding: isMobile ? '0 10px' : '0'
+          }}>
             <canvas
               ref={demoCanvasRef}
               width={500}
@@ -553,7 +606,10 @@ export default function SnakePlusAI({ repos }) {
                 borderRadius: '12px',
                 display: 'block',
                 boxShadow: '0 8px 32px rgba(139, 92, 246, 0.3)',
-                background: 'linear-gradient(135deg, #1f2937, #111827)'
+                background: 'linear-gradient(135deg, #1f2937, #111827)',
+                width: '100%',
+                height: 'auto',
+                maxWidth: isMobile ? '100%' : '500px'
               }}
             ></canvas>
             {!gamesStarted && !winnerMessage && (
@@ -568,56 +624,69 @@ export default function SnakePlusAI({ repos }) {
             )}
           </div>
         )}
+        {/* Speed slider - Hidden on mobile to simplify */}
+        {!isMobile && (
+          <div style={{ 
+            marginTop: '20px', 
+            padding: '20px',
+            background: 'linear-gradient(135deg, #374151, #1f2937)',
+            borderRadius: '12px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            width: '100%',
+            maxWidth: '450px'
+          }}>
+            <label 
+              htmlFor="speed-slider" 
+              style={{ 
+                display: 'block',
+                color: '#FFFFFF',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                marginBottom: '10px',
+                textAlign: 'center'
+              }}
+            >
+              🏃 Game Speed: {tempSpeed}ms
+            </label>
+            <input
+              id="speed-slider"
+              type="range"
+              min="35"
+              max="500"
+              step="10"
+              value={tempSpeed}
+              onChange={handleSliderChange}
+              onMouseUp={handleSliderChangeDone}
+              onTouchEnd={handleSliderChangeDone}
+              style={{ 
+                width: '100%', 
+                maxWidth: '350px',
+                height: '8px',
+                background: 'linear-gradient(90deg, #10b981, #8b5cf6)',
+                borderRadius: '4px',
+                outline: 'none',
+                appearance: 'none',
+                cursor: 'pointer'
+              }}
+            />
+          </div>
+        )}
         <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
           marginTop: '20px', 
-          padding: '20px',
-          background: 'linear-gradient(135deg, #374151, #1f2937)',
-          borderRadius: '12px',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-          border: '1px solid rgba(255, 255, 255, 0.1)'
+          gap: isMobile ? '8px' : '12px',
+          flexWrap: 'wrap',
+          width: '100%',
+          padding: isMobile ? '0 15px' : '0'
         }}>
-          <label 
-            htmlFor="speed-slider" 
-            style={{ 
-              display: 'block',
-              color: '#FFFFFF',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              marginBottom: '10px',
-              textAlign: 'center'
-            }}
-          >
-            🏃 Game Speed: {tempSpeed}ms
-          </label>
-          <input
-            id="speed-slider"
-            type="range"
-            min="35"
-            max="500"
-            step="10"
-            value={tempSpeed}
-            onChange={handleSliderChange}
-            onMouseUp={handleSliderChangeDone}
-            onTouchEnd={handleSliderChangeDone}
-            style={{ 
-              width: '100%', 
-              maxWidth: '350px',
-              height: '8px',
-              background: 'linear-gradient(90deg, #10b981, #8b5cf6)',
-              borderRadius: '4px',
-              outline: 'none',
-              appearance: 'none',
-              cursor: 'pointer'
-            }}
-          />
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', gap: '12px' }}>
           {[4, 5, 6].map((size) => (
             <button
               key={size}
               onClick={() => handleGridSizeChange(size)}
               style={{
-                padding: '12px 24px',
+                padding: isMobile ? '10px 18px' : '12px 24px',
                 border: '2px solid transparent',
                 borderRadius: '12px',
                 background: size === gridSize 
@@ -626,7 +695,7 @@ export default function SnakePlusAI({ repos }) {
                 color: '#FFFFFF',
                 cursor: 'pointer',
                 fontWeight: 'bold',
-                fontSize: '16px',
+                fontSize: isMobile ? '14px' : '16px',
                 transition: 'all 0.3s ease',
                 boxShadow: size === gridSize 
                   ? '0 4px 20px rgba(16, 185, 129, 0.4)' 
@@ -653,85 +722,94 @@ export default function SnakePlusAI({ repos }) {
             </button>
           ))}
         </div>
-        {/* Mode Buttons */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '15px', gap: '12px' }}>
-          <button
-            onClick={() => handleModeChange("compete")}
-            style={{
-              padding: '12px 28px',
-              border: '2px solid transparent',
-              borderRadius: '12px',
-              background: mode === "compete" 
-                ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' 
-                : 'linear-gradient(135deg, #374151, #1f2937)',
-              color: '#FFFFFF',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '16px',
-              transition: 'all 0.3s ease',
-              boxShadow: mode === "compete" 
-                ? '0 4px 20px rgba(139, 92, 246, 0.4)' 
-                : '0 4px 12px rgba(0, 0, 0, 0.2)',
-              transform: mode === "compete" ? 'translateY(-2px)' : 'none',
-              outline: 'none',
-            }}
-            onMouseEnter={(e) => {
-              if (mode !== "compete") {
-                e.target.style.background = 'linear-gradient(135deg, #4b5563, #374151)';
-                e.target.style.transform = 'translateY(-1px)';
-                e.target.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (mode !== "compete") {
-                e.target.style.background = 'linear-gradient(135deg, #374151, #1f2937)';
-                e.target.style.transform = 'none';
-                e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
-              }
-            }}
-          >
-            🎯 Compete
-          </button>
-          <button
-            onClick={() => handleModeChange("demo")}
-            style={{
-              padding: '12px 28px',
-              border: '2px solid transparent',
-              borderRadius: '12px',
-              background: mode === "demo" 
-                ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' 
-                : 'linear-gradient(135deg, #374151, #1f2937)',
-              color: '#FFFFFF',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '16px',
-              transition: 'all 0.3s ease',
-              boxShadow: mode === "demo" 
-                ? '0 4px 20px rgba(139, 92, 246, 0.4)' 
-                : '0 4px 12px rgba(0, 0, 0, 0.2)',
-              transform: mode === "demo" ? 'translateY(-2px)' : 'none',
-              outline: 'none',
-            }}
-            onMouseEnter={(e) => {
-              if (mode !== "demo") {
-                e.target.style.background = 'linear-gradient(135deg, #4b5563, #374151)';
-                e.target.style.transform = 'translateY(-1px)';
-                e.target.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (mode !== "demo") {
-                e.target.style.background = 'linear-gradient(135deg, #374151, #1f2937)';
-                e.target.style.transform = 'none';
-                e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
-              }
-            }}
-          >
-            🎮 Demo
-          </button>
-        </div>
-        {/* Bottom section from outdated code */}
-        {isGameReady && (
+        {/* Mode Buttons - Hidden on mobile */}
+        {!isMobile && (
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            marginTop: '15px', 
+            gap: '12px',
+            flexWrap: 'wrap',
+            width: '100%',
+          }}>
+            <button
+              onClick={() => handleModeChange("compete")}
+              style={{
+                padding: '12px 28px',
+                border: '2px solid transparent',
+                borderRadius: '12px',
+                background: mode === "compete" 
+                  ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' 
+                  : 'linear-gradient(135deg, #374151, #1f2937)',
+                color: '#FFFFFF',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '16px',
+                transition: 'all 0.3s ease',
+                boxShadow: mode === "compete" 
+                  ? '0 4px 20px rgba(139, 92, 246, 0.4)' 
+                  : '0 4px 12px rgba(0, 0, 0, 0.2)',
+                transform: mode === "compete" ? 'translateY(-2px)' : 'none',
+                outline: 'none',
+              }}
+              onMouseEnter={(e) => {
+                if (mode !== "compete") {
+                  e.target.style.background = 'linear-gradient(135deg, #4b5563, #374151)';
+                  e.target.style.transform = 'translateY(-1px)';
+                  e.target.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (mode !== "compete") {
+                  e.target.style.background = 'linear-gradient(135deg, #374151, #1f2937)';
+                  e.target.style.transform = 'none';
+                  e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+                }
+              }}
+            >
+              🎯 Compete
+            </button>
+            <button
+              onClick={() => handleModeChange("demo")}
+              style={{
+                padding: '12px 28px',
+                border: '2px solid transparent',
+                borderRadius: '12px',
+                background: mode === "demo" 
+                  ? 'linear-gradient(135deg, #8b5cf6, #7c3aed)' 
+                  : 'linear-gradient(135deg, #374151, #1f2937)',
+                color: '#FFFFFF',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '16px',
+                transition: 'all 0.3s ease',
+                boxShadow: mode === "demo" 
+                  ? '0 4px 20px rgba(139, 92, 246, 0.4)' 
+                  : '0 4px 12px rgba(0, 0, 0, 0.2)',
+                transform: mode === "demo" ? 'translateY(-2px)' : 'none',
+                outline: 'none',
+              }}
+              onMouseEnter={(e) => {
+                if (mode !== "demo") {
+                  e.target.style.background = 'linear-gradient(135deg, #4b5563, #374151)';
+                  e.target.style.transform = 'translateY(-1px)';
+                  e.target.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (mode !== "demo") {
+                  e.target.style.background = 'linear-gradient(135deg, #374151, #1f2937)';
+                  e.target.style.transform = 'none';
+                  e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+                }
+              }}
+            >
+              🎮 Demo
+            </button>
+          </div>
+        )}
+        {/* Bottom section - Hidden on mobile to simplify */}
+        {isGameReady && !isMobile && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '20px' }}>
             <Image
               src={`/models/ppo${gridSize}graph.png`}

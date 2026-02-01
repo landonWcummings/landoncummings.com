@@ -1118,6 +1118,7 @@ export default function AISandboxClient({ repos }) {
   const [successBanner, setSuccessBanner] = useState(false);
   const [failureBanner, setFailureBanner] = useState('');
   const [shooterDirections, setShooterDirections] = useState({});
+  const [isMobile, setIsMobile] = useState(false);
   const [generationStats, setGenerationStats] = useState({
     generation: 0,
     bestFitness: 0,
@@ -1169,6 +1170,17 @@ export default function AISandboxClient({ repos }) {
     }
     media.addListener(update);
     return () => media.removeListener(update);
+  }, []);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   useEffect(() => {
@@ -2046,13 +2058,18 @@ export default function AISandboxClient({ repos }) {
         style={{
           maxWidth: '1100px',
           margin: '0 auto',
-          padding: '30px 20px 80px',
+          padding: isMobile ? '20px 12px 60px' : '30px 20px 80px',
           background: theme.pageBg,
           color: theme.text,
-          borderRadius: '24px',
+          borderRadius: isMobile ? '0' : '24px',
         }}
       >
-        <h1 style={{ fontSize: '2.6rem', marginBottom: '10px', textAlign: 'center' }}>
+        <h1 style={{ 
+          fontSize: isMobile ? '1.8rem' : '2.6rem', 
+          marginBottom: '10px', 
+          textAlign: 'center',
+          padding: isMobile ? '0 10px' : '0',
+        }}>
           AI Platformer Sandbox
         </h1>
         <p style={{ textAlign: 'center', color: theme.subtext, maxWidth: '760px', margin: '0 auto 22px' }}>
@@ -2064,8 +2081,8 @@ export default function AISandboxClient({ repos }) {
 
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1fr) 300px',
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
             gap: '24px',
             alignItems: 'start',
           }}
@@ -2077,9 +2094,17 @@ export default function AISandboxClient({ repos }) {
               padding: '16px',
               boxShadow: '0 16px 30px rgba(15, 23, 42, 0.12)',
               position: 'relative',
+              flex: isMobile ? '1 1 100%' : '1 1 0',
+              minWidth: 0,
+              width: isMobile ? '100%' : 'auto',
             }}
           >
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '14px' }}>
+            <div style={{ 
+              display: 'flex', 
+              gap: isMobile ? '8px' : '12px', 
+              flexWrap: 'wrap', 
+              marginBottom: '14px',
+            }}>
               <button
                 type="button"
                 onClick={handlePlay}
@@ -2174,14 +2199,27 @@ export default function AISandboxClient({ repos }) {
               </div>
             )}
 
-            <div style={{ overflowX: 'auto' }}>
-              <div style={{ position: 'relative' }}>
+            <div style={{ 
+              overflowX: 'auto',
+              width: '100%',
+              maxWidth: '100%',
+              WebkitOverflowScrolling: 'touch',
+              touchAction: 'pan-x pan-y',
+            }}>
+              <div style={{ 
+                position: 'relative',
+                width: '100%',
+                maxWidth: isMobile ? '100%' : `${GRID_WIDTH * TILE_SIZE}px`,
+                margin: '0 auto',
+              }}>
                 <canvas
                   ref={canvasRef}
                   width={GRID_WIDTH * TILE_SIZE}
                   height={GRID_HEIGHT * TILE_SIZE}
                   style={{
                     width: '100%',
+                    height: 'auto',
+                    maxWidth: '100%',
                     borderRadius: '12px',
                     border: `1px solid ${theme.border}`,
                     display: 'block',
@@ -2215,6 +2253,7 @@ export default function AISandboxClient({ repos }) {
                       width: '100%',
                       height: '100%',
                       pointerEvents: 'none',
+                      maxWidth: '100%',
                     }}
                   />
                 )}
@@ -2252,10 +2291,20 @@ export default function AISandboxClient({ repos }) {
               borderRadius: '18px',
               padding: '18px',
               boxShadow: '0 10px 24px rgba(15, 23, 42, 0.12)',
+              flex: isMobile ? '1 1 100%' : '0 0 300px',
+              width: isMobile ? '100%' : '300px',
+              minWidth: 0,
             }}
           >
-            <h3 style={{ fontSize: '1.2rem', marginBottom: '12px' }}>Tile Palette</h3>
-            <div style={{ display: 'grid', gap: '8px' }}>
+            <h3 style={{ 
+              fontSize: isMobile ? '1.1rem' : '1.2rem', 
+              marginBottom: '12px' 
+            }}>Tile Palette</h3>
+            <div style={{ 
+              display: 'grid', 
+              gap: isMobile ? '6px' : '8px',
+              gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : '1fr',
+            }}>
               {TILE_LABELS.map((tile) => (
                 <button
                   key={tile.type}
@@ -2291,8 +2340,13 @@ export default function AISandboxClient({ repos }) {
               ))}
             </div>
 
-            <div style={{ marginTop: '20px' }}>
-              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+            <div style={{ marginTop: isMobile ? '16px' : '20px' }}>
+              <div style={{ 
+                display: 'flex', 
+                gap: isMobile ? '6px' : '8px', 
+                marginBottom: '12px', 
+                flexWrap: 'wrap' 
+              }}>
                 <button
                   type="button"
                   onClick={() => setAlgorithm('genetic')}
@@ -2326,7 +2380,10 @@ export default function AISandboxClient({ repos }) {
                   Neural Network
                 </button>
               </div>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '10px' }}>
+              <h3 style={{ 
+                fontSize: isMobile ? '1rem' : '1.1rem', 
+                marginBottom: '10px' 
+              }}>
                 {algorithm === 'genetic' ? 'Genetic Algorithm' : 'Neural Network'}
               </h3>
               <div style={{ display: 'grid', gap: '10px', marginBottom: '12px' }}>
@@ -2435,12 +2492,15 @@ export default function AISandboxClient({ repos }) {
             style={{
               background: theme.cardStrong,
               borderRadius: '16px',
-              padding: '20px 24px',
+              padding: isMobile ? '16px 18px' : '20px 24px',
               color: theme.text,
               boxShadow: '0 12px 26px rgba(15, 23, 42, 0.2)',
             }}
           >
-            <h2 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>How It Works</h2>
+            <h2 style={{ 
+              fontSize: isMobile ? '1.2rem' : '1.4rem', 
+              marginBottom: '12px' 
+            }}>How It Works</h2>
             <div style={{ color: theme.subtext, lineHeight: '1.6' }}>
               <p style={{ marginBottom: '12px' }}>
                 <strong>Two AI Approaches:</strong> Choose between a Genetic Algorithm that evolves action sequences, or a Neural Network that learns to map game state to actions. Both run entirely in your browser with no server required.
