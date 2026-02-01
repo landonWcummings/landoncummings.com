@@ -123,19 +123,196 @@ export default function Connect4WithBot({ repos }) {
   const [winner, setWinner] = useState(null);
   const [winningPositions, setWinningPositions] = useState(null);
   const [difficulty, setDifficulty] = useState('medium'); // 'easy' | 'medium' | 'hard'
+  const difficultyRef = useRef('medium'); // Track current difficulty to avoid closure issues
+  const [winrates, setWinrates] = useState({
+    easy: { total: 0, userWins: 0, botWins: 0, draws: 0, userWinRate: 0 },
+    medium: { total: 0, userWins: 0, botWins: 0, draws: 0, userWinRate: 0 },
+    hard: { total: 0, userWins: 0, botWins: 0, draws: 0, userWinRate: 0 },
+  });
+  const [winratesLoading, setWinratesLoading] = useState(true);
+  const lastSaveTimeRef = useRef(0); // Track last save time for rate limiting (60 seconds)
+  
+  // Keep difficultyRef in sync with difficulty state
+  useEffect(() => {
+    difficultyRef.current = difficulty;
+  }, [difficulty]);
 
   // ─── Load ONNX model once ────────────────────────────────────────────────────
   useEffect(() => {
+    // Configure ONNX Runtime logging to suppress warnings
+    // Set log level to error only (suppresses warnings)
+    if (ort.env && ort.env.logLevel !== undefined) {
+      ort.env.logLevel = 'error'; // Only show errors, suppress warnings
+    }
+
+    // Also filter console output as a backup
+    const originalWarn = console.warn;
+    const originalError = console.error;
+    
+    // Filter out ONNX CPU vendor warnings
+    const filterONNXWarnings = (...args) => {
+      const message = args[0];
+      if (message && typeof message === 'string') {
+        // Suppress ONNX CPU vendor warnings and other harmless ONNX warnings
+        if (message.includes('onnxruntime') || 
+            message.includes('Unknown CPU vendor') ||
+            message.includes('cpuid_info') ||
+            message.includes('[W:onnxruntime')) {
+          return; // Suppress these warnings
+        }
+      }
+      // Also check for ANSI color codes that ONNX uses
+      const fullMessage = args.join(' ');
+      if (fullMessage.includes('onnxruntime') && fullMessage.includes('cpuid_info')) {
+        return; // Suppress
+      }
+      originalWarn.apply(console, args);
+    };
+    
+    console.warn = filterONNXWarnings;
+
     (async () => {
       try {
-        sessionRef.current = await ort.InferenceSession.create(MODEL_PATH);
+        // Try to create session with minimal logging options
+        // Note: Some ONNX versions may not support these options
+        const sessionOptions = {};
+        try {
+          // Try setting log severity if supported
+          if (ort.env && typeof ort.env.logLevel !== 'undefined') {
+            ort.env.logLevel = 'error';
+          }
+        } catch (e) {
+          // Ignore if not supported
+        }
+
+        sessionRef.current = await ort.InferenceSession.create(MODEL_PATH, sessionOptions);
         console.log('✅ Model loaded from', MODEL_PATH);
         setModelLoaded(true);
       } catch (e) {
         console.error('❌ Failed to load ONNX model:', e);
+        // Model failed to load, but game can still work with easy/medium difficulty
+      } finally {
+        // Restore original console methods after a delay to allow ONNX to finish loading
+        setTimeout(() => {
+          console.warn = originalWarn;
+          console.error = originalError;
+        }, 2000); // Increased delay to catch all ONNX initialization messages
       }
     })();
   }, []);
+
+  // ─── Fetch winrates on component mount ────────────────────────────────────────
+  useEffect(() => {
+    const fetchWinrates = async () => {
+      try {
+        const response = await fetch('/api/connect4/winrates');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.winrates) {
+            setWinrates(data.winrates);
+          }
+        } else {
+          console.error('Failed to fetch winrates');
+        }
+      } catch (error) {
+        console.error('Error fetching winrates:', error);
+      } finally {
+        setWinratesLoading(false);
+      }
+    };
+    fetchWinrates();
+  }, []);
+
+  // ─── Update winrates locally ────────────────────────────────────────────────
+  const updateWinratesLocally = (gameWinner) => {
+    // Convert "You" to "human" for consistency
+    const normalizedWinner = gameWinner === 'You' ? 'human' : gameWinner.toLowerCase();
+    // Use ref to get current difficulty (avoids closure issues)
+    const currentDifficulty = difficultyRef.current;
+    
+    setWinrates((prev) => {
+      const newWinrates = { ...prev };
+      // Ensure stats object exists and has all required properties
+      const stats = {
+        total: newWinrates[currentDifficulty]?.total || 0,
+        userWins: newWinrates[currentDifficulty]?.userWins || 0,
+        botWins: newWinrates[currentDifficulty]?.botWins || 0,
+        draws: newWinrates[currentDifficulty]?.draws || 0,
+        userWinRate: newWinrates[currentDifficulty]?.userWinRate || 0,
+      };
+      
+      stats.total = (stats.total || 0) + 1;
+      if (normalizedWinner === 'human') {
+        stats.userWins = (stats.userWins || 0) + 1;
+      } else if (normalizedWinner === 'bot') {
+        stats.botWins = (stats.botWins || 0) + 1;
+      } else if (normalizedWinner === 'draw') {
+        stats.draws = (stats.draws || 0) + 1;
+      }
+      
+      // Recalculate win rate (excluding draws)
+      // Ensure no division by zero, NaN, or invalid values
+      const nonDrawGames = Math.max(0, (stats.total || 0) - (stats.draws || 0));
+      const userWins = stats.userWins || 0;
+      stats.userWinRate = nonDrawGames > 0 && !isNaN(nonDrawGames) && !isNaN(userWins) && isFinite(userWins)
+        ? Math.max(0, Math.min(100, (userWins / nonDrawGames) * 100))
+        : 0;
+      
+      newWinrates[currentDifficulty] = stats;
+      return newWinrates;
+    });
+  };
+
+  // ─── Save game result to database ───────────────────────────────────────────
+  const saveGameResult = async (gameWinner) => {
+    // Rate limiting: Only allow 1 save per 60 seconds
+    const now = Date.now();
+    const timeSinceLastSave = now - lastSaveTimeRef.current;
+    // Use ref to get current difficulty (avoids closure issues)
+    const currentDifficulty = difficultyRef.current;
+    
+    if (timeSinceLastSave < 60000) {
+      console.log('Rate limited: Please wait before saving another game result');
+      // Still update locally even if we can't save to DB
+      updateWinratesLocally(gameWinner);
+      return;
+    }
+
+    // Convert "You" to "human" for API
+    const normalizedWinner = gameWinner === 'You' ? 'human' : gameWinner.toLowerCase();
+    
+    try {
+      const response = await fetch('/api/connect4/game-result', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          difficulty: currentDifficulty,
+          winner: normalizedWinner,
+        }),
+      });
+
+      if (response.ok) {
+        lastSaveTimeRef.current = now;
+        // Update locally (don't re-fetch from database)
+        updateWinratesLocally(gameWinner);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        if (response.status === 429) {
+          console.log('Rate limit exceeded:', errorData.error || 'Too many requests');
+        } else {
+          console.error('Failed to save game result:', errorData.error || 'Unknown error');
+        }
+        // Still update locally even if save failed
+        updateWinratesLocally(gameWinner);
+      }
+    } catch (error) {
+      console.error('Error saving game result:', error);
+      // Still update locally even if save failed
+      updateWinratesLocally(gameWinner);
+    }
+  };
 
   // ─── Helper to declare winner, store sequence, and end game ──────────────────
   const setWinnerAndEnd = (who, sequence) => {
@@ -143,6 +320,8 @@ export default function Connect4WithBot({ repos }) {
     setWinner(who);
     setWinningPositions(sequence);
     setGameOver(true);
+    // Save game result to database
+    saveGameResult(who);
   };
 
   // ─── AI: Easy moves ─────────────────────────────────────────────────────────
@@ -439,6 +618,64 @@ export default function Connect4WithBot({ repos }) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Winrates Display */}
+      <div style={{ 
+        marginBottom: '20px', 
+        padding: '15px', 
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        borderRadius: '12px',
+        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)'
+      }}>
+        <h3 style={{ textAlign: 'center', marginBottom: '15px', color: '#333', fontSize: '1.3rem' }}>
+          📊 Global Human Win Rate
+        </h3>
+        {winratesLoading ? (
+          <p style={{ textAlign: 'center', color: '#666' }}>Loading statistics...</p>
+        ) : (
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
+            gap: '15px' 
+          }}>
+            {['easy', 'medium', 'hard'].map((level) => {
+              const stats = winrates[level] || { total: 0, userWins: 0, botWins: 0, draws: 0, userWinRate: 0 };
+              const winRate = (stats.userWinRate || 0).toFixed(1);
+              return (
+                <div
+                  key={level}
+                  style={{
+                    background: 'white',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div style={{ 
+                    fontSize: '1.1rem', 
+                    fontWeight: 'bold', 
+                    color: '#333',
+                    marginBottom: '8px',
+                    textTransform: 'capitalize'
+                  }}>
+                    {level}
+                  </div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#667eea', marginBottom: '5px' }}>
+                    {winRate}%
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: '#666' }}>
+                    {stats.userWins || 0}W / {stats.botWins || 0}L / {stats.draws || 0}D
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#999', marginTop: '4px' }}>
+                    {stats.total || 0} games
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Board container */}

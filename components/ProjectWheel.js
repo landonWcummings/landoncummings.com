@@ -8,6 +8,7 @@ const mainRepoNames = [
   'WhartonInvestmentQuant', //📈
   'snakePlusAi-V1-NEAT', //🐍
   'LandonGPT', //🪞
+  'ai-sandbox', //🤖
   '2048AI', //
   'Connect4Bot', //
   'PokerPilot', //
@@ -19,6 +20,7 @@ const buttonLabels = {
   WhartonInvestmentQuant: 'Wharton Quant',
   'snakePlusAi-V1-NEAT': 'Snake AI',
   LandonGPT: 'LandonGPT 2',
+  'ai-sandbox': 'AI Sandbox',
   '2048AI': '2048 AI',
   Connect4Bot: 'Connect4 Bot',
   PokerPilot: 'PokerPilot',
@@ -30,6 +32,7 @@ const projectEmojis = {
   WhartonInvestmentQuant: '📈',
   'snakePlusAi-V1-NEAT': '🐍',
   LandonGPT: '🪞',
+  'ai-sandbox': '🤖',
   '2048AI': '🎯',
   Connect4Bot: '🔴',
   PokerPilot: '🃏',
@@ -41,6 +44,7 @@ const projectDescriptions = {
   WhartonInvestmentQuant: 'Quantitative investment analysis platform using advanced financial models',
   'snakePlusAi-V1-NEAT': 'AI-powered Snake game using NEAT algorithm for evolutionary learning',
   LandonGPT: 'Modern LandonGPT experience with memory and embedding-based retrieval',
+  'ai-sandbox': 'Interactive 2D platformer where AI agents learn to navigate levels using genetic algorithms and neural networks',
   '2048AI': 'Intelligent agent that masters the 2048 game using reinforcement learning',
   Connect4Bot: 'Strategic AI bot that plays Connect4 with advanced minimax algorithms',
   PokerPilot: 'Sophisticated poker analysis tool with probability calculations and strategy recommendations',
@@ -88,7 +92,22 @@ export default function ProjectWheel({ repos = [] }) {
 
   // Filter repos to get main ones - memoized to prevent recreating on every render
   const mainRepos = useMemo(() => {
-    return repos.filter((repo) => mainRepoNames.includes(repo.name));
+    const filtered = repos.filter((repo) => mainRepoNames.includes(repo.name));
+    // Add 'ai-sandbox' if it's in mainRepoNames but not in repos (since it's not a GitHub repo)
+    if (mainRepoNames.includes('ai-sandbox') && !filtered.some(r => r.name === 'ai-sandbox')) {
+      filtered.push({
+        id: 'ai-sandbox',
+        name: 'ai-sandbox',
+        // Add other required properties with defaults
+        description: projectDescriptions['ai-sandbox'] || '',
+        html_url: '',
+        stargazers_count: 0,
+      });
+    }
+    // Sort to match mainRepoNames order
+    return mainRepoNames
+      .map(name => filtered.find(r => r.name === name))
+      .filter(Boolean);
   }, [repos]);
 
   // Define track system - positions around the circle with rotation offset

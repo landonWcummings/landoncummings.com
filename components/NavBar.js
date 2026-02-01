@@ -15,6 +15,7 @@ const mainRepoNames = [
 ];
 const staticProjects = [
   { slug: 'landonGPT', label: 'LandonGPT 2' },
+  { slug: 'ai-sandbox', label: 'AI Sandbox' },
 ];
 //     
 const buttonLabels = {

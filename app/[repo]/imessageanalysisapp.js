@@ -6,7 +6,6 @@ import NavBar from '../../components/NavBar';
 
 export default function IMessageAnalysisApp({ repos }) {
     const imageUrls = [
-        '/imessageanalysisimages/intro.png',
         '/imessageanalysisimages/lifetimeact.png',
         '/imessageanalysisimages/sentlife.png',
         '/imessageanalysisimages/24act.png',

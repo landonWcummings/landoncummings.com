@@ -140,13 +140,14 @@ export default function Mainpage({ repos = [] }) {
               // Featured projects array matching your navbar
               const featuredProjects = [
                 'nbodysimulation',
-                'imessageanalysisapp', 
+                'imessageanalysisapp',
                 'WhartonInvestmentQuant',
                 'snakePlusAi-V1-NEAT',
                 'LandonGPT',
+                'ai-sandbox',
                 '2048AI',
                 'Connect4Bot',
-                'PokerPilot'
+                'PokerPilot',
               ];
               const randomProject = featuredProjects[Math.floor(Math.random() * featuredProjects.length)];
               window.location.href = `/${randomProject}`;

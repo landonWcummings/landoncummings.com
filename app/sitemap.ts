@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/WhartonInvestmentQuant',
     '/snakePlusAi-V1-NEAT',
     '/LandonGPT',
+    '/ai-sandbox',
     '/2048AI',
     '/Connect4Bot',
     '/PokerPilot',
