@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useRef, useMemo } from 'react';
+import { usePathname } from 'next/navigation';
 
 const mainRepoNames = [
   'nbodysimulation', //☄️
@@ -30,6 +31,7 @@ const buttonLabels = {
 
 const NavBar = ({ repos = [] }) => {
   const navRef = useRef(null);
+  const pathname = usePathname();
 
   const [navHeight, setNavHeight] = useState(100);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
@@ -125,41 +127,58 @@ const NavBar = ({ repos = [] }) => {
           }}>
             {/* Home button on left */}
             <div>
-              <Link href="/" style={{ textDecoration: 'none' }}>
-                <button
-                  suppressHydrationWarning
-                  style={{
-                    padding: '8px 10px',
-                    fontSize: '18px',
-                    fontWeight: '500',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                    color: '#e0e0e0',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    whiteSpace: 'nowrap',
-                    minWidth: '40px',
-                    textAlign: 'center',
-                  }}
-                  onMouseEnter={(e) => {
+              <Link 
+                href="/" 
+                style={{ 
+                  textDecoration: 'none',
+                  padding: '8px 10px',
+                  fontSize: '18px',
+                  fontWeight: '500',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: pathname === '/'
+                    ? 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)'
+                    : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                  boxShadow: pathname === '/'
+                    ? '0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)'
+                    : '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                  color: pathname === '/' ? '#ffffff' : '#e0e0e0',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  whiteSpace: 'nowrap',
+                  minWidth: '40px',
+                  textAlign: 'center',
+                  display: 'block',
+                  WebkitTapHighlightColor: 'transparent',
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
+                }}
+                onMouseEnter={(e) => {
+                  if (pathname !== '/') {
                     e.target.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
                     e.target.style.transform = 'translateY(-2px)';
                     e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
                     e.target.style.borderColor = 'rgba(102, 126, 234, 0.5)';
                     e.target.style.color = '#ffffff';
-                  }}
-                  onMouseLeave={(e) => {
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (pathname !== '/') {
                     e.target.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
                     e.target.style.transform = 'translateY(0)';
                     e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
                     e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
                     e.target.style.color = '#e0e0e0';
-                  }}
-                >
-                  🏠
-                </button>
+                  }
+                }}
+                onTouchStart={(e) => {
+                  e.target.style.opacity = '0.8';
+                }}
+                onTouchEnd={(e) => {
+                  e.target.style.opacity = '1';
+                }}
+              >
+                🏠
               </Link>
             </div>
 
@@ -171,47 +190,66 @@ const NavBar = ({ repos = [] }) => {
                 gap: '8px',
               }}
             >
-              {mobileProjects.map((project) => (
-                <Link
-                  href={`/${project.slug}`}
-                  key={project.slug}
-                  style={{ textDecoration: 'none' }}
-                >
-                  <button
-                    suppressHydrationWarning
-                    style={{
-                      width: '100%',
-                      padding: '10px 8px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      borderRadius: '8px',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                      color: '#e0e0e0',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      textAlign: 'center',
-                    }}
+              {mobileProjects.map((project) => {
+                const isActive = pathname === `/${project.slug}`;
+                const baseStyle = {
+                  textDecoration: 'none',
+                  width: '100%',
+                  padding: '10px 8px',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: isActive 
+                    ? 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)'
+                    : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                  boxShadow: isActive
+                    ? '0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)'
+                    : '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                  color: isActive ? '#ffffff' : '#e0e0e0',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  textAlign: 'center',
+                  display: 'block',
+                  WebkitTapHighlightColor: 'transparent',
+                  WebkitUserSelect: 'none',
+                  userSelect: 'none',
+                };
+                
+                return (
+                  <Link
+                    href={`/${project.slug}`}
+                    key={project.slug}
+                    style={baseStyle}
                     onMouseEnter={(e) => {
-                      e.target.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
-                      e.target.style.transform = 'translateY(-2px)';
-                      e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
-                      e.target.style.borderColor = 'rgba(102, 126, 234, 0.5)';
-                      e.target.style.color = '#ffffff';
+                      if (!isActive) {
+                        e.target.style.background = 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)';
+                        e.target.style.transform = 'translateY(-2px)';
+                        e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)';
+                        e.target.style.borderColor = 'rgba(102, 126, 234, 0.5)';
+                        e.target.style.color = '#ffffff';
+                      }
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
-                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                      e.target.style.color = '#e0e0e0';
+                      if (!isActive) {
+                        e.target.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)';
+                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                        e.target.style.color = '#e0e0e0';
+                      }
+                    }}
+                    onTouchStart={(e) => {
+                      e.target.style.opacity = '0.8';
+                    }}
+                    onTouchEnd={(e) => {
+                      e.target.style.opacity = '1';
                     }}
                   >
                     {project.emoji} {project.label}
-                  </button>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Others button on right */}
